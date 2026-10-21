@@ -213,8 +213,8 @@ for _, cls in ipairs({ "^(pavucontrol|org.pulseaudio.pavucontrol)$", "^(nm-conne
 end
 
 
--- Glass: these stay fully solid (games, videos, browsers, fullscreen)
-hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|helium|librewolf|waterfox|firefox|zen|chromium|org.kde.gwenview|com.obsproject.Studio)$" }, opacity = "1.0 override 1.0 override" })
+-- Glass: these stay fully solid (games, video players, fullscreen)
+hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|org.kde.gwenview|com.obsproject.Studio)$" }, opacity = "1.0 override 1.0 override" })
 hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true }, opacity = "1.0 override 1.0 override" })
 -- kitty draws its own transparent background, so its text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty)$" }, opacity = "1.0 override 1.0 override" })
@@ -227,6 +227,13 @@ hl.window_rule({ name = "games-own-workspace", match = { class = "^(steam_app_[0
 hl.window_rule({ name = "steam-popups-float", match = { class = "^(steam)$", title = "^(Friends List|Steam Settings|Properties.*|.*Chat.*|Screenshot Manager|Game Servers|Players)$" }, float = true })
 hl.window_rule({ name = "discord-side", match = { class = "^(vesktop|discord)$" }, workspace = "name:side silent" })
 hl.window_rule({ name = "spotify-side", match = { class = "^(Spotify|spotify)$" }, workspace = "name:side silent" })
+
+---------------------------------------------------------------- SETTINGS PANEL
+-- Values chosen in the Hyprland settings panel (SUPER + comma) override the ones above.
+do
+    local ok, err = pcall(dofile, os.getenv("HOME") .. "/.config/hypr/settings.lua")
+    if not ok then print("settings.lua failed: " .. tostring(err)) end
+end
 
 ---------------------------------------------------------------- KEYBINDS
 -- Layout follows DankMaterialShell's defaults (duxlabs-dev/dux-shell hypr-binds.lua),
@@ -242,7 +249,7 @@ b("SUPER + Return",         run(terminal))
 b("SUPER + space",          run(menu))
 b("ALT + space",            run(menu))
 b("SUPER + V",              run("cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"))
-b("SUPER + comma",          run("systemsettings"))
+b("SUPER + comma",          run("qs ipc -p ~/.config/quickshell/bar call settings toggle"))
 b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call bar control"))
 b("SUPER + CTRL + N",       run("qs ipc -p ~/.config/quickshell/bar call bar notifications"))
 b("SUPER + TAB",            run("rofi -show window"))

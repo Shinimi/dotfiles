@@ -196,7 +196,7 @@ BarPopup {
                         ["", "Color",     ["sh", "-c", "sleep 0.3; hyprpicker -a"]],
                         ["", "Wallpaper", ["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "wallpaper", "toggle"]],
                         ["", "Games",     ["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "games", "toggle"]],
-                        ["", "Settings",  ["systemsettings"]]
+                        ["", "Settings",  ["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "settings", "toggle"]]
                     ]
                     Rectangle {
                         required property var modelData

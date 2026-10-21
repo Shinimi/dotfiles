@@ -32,4 +32,8 @@ ShellRoot {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         GameLibrary { required property var modelData; screen: modelData }
     }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        HyprSettings { required property var modelData; screen: modelData }
+    }
 }
