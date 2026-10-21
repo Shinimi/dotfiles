@@ -12,7 +12,7 @@
 --    SUPER + Space           app launcher        ALT + Space        app launcher
 --    SUPER + V               clipboard history   SUPER + A          control center
 --    SUPER + CTRL + N        notification center SUPER + comma      settings
---    SUPER + Tab / O         window switcher     SUPER + X          power menu
+--    SUPER + Tab / O         all windows (search)     SUPER + X          power menu
 --    SUPER + Q               close window
 --    SUPER + F               maximize            SUPER + SHIFT + F  fullscreen
 --    SUPER + SHIFT + T       float / tile        SUPER + W          group (tabs)
@@ -172,7 +172,19 @@ hl.config({
         allow_session_lock_restore = true,  -- if the lock screen ever crashes, a new one can take over
         disable_autoreload = true,          -- settings apply live; no surprise reloads (SUPER+SHIFT+R reloads)
     },
-    render = { new_render_scheduling = true },  -- smoother frame pacing when the GPU is busy
+    render = { new_render_scheduling = true },
+    -- window tabs (SUPER + W groups): Tokyo Night pills
+    group = {
+        col = { border_active = { colors = { "rgba(bb9af7ff)", "rgba(7aa2f7ff)" }, angle = 45 }, border_inactive = "rgba(414868aa)" },
+        groupbar = {
+            enabled = true, height = 24, font_family = "JetBrainsMono Nerd Font", font_size = 11,
+            gradients = true, rounding = 8, gradient_rounding = 8, round_only_edges = false,
+            indicator_height = 0, gaps_in = 4, gaps_out = 6, keep_upper_gap = true, text_padding = 10,
+            text_color = "rgba(16161eff)", text_color_inactive = "rgba(a9b1d6ff)",
+            col = { active = "rgba(7aa2f7ee)", inactive = "rgba(24283bdd)", locked_active = "rgba(bb9af7ee)", locked_inactive = "rgba(24283bdd)" },
+            blur = true, disable_when_only = false,
+        },
+    },  -- smoother frame pacing when the GPU is busy
     ecosystem = { no_update_news = true, no_donation_nag = true },
 })
 
@@ -293,8 +305,8 @@ b("SUPER + V",              run("qs ipc -p " .. os.getenv("HOME") .. "/.config/q
 b("SUPER + comma",          run("qs ipc -p ~/.config/quickshell/bar call settings toggle"))
 b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call bar control"))
 b("SUPER + CTRL + N",       run("qs ipc -p ~/.config/quickshell/bar call bar notifications"))
-b("SUPER + TAB",            run("rofi -show window"))
-b("SUPER + O",              run("rofi -show window"))
+b("SUPER + TAB",            run("qs ipc -p ~/.config/quickshell/bar call alttab overview"))   -- all windows with previews, type to search
+b("SUPER + O",              run("qs ipc -p ~/.config/quickshell/bar call alttab overview"))
 b("SUPER + X",              run("qs ipc -p ~/.config/quickshell/bar call bar power"))
 b("SUPER + E",              run(fileManager))
 b("SUPER + B",              run(browser))

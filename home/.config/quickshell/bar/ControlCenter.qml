@@ -3,6 +3,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Widgets
 import Quickshell.Services.Pipewire
 import Quickshell.Services.Mpris
@@ -24,7 +25,14 @@ BarPopup {
     readonly property string liveArt: cc.player ? (cc.player.trackArtUrl || "") : ""
     onLiveArtChanged: if (liveArt !== "") art = liveArt
 
-    onVisibleChanged: if (visible) SysState.refresh()
+    onVisibleChanged: if (visible) { SysState.refresh(); brGet.running = true }
+    // monitor brightness (DDC/CI); setting is debounced because the monitor is slow to answer
+    property var bright: ({ "DP-1": 100, "DP-2": 100 })
+    property var brPending: ({})
+    readonly property string brCmd: Qt.resolvedUrl("brightness.sh").toString().replace("file://", "")
+    Process { id: brGet; command: [cc.brCmd, "get"]; stdout: StdioCollector { onStreamFinished: { try { cc.bright = JSON.parse(this.text) } catch (e) {} } } }
+    Timer { id: brSet; interval: 250; onTriggered: { for (const k in cc.brPending) Quickshell.execDetached([cc.brCmd, "set", k, String(cc.brPending[k])]); cc.brPending = {} } }
+    function setBright(mon, v) { const b = Object.assign({}, bright); b[mon] = v; bright = b; const p = Object.assign({}, brPending); p[mon] = v; brPending = p; brSet.restart() }
     function speed(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + " MB/s" : b >= 1024 ? Math.round(b / 1024) + " KB/s" : b + " B/s" }
     function go(cmd) { cc.visible = false; Quickshell.execDetached(cmd) }
     function qs(target, fn) { go(["qs", "ipc", "-p", qsDir, "call", target, fn || "toggle"]) }
@@ -132,7 +140,9 @@ BarPopup {
                 ["\u{f009b}", "Silent", Notifs.dnd ? "No pop-ups" : "Off", Notifs.dnd, Theme.purple, () => { Notifs.dnd = !Notifs.dnd }],
                 ["\u{f0176}", "Keep awake", SysState.awake ? "No auto-lock" : "Off", SysState.awake, Theme.cyan, () => SysState.toggleAwake()],
                 ["\u{f04c5}", "Performance", SysState.perf ? "Max power" : "Balanced", SysState.perf, Theme.red, () => SysState.setProfile(SysState.perf ? "balanced" : "performance")],
-                ["\u{f036c}", "Clean mic", SysState.fx.mic ? "On" : "Off", !!SysState.fx.mic, Theme.green, () => SysState.fxToggle("mic")]
+                ["\u{f036c}", "Clean mic", SysState.fx.mic ? "On" : "Off", !!SysState.fx.mic, Theme.green, () => SysState.fxToggle("mic")],
+                ["\u{f0eb5}", "Game mode", SysState.gameMode ? "On" : "Auto", SysState.gameMode, Theme.red,
+                 () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", SysState.gameMode ? "off" : "on"]); SysState.gameMode = !SysState.gameMode }]
             ]
             Rectangle {
                 id: tile
@@ -243,6 +253,29 @@ BarPopup {
                                     SysState.fxPreset(modelData[0])
                                 } }
                         }
+                    }
+                }
+            }
+
+            CcCard {
+                title: "Screens"; icon: "\u{f0379}"
+                Repeater {
+                    model: [["DP-1", "Main"], ["DP-2", "Side"]]
+                    RowLayout {
+                        required property var modelData
+                        width: parent.width; spacing: 10
+                        Rectangle {
+                            width: 30; height: 30; radius: 10; color: "#331a1b26"
+                            Label { anchors.centerIn: parent; text: "\u{f00df}"; color: Theme.yellow; font.pixelSize: 15 }
+                        }
+                        Label { text: modelData[1]; color: Theme.fgDim; font.pixelSize: 11; Layout.preferredWidth: 34 }
+                        Item {
+                            Layout.fillWidth: true; height: 30
+                            Slider { anchors.verticalCenter: parent.verticalCenter; width: parent.width; accent: Theme.yellow
+                                     value: (cc.bright[modelData[0]] || 0) / 100
+                                     onMoved: v => cc.setBright(modelData[0], Math.round(v * 100)) }
+                        }
+                        Label { text: (cc.bright[modelData[0]] || 0) + "%"; color: Theme.fgDim; font.pixelSize: 11; Layout.preferredWidth: 34; horizontalAlignment: Text.AlignRight }
                     }
                 }
             }

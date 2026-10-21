@@ -22,17 +22,17 @@ hl.config({
               scroll_method = "no_scroll" },
     cursor = { hide_on_key_press = false, inactive_timeout = 0 },
     binds = { workspace_back_and_forth = false },
-    misc = { focus_on_activate = true, middle_click_paste = false,
+    misc = { focus_on_activate = true, middle_click_paste = true,
              enable_swallow = false, swallow_regex = "^(kitty)$", mouse_move_enables_dpms = false },
 })
 hl.animation({ leaf = "borderangle", enabled = true, speed = 60, bezier = "linear", style = "loop" })
-hl.animation({ leaf = "windows", enabled = true, speed = 4.00, bezier = "overshot" })
-hl.animation({ leaf = "windowsIn", enabled = true, speed = 3.50, bezier = "overshot", style = "popin 80%" })
-hl.animation({ leaf = "windowsOut", enabled = true, speed = 2.50, bezier = "smoothOut", style = "popin 80%" })
-hl.animation({ leaf = "windowsMove", enabled = true, speed = 4.00, bezier = "overshot", style = "slide" })
-hl.animation({ leaf = "fade", enabled = true, speed = 3.00, bezier = "snappy" })
-hl.animation({ leaf = "layers", enabled = true, speed = 3.00, bezier = "snappy", style = "fade" })
-hl.animation({ leaf = "workspaces", enabled = true, speed = 4.00, bezier = "easeInOut", style = "slidefade 12%" })
-hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 4.00, bezier = "overshot", style = "slidevert" })
+hl.animation({ leaf = "windows", enabled = true, speed = 2.60, bezier = "overshot" })
+hl.animation({ leaf = "windowsIn", enabled = true, speed = 2.27, bezier = "overshot", style = "popin 80%" })
+hl.animation({ leaf = "windowsOut", enabled = true, speed = 1.62, bezier = "smoothOut", style = "popin 80%" })
+hl.animation({ leaf = "windowsMove", enabled = true, speed = 2.60, bezier = "overshot", style = "slide" })
+hl.animation({ leaf = "fade", enabled = true, speed = 1.95, bezier = "snappy" })
+hl.animation({ leaf = "layers", enabled = true, speed = 1.95, bezier = "snappy", style = "fade" })
+hl.animation({ leaf = "workspaces", enabled = true, speed = 2.60, bezier = "easeInOut", style = "slidefade 12%" })
+hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 2.60, bezier = "overshot", style = "slidevert" })
 hl.monitor({ output = "DP-1", mode = "2560x1440@144.00", position = "0x0", scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })
 hl.monitor({ output = "DP-2", mode = "1920x1080@165.01", position = "2560x0", scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })

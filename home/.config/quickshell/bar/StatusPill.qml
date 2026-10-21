@@ -9,6 +9,12 @@ Pill {
     active: cc.visible
     readonly property var sink: Pipewire.defaultAudioSink
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
+    Repeater {   // small icons that only show while something is on
+        model: [[SysState.gameMode, "\u{f0eb5}", Theme.red], [SysState.night, "\u{f0594}", Theme.yellow], [SysState.awake, "\u{f0176}", Theme.cyan],
+                [Notifs.dnd, "\u{f009b}", Theme.purple], [!!SysState.fx.mic, "\u{f036c}", Theme.green]].filter(x => x[0])
+        Label { required property var modelData; text: modelData[1]; color: modelData[2]; font.pixelSize: 13
+                anchors.verticalCenter: parent ? parent.verticalCenter : undefined }
+    }
     Item {
         width: 16; height: 16
         anchors.verticalCenter: parent ? parent.verticalCenter : undefined

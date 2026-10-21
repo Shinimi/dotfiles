@@ -7,4 +7,4 @@ user_pref("browser.theme.toolbar-theme", 0);
 user_pref("extensions.activeThemeID", "firefox-compact-dark@mozilla.org");
 // Windows-style middle-click autoscroll. Made by Claude.
 user_pref("general.autoScroll", true);
-user_pref("middlemouse.paste", false);
+user_pref("middlemouse.paste", true);

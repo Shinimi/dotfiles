@@ -44,7 +44,7 @@ Scope {
     readonly property var keyPage: ({
         accent: "appearance", border_spin: "appearance", border_angle: "appearance", gaps_in: "appearance", gaps_out: "appearance", border_size: "appearance", rounding: "appearance", layout: "appearance", smart_split: "appearance", snap: "appearance", resize_on_border: "appearance",
         glow: "effects", glow_range: "effects", glow_strength: "effects", shadows: "effects", shadow_range: "effects", shadow_tint: "effects", dim_inactive: "effects", dim_strength: "effects", animations: "effects", anim_speed: "effects", ws_anim: "effects",
-        folder_color: "theme", icon_base: "theme", cursor_theme: "theme", cursor_size: "theme", ui_font: "theme", ui_font_size: "theme",
+        folder_color: "theme", icon_base: "theme", cursor_theme: "theme", cursor_size: "theme", ui_font: "theme", ui_font_size: "theme", fetch_logo: "theme", fetch_source: "theme",
         opacity_active: "glass", opacity_inactive: "glass", glass: "glass", blur: "glass", blur_size: "glass", blur_passes: "glass", vibrancy: "glass", blur_brightness: "glass", blur_noise: "glass", blur_xray: "glass", blur_popups: "glass",
         clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_weather: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
         sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", scroll_mode: "input", middle_paste: "input", focus_on_activate: "input",
@@ -72,6 +72,11 @@ Scope {
     }
 
     // ---- data for the Display / System pages ----
+    Process {
+        id: fetchPick
+        command: ["kdialog", "--title", "Picture for terminal art", "--getopenfilename", Quickshell.env("HOME") + "/Pictures", "Images (*.png *.jpg *.jpeg *.webp)"]
+        stdout: StdioCollector { onStreamFinished: { const p = this.text.trim(); if (p) Settings.set("fetch_source", p) } }
+    }
     property var monitors: []
     Process {
         id: mons
@@ -485,6 +490,19 @@ Scope {
                             }
                         }
                         Label { width: parent.width; wrapMode: Text.WordWrap; text: "Icons and fonts update in GTK apps right away; Qt apps like Dolphin pick them up next time they open."; color: Theme.muted; font.pixelSize: 10 }
+                        SetSection {
+                            width: parent.width; title: "Terminal art (fastfetch)"; icon: "\u{f018d}"
+                            SetChoice {
+                                label: "Shown next to your system info"; current: Settings.get("fetch_logo"); onPicked: v => Settings.set("fetch_logo", v)
+                                options: [["ascii", "Text art"], ["picture", "My picture"], ["distro", "CachyOS logo"]]
+                            }
+                            Row {
+                                visible: Settings.get("fetch_logo") === "ascii"; spacing: 8
+                                SetButton { icon: "\u{f0256}"; text: "Make text art from a picture…"; onClicked: fetchPick.running = true }
+                                Label { anchors.verticalCenter: parent.verticalCenter; text: Settings.get("fetch_source") ? Settings.get("fetch_source").split("/").pop() : "Shinobu (default)"; color: Theme.muted; font.pixelSize: 11 }
+                            }
+                            Label { width: parent.width; wrapMode: Text.WordWrap; text: "Tip: close-up, high-contrast pictures (manga panels, simple portraits) turn into the clearest art."; color: Theme.muted; font.pixelSize: 10 }
+                        }
                     }
 
                     // ---------- 1 Glass ----------

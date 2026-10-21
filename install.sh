@@ -30,7 +30,7 @@ PKGS=(
   # look
   papirus-icon-theme capitaine-cursors adw-gtk-theme ttf-jetbrains-mono-nerd inter-font noto-fonts noto-fonts-emoji plymouth
   # terminal & gaming
-  fish starship fastfetch btop mangohud scx-tools
+  fish starship fastfetch chafa btop mangohud scx-tools ddcutil
   # apps
   vesktop-bin git github-cli
 )

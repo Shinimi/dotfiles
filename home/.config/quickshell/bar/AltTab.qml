@@ -1,7 +1,9 @@
-// Alt+Tab workspace switcher. Hold Alt, tap Tab (Shift+Tab back), release Alt to switch.
-// Most-recently-used order, so one quick Alt+Tab returns to the previous workspace. Made by Claude.
+// Window switcher with live previews, like Windows.
+//   Alt+Tab (hold Alt)   : most-recently-used windows; tap Tab to move, release Alt to switch.
+//   Super+Tab            : same list, stays open; type to search, Enter/click to switch, Esc to close.
+// Made by Claude.
 import QtQuick
-import QtQuick.Layouts
+import QtQuick.Controls.Basic
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
@@ -12,33 +14,30 @@ Scope {
     id: root
     required property var screen
     property bool visible: false
-    property var mru: []            // workspace ids, most recent first
-    property var cards: []          // [{id, windows:[{cls,title}]}]
+    property bool sticky: false        // Super+Tab mode (doesn't close on Alt release)
+    property var wins: []              // [{address, cls, title, ws, wsName}]
     property int sel: 0
-
-    Connections {
-        target: Hyprland
-        function onFocusedWorkspaceChanged() {
-            const w = Hyprland.focusedWorkspace
-            if (!w || w.id < 1) return
-            root.mru = [w.id].concat(root.mru.filter(x => x !== w.id))
-        }
+    property string query: ""
+    readonly property var shown: {
+        const q = query.trim().toLowerCase()
+        return q ? wins.filter(w => (w.title + " " + w.cls).toLowerCase().indexOf(q) >= 0) : wins
     }
-    Component.onCompleted: if (Hyprland.focusedWorkspace) mru = [Hyprland.focusedWorkspace.id]
+    onShownChanged: if (sel >= shown.length) sel = Math.max(0, shown.length - 1)
 
-    function open(step) {
+    function load(step, stick) {
+        sticky = stick; query = ""
         clients.step = step
         clients.running = true
     }
     function move(step) {
-        if (!visible) { open(step); return }
-        if (cards.length) sel = (sel + step + cards.length) % cards.length
+        if (!visible) { load(step, false); return }
+        if (shown.length) sel = (sel + step + shown.length) % shown.length
     }
     function confirm() {
         if (!visible) return
         visible = false
-        const c = cards[sel]
-        if (c) Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = " + c.id + " })"])
+        const w = shown[sel]
+        if (w) Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ window = \"address:" + w.address + "\" })"])
     }
     function cancel() { visible = false }
 
@@ -50,22 +49,12 @@ Scope {
             onStreamFinished: {
                 let list = []
                 try { list = JSON.parse(this.text) } catch (e) {}
-                const byWs = {}
-                for (const c of list) {
-                    const id = c.workspace ? c.workspace.id : -1
-                    if (id < 1) continue
-                    ;(byWs[id] = byWs[id] || []).push({ cls: c.class || c.initialClass || "", title: c.title || "" })
-                }
-                const cur = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
-                const ids = Object.keys(byWs).map(Number)
-                if (!ids.includes(cur)) ids.push(cur)
-                ids.sort((a, b) => {
-                    const ia = root.mru.indexOf(a), ib = root.mru.indexOf(b)
-                    return (ia < 0 ? 999 + a : ia) - (ib < 0 ? 999 + b : ib)
-                })
-                root.cards = ids.map(id => ({ id: id, windows: byWs[id] || [] }))
-                root.sel = root.cards.length > 1 ? (clients.step > 0 ? 1 : root.cards.length - 1) : 0
-                root.visible = true
+                list = list.filter(c => c.mapped !== false && c.workspace && c.workspace.id !== -1 && (c.title || c.class))
+                list.sort((a, b) => a.focusHistoryID - b.focusHistoryID)       // most recent first
+                root.wins = list.map(c => ({ address: c.address, cls: c.class || c.initialClass || "", title: c.title || c.class,
+                                             ws: c.workspace.id, wsName: c.workspace.name }))
+                root.sel = root.wins.length > 1 ? (root.sticky ? 0 : (clients.step > 0 ? 1 : root.wins.length - 1)) : 0
+                root.visible = root.wins.length > 0
             }
         }
     }
@@ -76,15 +65,32 @@ Scope {
         function prev(): void { root.move(-1) }
         function confirm(): void { root.confirm() }
         function cancel(): void { root.cancel() }
+        function overview(): void { if (root.visible) root.cancel(); else root.load(0, true) }
     }
 
+    function toplevelFor(addr) {
+        const a = addr.replace(/^0x/, "").toLowerCase()
+        for (const t of Hyprland.toplevels.values) if (String(t.address).replace(/^0x/, "").toLowerCase() === a) return t.wayland
+        return null
+    }
     function iconFor(cls) {
         const e = DesktopEntries.heuristicLookup(cls)
         const name = e && e.icon ? e.icon : cls.toLowerCase()
         return Quickshell.iconPath(name, true) || Quickshell.iconPath("application-x-executable")
     }
 
+    PanelWindow {   // dim + click outside to close
+        visible: root.visible; screen: root.screen
+        anchors { top: true; bottom: true; left: true; right: true }
+        exclusionMode: ExclusionMode.Ignore
+        WlrLayershell.layer: WlrLayer.Top
+        WlrLayershell.namespace: "qsbar-dismiss"
+        color: "#55000000"
+        MouseArea { anchors.fill: parent; onClicked: root.cancel() }
+    }
+
     PanelWindow {
+        id: win
         visible: root.visible
         screen: root.screen
         exclusionMode: ExclusionMode.Ignore
@@ -92,80 +98,98 @@ Scope {
         WlrLayershell.namespace: "qsbar-alttab"
         WlrLayershell.keyboardFocus: root.visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
         color: "transparent"
-        implicitWidth: Math.min(row.implicitWidth + 40, 1800)
-        implicitHeight: 230
+        readonly property int perRow: Math.min(5, Math.max(1, root.shown.length))
+        implicitWidth: Math.max(520, perRow * 300 + (perRow - 1) * 14 + 48)
+        implicitHeight: grid.implicitHeight + (root.sticky ? 112 : 48)
 
         Rectangle {
-            anchors.fill: parent; radius: 18; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
+            id: frame
+            anchors.fill: parent; radius: 22; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
             focus: true
             Keys.onPressed: e => {
                 if (e.key === Qt.Key_Tab || e.key === Qt.Key_Right) { root.move(1); e.accepted = true }
                 else if (e.key === Qt.Key_Backtab || e.key === Qt.Key_Left) { root.move(-1); e.accepted = true }
+                else if (e.key === Qt.Key_Down) { root.move(win.perRow); e.accepted = true }
+                else if (e.key === Qt.Key_Up) { root.move(-win.perRow); e.accepted = true }
                 else if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter) { root.confirm(); e.accepted = true }
                 else if (e.key === Qt.Key_Escape) { root.cancel(); e.accepted = true }
+                else if (root.sticky && e.text && e.text.length === 1 && e.text >= " ") { search.forceActiveFocus(); search.text += e.text; root.query = search.text; e.accepted = true }
             }
-            Keys.onReleased: e => { if (e.key === Qt.Key_Alt || e.key === Qt.Key_AltGr) root.confirm() }
+            Keys.onReleased: e => { if (!root.sticky && (e.key === Qt.Key_Alt || e.key === Qt.Key_AltGr)) root.confirm() }
+            Connections { target: root; function onVisibleChanged() { if (root.visible) frame.forceActiveFocus() } }
 
-            Row {
-                id: row
-                anchors.centerIn: parent
-                spacing: 14
+            TextField {   // Super+Tab: type to filter
+                id: search
+                visible: root.sticky
+                x: 24; y: 20; width: parent.width - 48; height: 40
+                text: root.query; onTextEdited: root.query = text
+                placeholderText: "Type to find a window…"; placeholderTextColor: Theme.muted
+                color: Theme.fg; font.family: Theme.font; font.pixelSize: 13; leftPadding: 38
+                background: Rectangle { radius: 12; color: Theme.bgAlt; border.width: search.activeFocus ? 2 : 1; border.color: search.activeFocus ? Theme.blue : Theme.line }
+                Label { x: 14; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 14 }
+                Keys.onReturnPressed: root.confirm()
+                Keys.onEscapePressed: root.cancel()
+                Keys.onTabPressed: root.move(1)
+            }
+
+            Grid {
+                id: grid
+                x: 24; y: root.sticky ? 76 : 24
+                columns: win.perRow; spacing: 14
                 Repeater {
-                    model: root.cards
+                    model: root.visible ? root.shown.slice(0, 15) : []
                     Rectangle {
+                        id: card
                         required property var modelData
                         required property int index
                         readonly property bool selected: index === root.sel
-                        width: 200; height: 180; radius: 14
-                        color: selected ? "#4d7aa2f7" : Theme.card
-                        border.width: selected ? 2 : 1
-                        border.color: selected ? Theme.blue : Theme.border
-                        scale: selected ? 1.0 : 0.94
-                        Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
-                        Behavior on color { ColorAnimation { duration: 110 } }
+                        width: 300; height: 220; radius: 16
+                        color: selected ? Qt.rgba(0.48, 0.64, 0.97, 0.16) : (cm.containsMouse ? "#1ec0caf5" : Theme.card)
+                        border.width: selected ? 2 : 1; border.color: selected ? Theme.blue : "#14c0caf5"
+                        Behavior on color { ColorAnimation { duration: 90 } }
 
-                        Column {
-                            anchors.fill: parent; anchors.margins: 14; spacing: 10
-                            RowLayout {
-                                width: parent.width
-                                Rectangle {
-                                    width: 30; height: 30; radius: 8
-                                    color: selected ? Theme.blue : Theme.bg
-                                    Label { anchors.centerIn: parent; text: modelData.id; color: selected ? Theme.bg : Theme.fg; font.pixelSize: 15; font.weight: Font.Bold }
-                                }
-                                Label {
-                                    Layout.fillWidth: true; horizontalAlignment: Text.AlignRight
-                                    text: modelData.windows.length === 0 ? "empty" : modelData.windows.length + (modelData.windows.length === 1 ? " window" : " windows")
-                                    color: Theme.muted; font.pixelSize: 11
-                                }
+                        ClippingRectangle {   // live preview of the window
+                            x: 10; y: 10; width: parent.width - 20; height: 160; radius: 10; color: Theme.bgAlt
+                            ScreencopyView {
+                                id: shot
+                                anchors.centerIn: parent
+                                captureSource: root.toplevelFor(card.modelData.address)
+                                live: card.selected
+                                constraintSize: Qt.size(parent.width, parent.height)
                             }
-                            Flow {
-                                width: parent.width; spacing: 8
-                                height: 44
-                                Repeater {
-                                    model: modelData.windows.slice(0, 4)
-                                    IconImage { required property var modelData; implicitSize: 40; source: root.iconFor(modelData.cls) }
-                                }
-                                Label { visible: modelData.windows.length === 0; text: ""; color: Theme.line; font.pixelSize: 9 }
+                            IconImage {   // shown until the preview arrives
+                                anchors.centerIn: parent; visible: !shot.hasContent
+                                implicitSize: 56; source: root.iconFor(card.modelData.cls); opacity: 0.8
                             }
+                        }
+                        Row {
+                            x: 12; y: 182; spacing: 10; width: parent.width - 24
+                            IconImage { id: ic; implicitSize: 24; source: root.iconFor(card.modelData.cls); anchors.verticalCenter: parent.verticalCenter }
                             Label {
-                                width: parent.width
-                                text: modelData.windows.length ? modelData.windows[0].title : "Nothing open here"
-                                color: selected ? Theme.fg : Theme.fgDim; elide: Text.ElideRight; font.weight: Font.Normal
+                                width: parent.width - ic.width - wsTag.width - 20; anchors.verticalCenter: parent.verticalCenter
+                                text: card.modelData.title; elide: Text.ElideRight
+                                color: card.selected ? Theme.fg : Theme.fgDim; font.pixelSize: 12
                             }
-                            Label {
-                                visible: modelData.windows.length > 1
-                                width: parent.width
-                                text: modelData.windows.slice(1).map(w => w.cls).join(" · ")
-                                color: Theme.muted; elide: Text.ElideRight; font.pixelSize: 10
+                            Rectangle {
+                                id: wsTag
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: wsl.implicitWidth + 14; height: 20; radius: 6
+                                color: card.selected ? Theme.blue : Theme.bgAlt
+                                Label { id: wsl; anchors.centerIn: parent; text: card.modelData.wsName === "side" ? "side" : String(card.modelData.ws)
+                                        color: card.selected ? Theme.bg : Theme.muted; font.pixelSize: 10 }
                             }
                         }
                         MouseArea {
-                            anchors.fill: parent; cursorShape: Qt.PointingHandCursor
-                            onClicked: { root.sel = index; root.confirm() }
+                            id: cm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: { root.sel = card.index; root.confirm() }
                         }
                     }
                 }
+            }
+            Label {
+                anchors.bottom: parent.bottom; anchors.bottomMargin: 12; anchors.horizontalCenter: parent.horizontalCenter
+                visible: root.sticky
+                text: "←→↑↓ choose · Enter switch · Esc close"; color: Theme.muted; font.pixelSize: 10
             }
         }
     }

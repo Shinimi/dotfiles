@@ -1,13 +1,7 @@
-// fastfetch – Tokyo Night, your picture on the left (kitty), grouped info on the right. Made by Claude.
+// fastfetch – Tokyo Night; braille art (or your picture) on the left, grouped info on the right. Made by Claude.
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": {
-    "type": "kitty-direct",
-    "source": "~/.config/fastfetch/logo.png",
-    "width": 38,
-    "height": 15,
-    "padding": { "top": 1, "left": 2, "right": 4 }
-  },
+  "logo": { "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }, // LOGO (Settings → Theme)
   "display": {
     "separator": "  ",
     "color": { "keys": "#7aa2f7", "title": "#bb9af7", "separator": "#414868", "output": "#c0caf5" },

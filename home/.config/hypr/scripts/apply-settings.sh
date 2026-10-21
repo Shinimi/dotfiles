@@ -45,7 +45,7 @@ ga=f'{int(s["glow_strength"]*255/100):02x}'
 glowcols=", ".join(f'"rgba({c}{ga})"' for c in acc[:2])
 shadow_col=f'rgba({acc[0]}55)' if s["shadow_tint"] else "rgba(000000aa)"
 # animation speed: Hyprland "speed" is a duration, so fast = smaller numbers
-f={"slow":1.6,"normal":1.0,"fast":0.6}.get(s["anim_speed"],1.0)
+f={"slow":1.0,"normal":0.65,"fast":0.45}.get(s["anim_speed"],0.65)   # 1.0 = the old "normal"
 ws_style={"slidefade":"slidefade 12%","slide":"slide","fade":"fade","slidevert":"slidevert"}.get(s["ws_anim"],"slidefade 12%")
 an=lambda leaf,sp,bz,st=None: f'hl.animation({{ leaf = "{leaf}", enabled = true, speed = {sp*f:.2f}, bezier = "{bz}"'+(f', style = "{st}"' if st else '')+' })\n'
 anims=(an("windows",4,"overshot")+an("windowsIn",3.5,"overshot","popin 80%")+an("windowsOut",2.5,"smoothOut","popin 80%")+
@@ -184,3 +184,19 @@ open(sys.argv[2],'w').write("#!/usr/bin/env bash\n# Apps that open at login – 
     "".join(f"gtk-launch {shlex.quote(a)} >/dev/null 2>&1 &\n" for a in apps))
 PY
 chmod +x "$H/autostart.sh"; rm -f "$S"/*.todo
+
+# ---- fastfetch art (text art from a picture, your picture, or the distro logo)
+python3 -I - "$H/settings.json" "$S" <<'PY'
+import json,sys,os,subprocess,re
+s=json.load(open(sys.argv[1])); st=sys.argv[2]
+mode=s.get("fetch_logo","ascii"); src=s.get("fetch_source","") or os.path.expanduser("~/.config/fastfetch/shinobu-source.png")
+key=json.dumps([mode,src]); f=os.path.join(st,"fetch.applied")
+if os.path.exists(f) and open(f).read()==key: sys.exit()
+if mode=="ascii": subprocess.run([os.path.expanduser("~/.local/bin/fetch-ascii.sh"),src],capture_output=True)
+logo={"ascii":'{ "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }',
+      "picture":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 38, "height": 15, "padding": { "top": 1, "left": 2, "right": 4 } }',
+      "distro":'{ "type": "builtin", "color": { "1": "#7aa2f7", "2": "#bb9af7" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
+p=os.path.expanduser("~/.config/fastfetch/config.jsonc"); c=open(p).read()
+c=re.sub(r'  "logo": .*// LOGO \(Settings → Theme\)', lambda m: f'  "logo": {logo}, // LOGO (Settings → Theme)', c)
+open(p,'w').write(c); open(f,'w').write(key)
+PY

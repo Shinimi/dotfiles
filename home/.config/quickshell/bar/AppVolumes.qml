@@ -18,7 +18,9 @@ Column {
         const g = {}
         for (const s of streams) {
             const p = s.properties || {}
-            const raw = p["application.name"] || s.name || s.description || "Unknown"
+            const bin = (p["application.process.binary"] || "").toLowerCase()
+            // Chromium-based apps (Spotify, Discord…) report "Chromium"; use the real program name
+            const raw = (bin && bin !== "chromium" && /chromium/i.test(p["application.name"] || "")) ? bin : (p["application.name"] || s.name || s.description || "Unknown")
             const name = raw.charAt(0).toUpperCase() + raw.slice(1)
             if (!g[name]) g[name] = { name: name, icon: p["application.icon-name"] || raw.toLowerCase(), nodes: [] }
             g[name].nodes.push(s)
@@ -26,7 +28,7 @@ Column {
         return Object.values(g).sort((a, b) => a.name.localeCompare(b.name))
     }
     // apps whose stream name doesn't match their launcher
-    readonly property var aliases: ({ "spotify": "spotify-launcher", "ue4": "steam", "ue5": "steam", "librewolf": "librewolf" })
+    readonly property var aliases: ({ "spotify": "spotify-launcher", "vesktop": "vesktop", "helium": "helium", "ue4": "steam", "ue5": "steam", "librewolf": "librewolf" })
     function iconFor(app) {
         const key = app.icon.toLowerCase()
         if (aliases[key]) { const a = Quickshell.iconPath(aliases[key], true); if (a) return a }
