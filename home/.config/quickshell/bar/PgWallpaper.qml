@@ -45,9 +45,9 @@ Column {
                 readonly property bool sel: pg.target === modelData[0]
                 readonly property string img: Settings.get(modelData[0]) || pg.active[modelData[2]] || ""
                 width: (parent.width - 14) / 2; height: 150; radius: 16; clip: true
-                color: Theme.card; border.width: sel ? 2 : 1; border.color: sel ? Theme.blue : "#14c0caf5"
+                color: Theme.card; border.width: sel ? 2 : 1; border.color: sel ? Theme.blue : "#14ece4f6"
                 Image { anchors.fill: parent; anchors.margins: 2; source: Theme.fileUrl(pg.thumb(sc.img)); fillMode: Image.PreserveAspectCrop; asynchronous: true; opacity: 0.9 }
-                Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 36; color: "#cc16161e"
+                Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 36; color: "#cc13111c"
                     Label { x: 14; anchors.verticalCenter: parent.verticalCenter; text: (sc.sel ? "\u{f012c}  " : "") + sc.modelData[1]; color: sc.sel ? Theme.blue : Theme.fg; font.pixelSize: 12 } }
                 MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: pg.target = sc.modelData[0] }
             }
@@ -65,7 +65,7 @@ Column {
                 width: (parent.width - 30) / 4; height: width * 9 / 16; radius: 12; clip: true; color: Theme.bgAlt
                 border.width: cur ? 3 : 0; border.color: Theme.blue
                 Image { anchors.fill: parent; anchors.margins: wt.cur ? 3 : 0; source: Theme.fileUrl(pg.thumb(wt.modelData)); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 240 }
-                Rectangle { anchors.fill: parent; color: wm.containsMouse ? "#22c0caf5" : "transparent"; radius: 12 }
+                Rectangle { anchors.fill: parent; color: wm.containsMouse ? "#22ece4f6" : "transparent"; radius: 12 }
                 MouseArea { id: wm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Settings.set(pg.target, wt.modelData) }
             }
         }

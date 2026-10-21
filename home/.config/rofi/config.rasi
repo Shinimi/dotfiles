@@ -11,7 +11,7 @@ configuration {
   font: "JetBrainsMono Nerd Font 12";
 }
 * {
-  bg: #1a1b26d9; bg-alt: #24283bcc; hl: #292e42; fg: #c0caf5; dim: #565f89; accent: #7aa2f7;
+  bg: #1a1b26d9; bg-alt: #24283bcc; hl: #2d2640; fg: #ece4f6; dim: #7d7299; accent: #b69cf0;
   background-color: transparent; text-color: @fg;
 }
 window { width: 560px; background-color: @bg; border: 2px; border-color: @accent; border-radius: 12px; padding: 12px; }
@@ -23,7 +23,7 @@ listview { lines: 9; columns: 1; spacing: 4px; scrollbar: false; }
 element { padding: 8px 10px; border-radius: 8px; spacing: 10px; }
 element normal.normal, element alternate.normal, element normal.active, element alternate.active { background-color: transparent; text-color: @fg; }
 element selected.normal, element selected.active { background-color: @hl; text-color: @accent; }
-element normal.urgent, element alternate.urgent, element selected.urgent { background-color: transparent; text-color: #f7768e; }
+element normal.urgent, element alternate.urgent, element selected.urgent { background-color: transparent; text-color: #f27a9e; }
 element-icon { size: 22px; }
 element-text { text-color: inherit; vertical-align: 0.5; }
 message { background-color: @bg-alt; border-radius: 8px; padding: 8px; }

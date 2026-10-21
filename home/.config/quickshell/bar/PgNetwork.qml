@@ -20,11 +20,11 @@ Column {
             id: dc
             required property var modelData
             readonly property bool up: modelData.state.indexOf("connected") === 0
-            width: pg.width; height: 190; radius: 18; color: Theme.card; border.width: 1; border.color: up ? Qt.rgba(0.62, 0.81, 0.42, 0.4) : "#14c0caf5"
+            width: pg.width; height: 190; radius: 18; color: Theme.card; border.width: 1; border.color: up ? Qt.rgba(0.62, 0.86, 0.75, 0.4) : "#14ece4f6"
             Row {
                 x: 22; y: 20; spacing: 16
                 Rectangle {
-                    width: 52; height: 52; radius: 16; color: dc.up ? Qt.rgba(0.62, 0.81, 0.42, 0.18) : Theme.bgAlt
+                    width: 52; height: 52; radius: 16; color: dc.up ? Qt.rgba(0.62, 0.86, 0.75, 0.18) : Theme.bgAlt
                     Label { anchors.centerIn: parent; text: dc.modelData.type === "wifi" ? "\u{f05a9}" : "\u{f0200}"; color: dc.up ? Theme.green : Theme.muted; font.pixelSize: 24 }
                 }
                 Column {

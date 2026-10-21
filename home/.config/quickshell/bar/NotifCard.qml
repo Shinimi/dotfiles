@@ -13,7 +13,7 @@ Rectangle {
     width: parent ? parent.width : 340
     implicitHeight: col.implicitHeight + 24
     radius: 12
-    color: popup ? Theme.panel : "#661a1b26"
+    color: popup ? Theme.panel : "#661a1726"
     border.width: 1
     border.color: critical ? Theme.red : (popup ? Theme.glassLine : "transparent")
 

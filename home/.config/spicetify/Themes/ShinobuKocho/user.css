@@ -1,0 +1,3 @@
+/* Tokyo Night for Spotify (made by Claude). Hyprland adds the glass. */
+.main-nowPlayingBar-container, .Root__now-playing-bar { border-top: 1px solid #2d2640 !important; }
+::selection { background: rgba(182,156,240,.35); }

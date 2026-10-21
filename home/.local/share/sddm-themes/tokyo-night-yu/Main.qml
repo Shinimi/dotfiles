@@ -9,18 +9,18 @@ Item {
     width: 2560; height: 1440
 
     // ---------- palette ----------
-    readonly property color bg:      "#1a1b26"
-    readonly property color bgAlt:   "#24283b"
-    readonly property color bgHover: "#292e42"
-    readonly property color line:    "#414868"
-    readonly property color fg:      "#c0caf5"
-    readonly property color fgDim:   "#a9b1d6"
-    readonly property color muted:   "#565f89"
-    readonly property color blue:    "#7aa2f7"
-    readonly property color cyan:    "#7dcfff"
-    readonly property color purple:  "#bb9af7"
-    readonly property color yellow:  "#e0af68"
-    readonly property color red:     "#f7768e"
+    readonly property color bg:      "#1a1726"
+    readonly property color bgAlt:   "#252033"
+    readonly property color bgHover: "#2d2640"
+    readonly property color line:    "#4a3f63"
+    readonly property color fg:      "#ece4f6"
+    readonly property color fgDim:   "#c9bddf"
+    readonly property color muted:   "#7d7299"
+    readonly property color blue:    "#b69cf0"
+    readonly property color cyan:    "#8fd3e0"
+    readonly property color purple:  "#e49bd8"
+    readonly property color yellow:  "#f0c98a"
+    readonly property color red:     "#f27a9e"
     readonly property string font:   config.font || "JetBrainsMono Nerd Font"
 
     // the big screen gets the login card; other screens just the wallpaper + clock
@@ -103,9 +103,9 @@ Item {
     Rectangle {   // soft vignette so text always reads well
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0.0; color: "#661a1b26" }
-            GradientStop { position: 0.45; color: "#221a1b26" }
-            GradientStop { position: 1.0; color: "#cc16161e" }
+            GradientStop { position: 0.0; color: "#661a1726" }
+            GradientStop { position: 0.45; color: "#221a1726" }
+            GradientStop { position: 1.0; color: "#cc13111c" }
         }
     }
 
@@ -249,7 +249,7 @@ Item {
                     Rectangle {
                         Layout.preferredWidth: 50; Layout.preferredHeight: 50
                         radius: 14
-                        color: root.busy ? root.line : (goMouse.containsMouse ? "#8fb0ff" : root.blue)
+                        color: root.busy ? root.line : (goMouse.containsMouse ? "#c9b2ff" : root.blue)
                         Behavior on color { ColorAnimation { duration: 120 } }
                         Text {
                             anchors.centerIn: parent

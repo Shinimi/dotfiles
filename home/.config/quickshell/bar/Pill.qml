@@ -15,7 +15,7 @@ Rectangle {
     implicitWidth: row.implicitWidth + padding * 2
     radius: Theme.radius
     // pills sit on the translucent bar: no box of their own, only a soft highlight
-    color: active ? "#3dc0caf5" : (hovered ? "#24c0caf5" : "transparent")
+    color: active ? "#3dece4f6" : (hovered ? "#24ece4f6" : "transparent")
     border.width: 0
     Behavior on color { ColorAnimation { duration: 120 } }
 

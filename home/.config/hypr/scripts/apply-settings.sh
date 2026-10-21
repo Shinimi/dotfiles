@@ -17,8 +17,8 @@ d={"gaps_in":4,"gaps_out":8,"border_size":2,"rounding":10,"accent":"tokyo","bord
    "hide_cursor_typing":False,"cursor_hide_after":0,"ws_back_forth":False,"swallow":False,
    "night_temp":4500,"vibrance":100,"monitors":{},"lock_minutes":10,"screen_off_after":1,"mouse_wakes":False}
 s=dict(d); s.update(json.load(open(jf))); b=lambda v: "true" if v else "false"
-pal={"tokyo":["7aa2f7","bb9af7","7dcfff","7aa2f7"],"storm":["7aa2f7","7dcfff"],"sakura":["f7768e","bb9af7"],
-     "matcha":["9ece6a","73daca"],"sunset":["ff9e64","e0af68","f7768e"],"mono":["c0caf5","565f89"]}
+pal={"tokyo":["b69cf0","e49bd8","8fd3e0","b69cf0"],"storm":["b69cf0","8fd3e0"],"sakura":["f27a9e","e49bd8"],
+     "matcha":["9fdcc0","7fcfc4"],"sunset":["f5a98a","f0c98a","f27a9e"],"mono":["ece4f6","7d7299"]}
 cols=", ".join(f'"rgba({c}ff)"' for c in pal.get(s["accent"],pal["tokyo"]))
 
 # colour vibrance: a tiny screen shader, only used when not 100%
@@ -125,7 +125,7 @@ import json,shlex; t=json.load(open('$S/theme.json'))
 for k,v in t.items(): print(f'{k}={shlex.quote(str(v))}')")"
   icons="$icon_base"
   if [ "$icon_base" = Papirus-Dark ] && [ "$folder_color" != blue ]; then
-    "$HOME/.local/bin/papirus-folders-color.sh" "$folder_color" >/dev/null; icons=Papirus-Tokyo
+    "$HOME/.local/bin/papirus-folders-color.sh" "$folder_color" >/dev/null; icons=Papirus-Shinobu
   fi
   for f in "$HOME/.config/gtk-3.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"; do
     [ -f "$f" ] || continue
@@ -167,7 +167,6 @@ U=$(busctl --system call org.freedesktop.Accounts /org/freedesktop/Accounts org.
 if a=$(todo avatar) && [ -f "$a" ]; then
   magick "$a" -auto-orient -resize 512x512^ -gravity center -extent 512x512 "PNG:$HOME/.face.icon" 2>/dev/null && cp "$HOME/.face.icon" "$HOME/.face"
   [ -n "$U" ] && busctl --system call org.freedesktop.Accounts "$U" org.freedesktop.Accounts.User SetIconFile s "$HOME/.face.icon" >/dev/null 2>&1
-  "$HOME/.local/bin/fetch-logo.sh"
 fi
 if n=$(todo user_name) && [ -n "$n" ] && [ -n "$U" ]; then busctl --system call org.freedesktop.Accounts "$U" org.freedesktop.Accounts.User SetRealName s "$n" >/dev/null 2>&1; fi
 w=$(todo wall_main) && [ -f "$w" ] && "$HOME/.config/quickshell/bar/setwall.sh" DP-1 "$w"
@@ -193,9 +192,13 @@ mode=s.get("fetch_logo","ascii"); src=s.get("fetch_source","") or os.path.expand
 key=json.dumps([mode,src]); f=os.path.join(st,"fetch.applied")
 if os.path.exists(f) and open(f).read()==key: sys.exit()
 if mode=="ascii": subprocess.run([os.path.expanduser("~/.local/bin/fetch-ascii.sh"),src],capture_output=True)
-logo={"ascii":'{ "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }',
-      "picture":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 38, "height": 15, "padding": { "top": 1, "left": 2, "right": 4 } }',
-      "distro":'{ "type": "builtin", "color": { "1": "#7aa2f7", "2": "#bb9af7" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
+if mode in ("portrait","picture"):
+    pic=os.path.expanduser("~/.config/fastfetch/shinobu-portrait.png") if mode=="portrait" else os.path.expanduser("~/.face.icon")
+    subprocess.run([os.path.expanduser("~/.local/bin/fetch-logo.sh"),pic],capture_output=True)
+logo={"portrait":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 34, "height": 15, "padding": { "top": 1, "left": 3, "right": 5 } }',
+      "ascii":'{ "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }',
+      "picture":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 34, "height": 15, "padding": { "top": 1, "left": 3, "right": 5 } }',
+      "distro":'{ "type": "builtin", "color": { "1": "#b69cf0", "2": "#e49bd8" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
 p=os.path.expanduser("~/.config/fastfetch/config.jsonc"); c=open(p).read()
 c=re.sub(r'  "logo": .*// LOGO \(Settings → Theme\)', lambda m: f'  "logo": {logo}, // LOGO (Settings → Theme)', c)
 open(p,'w').write(c); open(f,'w').write(key)

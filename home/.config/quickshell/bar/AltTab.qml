@@ -144,8 +144,8 @@ Scope {
                         required property int index
                         readonly property bool selected: index === root.sel
                         width: 300; height: 220; radius: 16
-                        color: selected ? Qt.rgba(0.48, 0.64, 0.97, 0.16) : (cm.containsMouse ? "#1ec0caf5" : Theme.card)
-                        border.width: selected ? 2 : 1; border.color: selected ? Theme.blue : "#14c0caf5"
+                        color: selected ? Qt.rgba(0.71, 0.61, 0.94, 0.16) : (cm.containsMouse ? "#1eece4f6" : Theme.card)
+                        border.width: selected ? 2 : 1; border.color: selected ? Theme.blue : "#14ece4f6"
                         Behavior on color { ColorAnimation { duration: 90 } }
 
                         ClippingRectangle {   // live preview of the window

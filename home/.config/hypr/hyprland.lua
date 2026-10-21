@@ -40,15 +40,15 @@
 ---------------------------------------------------------------- COLORS
 -- Tokyo Night palette
 local c = {
-    bg      = "1a1b26",
-    bg_dark = "16161e",
-    bg_hl   = "292e42",
-    fg      = "c0caf5",
-    comment = "565f89",
-    blue    = "7aa2f7",
-    purple  = "bb9af7",
-    cyan    = "7dcfff",
-    border  = "414868",
+    bg      = "1a1726",
+    bg_dark = "13111c",
+    bg_hl   = "2d2640",
+    fg      = "ece4f6",
+    comment = "7d7299",
+    blue    = "b69cf0",
+    purple  = "e49bd8",
+    cyan    = "8fd3e0",
+    border  = "4a3f63",
 }
 local function rgba(hex, a) return "rgba(" .. hex .. (a or "ff") .. ")" end
 
@@ -175,13 +175,13 @@ hl.config({
     render = { new_render_scheduling = true },
     -- window tabs (SUPER + W groups): Tokyo Night pills
     group = {
-        col = { border_active = { colors = { "rgba(bb9af7ff)", "rgba(7aa2f7ff)" }, angle = 45 }, border_inactive = "rgba(414868aa)" },
+        col = { border_active = { colors = { "rgba(e49bd8ff)", "rgba(b69cf0ff)" }, angle = 45 }, border_inactive = "rgba(4a3f63aa)" },
         groupbar = {
             enabled = true, height = 24, font_family = "JetBrainsMono Nerd Font", font_size = 11,
             gradients = true, rounding = 8, gradient_rounding = 8, round_only_edges = false,
             indicator_height = 0, gaps_in = 4, gaps_out = 6, keep_upper_gap = true, text_padding = 10,
-            text_color = "rgba(16161eff)", text_color_inactive = "rgba(a9b1d6ff)",
-            col = { active = "rgba(7aa2f7ee)", inactive = "rgba(24283bdd)", locked_active = "rgba(bb9af7ee)", locked_inactive = "rgba(24283bdd)" },
+            text_color = "rgba(13111cff)", text_color_inactive = "rgba(c9bddfff)",
+            col = { active = "rgba(b69cf0ee)", inactive = "rgba(252033dd)", locked_active = "rgba(e49bd8ee)", locked_inactive = "rgba(252033dd)" },
             blur = true, disable_when_only = false,
         },
     },  -- smoother frame pacing when the GPU is busy

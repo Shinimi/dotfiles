@@ -1,8 +1,0 @@
-[Plymouth Theme]
-Name=Tokyo Night
-Description=Tokyo Night boot splash. Made by Claude.
-ModuleName=script
-
-[script]
-ImageDir=/usr/share/plymouth/themes/tokyo-night
-ScriptFile=/usr/share/plymouth/themes/tokyo-night/tokyo-night.script

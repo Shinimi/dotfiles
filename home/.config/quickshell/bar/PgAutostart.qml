@@ -24,7 +24,7 @@ Column {
                 id: ar
                 required property string modelData
                 readonly property var e: pg.entry(modelData)
-                width: parent.width; height: 46; radius: 12; color: "#331a1b26"
+                width: parent.width; height: 46; radius: 12; color: "#331a1726"
                 Row {
                     x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                     IconImage { implicitSize: 26; source: Quickshell.iconPath(ar.e ? ar.e.icon : "application-x-executable", true); anchors.verticalCenter: parent.verticalCenter }

@@ -1,33 +1,33 @@
 /* Tokyo Night glass for Discord (Vesktop) under Hyprland blur. Made by Claude. Delete this to go back to default. */
 html, body, #app-mount, [class*="appMount"], [class*="app_"], [class*="bg_"], [class*="layers_"], [class*="layer_"] { background: transparent !important; }
 :root, .theme-dark, .theme-darker, .theme-midnight, .visual-refresh {
-  --tn-base: rgba(26, 27, 38, 0.62);
-  --tn-dark: rgba(22, 22, 30, 0.70);
-  --tn-raise: rgba(36, 40, 59, 0.72);
-  --tn-hover: rgba(122, 162, 247, 0.14);
-  --tn-blue: #7aa2f7; --tn-purple: #bb9af7; --tn-cyan: #7dcfff; --tn-fg: #c0caf5; --tn-dim: #a9b1d6; --tn-muted: #565f89;
+  --tn-base: rgba(26,23,38, 0.62);
+  --tn-dark: rgba(19,17,28, 0.70);
+  --tn-raise: rgba(37,32,51, 0.72);
+  --tn-hover: rgba(182,156,240, 0.14);
+  --tn-blue: #b69cf0; --tn-purple: #e49bd8; --tn-cyan: #8fd3e0; --tn-fg: #ece4f6; --tn-dim: #c9bddf; --tn-muted: #7d7299;
 
   --background-primary: var(--tn-base) !important;
   --background-secondary: var(--tn-dark) !important;
   --background-secondary-alt: var(--tn-dark) !important;
   --background-tertiary: var(--tn-dark) !important;
-  --background-floating: rgba(26, 27, 38, 0.94) !important;
+  --background-floating: rgba(26,23,38, 0.94) !important;
   --background-base-lowest: var(--tn-dark) !important;
   --background-base-lower: var(--tn-dark) !important;
   --background-base-low: var(--tn-base) !important;
   --background-surface-high: var(--tn-raise) !important;
-  --background-surface-higher: rgba(41, 46, 66, 0.82) !important;
-  --background-surface-highest: rgba(41, 46, 66, 0.9) !important;
+  --background-surface-higher: rgba(45,38,64, 0.82) !important;
+  --background-surface-highest: rgba(45,38,64, 0.9) !important;
   --chat-background-default: var(--tn-raise) !important;
   --channeltextarea-background: var(--tn-raise) !important;
-  --modal-background: rgba(26, 27, 38, 0.95) !important;
+  --modal-background: rgba(26,23,38, 0.95) !important;
   --bg-overlay-chat: var(--tn-base) !important;
   --bg-overlay-app-frame: var(--tn-dark) !important;
   --bg-base-primary: var(--tn-base) !important;
   --bg-base-secondary: var(--tn-dark) !important;
   --bg-base-tertiary: var(--tn-dark) !important;
   --background-modifier-hover: var(--tn-hover) !important;
-  --background-modifier-selected: rgba(122, 162, 247, 0.22) !important;
+  --background-modifier-selected: rgba(182,156,240, 0.22) !important;
 
   --text-normal: var(--tn-fg) !important;
   --text-default: var(--tn-fg) !important;
@@ -40,7 +40,7 @@ html, body, #app-mount, [class*="appMount"], [class*="app_"], [class*="bg_"], [c
   --brand-560: #6a8fe0 !important;
   --button-filled-brand-background: var(--tn-blue) !important;
   --control-brand-foreground: var(--tn-blue) !important;
-  --mention-background: rgba(187, 154, 247, 0.14) !important;
+  --mention-background: rgba(228,155,216, 0.14) !important;
   --mention-foreground: var(--tn-purple) !important;
 }
-::selection { background: rgba(122, 162, 247, 0.35); }
+::selection { background: rgba(182,156,240, 0.35); }

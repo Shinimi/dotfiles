@@ -7,7 +7,7 @@ Rectangle {
     property string title; property string icon
     implicitWidth: 300               // the RowLayout decides the real width
     implicitHeight: col.implicitHeight + 28
-    radius: 14; color: Theme.card; border.width: 1; border.color: "#14c0caf5"
+    radius: 14; color: Theme.card; border.width: 1; border.color: "#14ece4f6"
     Column {
         id: col
         x: 14; y: 14; width: parent.width - 28; spacing: 12

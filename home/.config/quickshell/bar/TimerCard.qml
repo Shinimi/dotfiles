@@ -13,7 +13,7 @@ Rectangle {
         property string text; property bool primary: false; property bool on: false; signal hit()
         Layout.fillWidth: true; Layout.preferredWidth: 1
         height: 30; radius: 8
-        color: primary ? (bMouse.containsMouse ? "#8fb0ff" : Theme.blue) : (on ? Theme.bgHover : (bMouse.containsMouse ? Theme.bgHover : Theme.bg))
+        color: primary ? (bMouse.containsMouse ? "#c9b2ff" : Theme.blue) : (on ? Theme.bgHover : (bMouse.containsMouse ? Theme.bgHover : Theme.bg))
         border.width: on ? 1 : 0; border.color: Theme.blue
         Label { anchors.centerIn: parent; text: parent.text; color: parent.primary ? Theme.bg : Theme.fg; font.pixelSize: 11 }
         MouseArea { id: bMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.hit() }

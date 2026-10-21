@@ -79,7 +79,7 @@ Scope {
                     Label { text: "Clipboard"; color: Theme.fg; font.pixelSize: 16; font.bold: true; Layout.fillWidth: true }
                     Rectangle {
                         implicitWidth: clearTxt.implicitWidth + 22; implicitHeight: 28; radius: 9
-                        color: clearMouse.containsMouse ? Qt.rgba(0.97, 0.46, 0.56, 0.18) : Theme.bgAlt
+                        color: clearMouse.containsMouse ? Qt.rgba(0.95, 0.48, 0.62, 0.18) : Theme.bgAlt
                         visible: root.items.length > 0
                         Label { id: clearTxt; anchors.centerIn: parent; text: "󰩺  Clear all"; color: clearMouse.containsMouse ? Theme.red : Theme.fgDim; font.pixelSize: 11 }
                         MouseArea {
@@ -121,7 +121,7 @@ Scope {
                         width: list.width
                         height: modelData.img ? 110 : Math.min(76, txt.implicitHeight + 24)
                         radius: 12
-                        color: current ? Qt.rgba(0.48, 0.64, 0.97, 0.16) : (rowMouse.containsMouse ? Theme.bgHover : Theme.card)
+                        color: current ? Qt.rgba(0.71, 0.61, 0.94, 0.16) : (rowMouse.containsMouse ? Theme.bgHover : Theme.card)
                         border.width: current ? 1 : 0; border.color: Theme.blue
                         Behavior on color { ColorAnimation { duration: 120 } }
 
@@ -160,7 +160,7 @@ Scope {
                             anchors { right: parent.right; rightMargin: 10; verticalCenter: parent.verticalCenter }
                             width: 28; height: 28; radius: 8
                             opacity: rowMouse.containsMouse || delMouse.containsMouse || row.current ? 1 : 0
-                            color: delMouse.containsMouse ? Qt.rgba(0.97, 0.46, 0.56, 0.2) : "transparent"
+                            color: delMouse.containsMouse ? Qt.rgba(0.95, 0.48, 0.62, 0.2) : "transparent"
                             Label { anchors.centerIn: parent; text: "󰆴"; color: delMouse.containsMouse ? Theme.red : Theme.muted; font.pixelSize: 14 }
                             MouseArea { id: delMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.remove(row.modelData) }
                         }

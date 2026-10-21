@@ -1,32 +1,29 @@
-// fastfetch – Tokyo Night; braille art (or your picture) on the left, grouped info on the right. Made by Claude.
+// fastfetch – Shinobu Kochō. Portrait on the left (kitty), a calm list on the right. Made by Claude.
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": { "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }, // LOGO (Settings → Theme)
+  "logo": { "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 34, "height": 15, "padding": { "top": 1, "left": 3, "right": 5 } }, // LOGO (Settings → Theme)
   "display": {
-    "separator": "  ",
-    "color": { "keys": "#7aa2f7", "title": "#bb9af7", "separator": "#414868", "output": "#c0caf5" },
-    "key": { "width": 15 },
-    "bar": { "char": { "elapsed": "━", "total": "─" }, "border": { "left": "", "right": "" }, "width": 12, "color": { "total": "#414868" } },
-    "percent": { "type": 3, "color": { "green": "#9ece6a", "yellow": "#e0af68", "red": "#f7768e" } }
+    "separator": "   ",
+    "color": { "keys": "#b69cf0", "title": "#e49bd8", "separator": "#4a3f63", "output": "#ece4f6" },
+    "key": { "width": 11 },
+    "bar": { "char": { "elapsed": "■", "total": "■" }, "border": { "left": "", "right": "" }, "width": 10, "color": { "elapsed": "#e49bd8", "total": "#2d2640" } },
+    "percent": { "type": 3 }
   },
   "modules": [
-    { "type": "title", "format": "{#1;38;2;122;162;247}{user-name}{#0;38;2;65;72;104} @ {#1;38;2;187;154;247}{host-name}" },
-    { "type": "custom", "format": "{#38;2;65;72;104}╭──────────────────────────── {#38;2;187;154;247}system {#38;2;65;72;104}──" },
-    { "type": "os",       "key": "│ 󰣇  os",       "format": "{pretty-name}" },
-    { "type": "kernel",   "key": "│   kernel",   "format": "{release}" },
-    { "type": "wm",       "key": "│   wm",       "format": "{pretty-name} {version}" },
-    { "type": "packages", "key": "│ 󰏖  pkgs" },
-    { "type": "uptime",   "key": "│ 󰅐  uptime" },
-    { "type": "custom", "format": "{#38;2;65;72;104}├──────────────────────────── {#38;2;125;207;255}hardware {#38;2;65;72;104}─" },
-    { "type": "cpu",      "key": "│ 󰻠  cpu",      "keyColor": "#7dcfff", "format": "{name} · {cores-logical}t · {temperature}", "temp": true },
-    { "type": "gpu",      "key": "│ 󰢮  gpu",      "keyColor": "#7dcfff", "format": "{name}" },
-    { "type": "memory",   "key": "│ 󰍛  memory",   "keyColor": "#7dcfff", "format": "{used} / {total}  {percentage-bar}" },
-    { "type": "disk",     "key": "│ 󰋊  disk",     "keyColor": "#7dcfff", "folders": "/", "format": "{size-used} / {size-total}  {size-percentage-bar}" },
-    { "type": "custom", "format": "{#38;2;65;72;104}├──────────────────────────── {#38;2;158;206;106}look {#38;2;65;72;104}─────" },
-    { "type": "terminal", "key": "│   terminal", "keyColor": "#9ece6a" },
-    { "type": "shell",    "key": "│   shell",    "keyColor": "#9ece6a" },
-    { "type": "theme",    "key": "│ 󰏘  theme",    "keyColor": "#9ece6a", "format": "Tokyo Night glass" },
-    { "type": "custom", "format": "{#38;2;65;72;104}╰──────────────────────────────────────────" },
-    { "type": "colors", "symbol": "circle", "paddingLeft": 2 }
+    "break",
+    { "type": "custom", "format": "{#1;38;2;228;155;216}胡蝶しのぶ{#0;38;2;125;114;153}  ·  {#38;2;182;156;240}{$USER}{#38;2;125;114;153}@cachyos" },
+    { "type": "custom", "format": "{#38;2;74;63;99}────────────────────────────────────" },
+    { "type": "os",       "key": " os",     "format": "{pretty-name}" },
+    { "type": "kernel",   "key": " kernel", "format": "{release}" },
+    { "type": "wm",       "key": " wm",     "format": "{pretty-name}" },
+    { "type": "packages", "key": " pkgs",   "format": "{all}" },
+    { "type": "uptime",   "key": " up" },
+    "break",
+    { "type": "cpu",      "key": " cpu",    "keyColor": "#e49bd8", "format": "{name} · {temperature}", "temp": true },
+    { "type": "gpu",      "key": " gpu",    "keyColor": "#e49bd8", "format": "{name}" },
+    { "type": "memory",   "key": " ram",    "keyColor": "#e49bd8", "format": "{percentage-bar}  {used}" },
+    { "type": "disk",     "key": " disk",   "keyColor": "#e49bd8", "folders": "/", "format": "{size-percentage-bar}  {size-used}" },
+    "break",
+    { "type": "custom", "format": "{#38;2;182;156;240}●  {#38;2;228;155;216}●  {#38;2;143;211;224}●  {#38;2;159;220;192}●  {#38;2;240;201;138}●  {#38;2;242;122;158}●" }
   ]
 }

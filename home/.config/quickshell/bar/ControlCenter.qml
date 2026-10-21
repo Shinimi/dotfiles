@@ -64,7 +64,7 @@ BarPopup {
                 required property var modelData
                 width: 38; height: 38; radius: 12
                 color: hm.containsMouse ? Qt.rgba(modelData[2].r, modelData[2].g, modelData[2].b, 0.2) : Theme.card
-                border.width: 1; border.color: "#14c0caf5"
+                border.width: 1; border.color: "#14ece4f6"
                 Behavior on color { ColorAnimation { duration: 120 } }
                 Label { anchors.centerIn: parent; text: modelData[0]; color: hm.containsMouse ? modelData[2] : Theme.fgDim; font.pixelSize: 16 }
                 MouseArea { id: hm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData[3]() }
@@ -76,13 +76,13 @@ BarPopup {
     ClippingRectangle {
         visible: cc.player !== null && cc.player.trackTitle !== ""
         width: parent.width; height: 96; radius: 16; color: Theme.card
-        border.width: 1; border.color: "#14c0caf5"
+        border.width: 1; border.color: "#14ece4f6"
         Image {   // album art as a soft backdrop
             anchors.fill: parent; source: cc.art
             fillMode: Image.PreserveAspectCrop; asynchronous: true; opacity: 0.22
         }
         Rectangle { anchors.fill: parent; gradient: Gradient { orientation: Gradient.Horizontal
-            GradientStop { position: 0; color: "#cc16161e" } GradientStop { position: 1; color: "#3316161e" } } }
+            GradientStop { position: 0; color: "#cc13111c" } GradientStop { position: 1; color: "#3313111c" } } }
         RowLayout {
             anchors.fill: parent; anchors.margins: 12; spacing: 14
             ClippingRectangle {
@@ -97,7 +97,7 @@ BarPopup {
                 Item { width: 1; height: 6 }
                 Rectangle {   // progress
                     visible: cc.player && cc.player.lengthSupported && cc.player.length > 0
-                    width: parent.width; height: 4; radius: 2; color: "#33c0caf5"
+                    width: parent.width; height: 4; radius: 2; color: "#33ece4f6"
                     Rectangle {
                         height: parent.height; radius: 2; color: Theme.green
                         width: cc.player && cc.player.length > 0 ? parent.width * Math.min(1, cc.player.position / cc.player.length) : 0
@@ -115,7 +115,7 @@ BarPopup {
                         readonly property bool main: modelData[1] === "toggle"
                         width: main ? 44 : 34; height: width; radius: width / 2
                         anchors.verticalCenter: parent.verticalCenter
-                        color: main ? Theme.green : (pm.containsMouse ? "#33c0caf5" : "#22c0caf5")
+                        color: main ? Theme.green : (pm.containsMouse ? "#33ece4f6" : "#22ece4f6")
                         Label {
                             anchors.centerIn: parent
                             text: main ? (cc.player && cc.player.isPlaying ? "\u{f03e4}" : "\u{f040a}") : modelData[0]
@@ -151,14 +151,14 @@ BarPopup {
                 readonly property color accent: modelData[4]
                 Layout.fillWidth: true; Layout.preferredWidth: 1
                 height: 84; radius: 16
-                color: on ? Qt.rgba(accent.r, accent.g, accent.b, 0.22) : (tm.containsMouse ? "#22c0caf5" : Theme.card)
-                border.width: 1; border.color: on ? Qt.rgba(accent.r, accent.g, accent.b, 0.7) : "#14c0caf5"
+                color: on ? Qt.rgba(accent.r, accent.g, accent.b, 0.22) : (tm.containsMouse ? "#22ece4f6" : Theme.card)
+                border.width: 1; border.color: on ? Qt.rgba(accent.r, accent.g, accent.b, 0.7) : "#14ece4f6"
                 Behavior on color { ColorAnimation { duration: 150 } }
                 Column {
                     x: 12; y: 12; width: parent.width - 24; spacing: 8
                     Rectangle {
                         width: 30; height: 30; radius: 10
-                        color: tile.on ? tile.accent : "#331a1b26"
+                        color: tile.on ? tile.accent : "#331a1726"
                         Behavior on color { ColorAnimation { duration: 150 } }
                         Label { anchors.centerIn: parent; text: modelData[0]; color: tile.on ? Theme.bg : tile.accent; font.pixelSize: 15 }
                     }
@@ -187,7 +187,7 @@ BarPopup {
                 RowLayout {
                     width: parent.width; spacing: 10
                     Rectangle {
-                        width: 30; height: 30; radius: 10; color: om.containsMouse ? Theme.bgHover : "#331a1b26"
+                        width: 30; height: 30; radius: 10; color: om.containsMouse ? Theme.bgHover : "#331a1726"
                         Label { anchors.centerIn: parent; text: cc.sink && cc.sink.audio && cc.sink.audio.muted ? "\u{f075f}" : "\u{f057e}"; color: Theme.green; font.pixelSize: 15 }
                         MouseArea { id: om; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (cc.sink) cc.sink.audio.muted = !cc.sink.audio.muted }
                     }
@@ -203,7 +203,7 @@ BarPopup {
                 RowLayout {
                     width: parent.width; spacing: 10
                     Rectangle {
-                        width: 30; height: 30; radius: 10; color: mm.containsMouse ? Theme.bgHover : "#331a1b26"
+                        width: 30; height: 30; radius: 10; color: mm.containsMouse ? Theme.bgHover : "#331a1726"
                         Label { anchors.centerIn: parent; text: cc.source && cc.source.audio && cc.source.audio.muted ? "\u{f036d}" : "\u{f036c}"; color: Theme.purple; font.pixelSize: 15 }
                         MouseArea { id: mm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (cc.source) cc.source.audio.muted = !cc.source.audio.muted }
                     }
@@ -224,7 +224,7 @@ BarPopup {
                             required property var modelData
                             readonly property bool cur: cc.sink && (cc.sink.id === modelData.id || (cc.sink.name === "headset_eq" && (modelData.name || "").indexOf("Fuxi") >= 0))
                             width: dl.implicitWidth + 26; height: 28; radius: 10
-                            color: cur ? Qt.rgba(0.48, 0.64, 0.97, 0.2) : (dm.containsMouse ? "#22c0caf5" : "#331a1b26")
+                            color: cur ? Qt.rgba(0.71, 0.61, 0.94, 0.2) : (dm.containsMouse ? "#22ece4f6" : "#331a1726")
                             border.width: cur ? 1 : 0; border.color: Theme.blue
                             Label { id: dl; anchors.centerIn: parent; text: (cur ? "\u{f012c} " : "") + cc.nice(modelData).slice(0, 20); color: cur ? Theme.blue : Theme.fgDim; font.pixelSize: 10 }
                             MouseArea { id: dm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -233,7 +233,7 @@ BarPopup {
                     }
                 }
                 // EQ
-                Rectangle { width: parent.width; height: 1; color: "#14c0caf5" }
+                Rectangle { width: parent.width; height: 1; color: "#14ece4f6" }
                 RowLayout {
                     width: parent.width; spacing: 6
                     Label { text: "\u{f1de}  EQ"; color: SysState.fx.eq ? Theme.cyan : Theme.muted; font.pixelSize: 11; Layout.rightMargin: 4 }
@@ -243,7 +243,7 @@ BarPopup {
                             required property var modelData
                             readonly property bool cur: modelData[0] === "off" ? !SysState.fx.eq : (!!SysState.fx.eq && SysState.fx.preset === modelData[0])
                             Layout.fillWidth: true; height: 26; radius: 9
-                            color: cur ? Theme.cyan : (em.containsMouse ? "#22c0caf5" : "#331a1b26")
+                            color: cur ? Theme.cyan : (em.containsMouse ? "#22ece4f6" : "#331a1726")
                             Behavior on color { ColorAnimation { duration: 120 } }
                             Label { anchors.centerIn: parent; text: modelData[1]; color: cur ? Theme.bg : Theme.fgDim; font.pixelSize: 10 }
                             MouseArea { id: em; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -265,7 +265,7 @@ BarPopup {
                         required property var modelData
                         width: parent.width; spacing: 10
                         Rectangle {
-                            width: 30; height: 30; radius: 10; color: "#331a1b26"
+                            width: 30; height: 30; radius: 10; color: "#331a1726"
                             Label { anchors.centerIn: parent; text: "\u{f00df}"; color: Theme.yellow; font.pixelSize: 15 }
                         }
                         Label { text: modelData[1]; color: Theme.fgDim; font.pixelSize: 11; Layout.preferredWidth: 34 }
@@ -327,7 +327,7 @@ BarPopup {
                 Rectangle {
                     visible: Notifs.count > 0
                     width: parent.width; height: 28; radius: 9
-                    color: clrMouse.containsMouse ? "#22c0caf5" : "#331a1b26"
+                    color: clrMouse.containsMouse ? "#22ece4f6" : "#331a1726"
                     Label { anchors.centerIn: parent; text: "\u{f0e1e}  Clear all"; color: Theme.fgDim; font.pixelSize: 10 }
                     MouseArea { id: clrMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Notifs.clearAll() }
                 }
@@ -360,7 +360,7 @@ BarPopup {
                     Rectangle {
                         visible: Updates.total > 0
                         width: ul.implicitWidth + 22; height: 28; radius: 10
-                        color: uMouse.containsMouse ? "#8fb0ff" : Theme.blue
+                        color: uMouse.containsMouse ? "#c9b2ff" : Theme.blue
                         Label { id: ul; anchors.centerIn: parent; text: "\u{f06b0}  Update " + Updates.total; color: Theme.bg; font.pixelSize: 10 }
                         MouseArea { id: uMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                             onClicked: cc.go(["kitty", "--class", "updater", "-e", "bash", "-c", "yay -Syu; echo; read -n1 -rsp 'Done – press any key to close'"]) }
@@ -387,7 +387,7 @@ BarPopup {
                 required property var modelData
                 Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 14
                 color: qm.containsMouse ? Qt.rgba(modelData[2].r, modelData[2].g, modelData[2].b, 0.16) : Theme.card
-                border.width: 1; border.color: qm.containsMouse ? Qt.rgba(modelData[2].r, modelData[2].g, modelData[2].b, 0.5) : "#14c0caf5"
+                border.width: 1; border.color: qm.containsMouse ? Qt.rgba(modelData[2].r, modelData[2].g, modelData[2].b, 0.5) : "#14ece4f6"
                 Behavior on color { ColorAnimation { duration: 120 } }
                 Column {
                     anchors.centerIn: parent; spacing: 5
