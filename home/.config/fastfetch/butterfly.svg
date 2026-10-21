@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="440" viewBox="0 0 600 440">
+<rect width="600" height="440" fill="black"/>
+<g fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round">
+ <g id="w">
+  <!-- upper wing -->
+  <path stroke-width="9" d="M292 200 C250 120 190 40 110 30 C60 25 40 60 52 100 C66 150 120 185 175 200 C220 212 262 210 292 200 Z"/>
+  <path stroke-width="4" d="M292 200 C230 160 160 90 110 50 M292 200 C230 175 150 140 70 95 M292 200 C240 195 180 190 120 175"/>
+  <!-- lower wing -->
+  <path stroke-width="9" d="M292 212 C250 222 190 240 160 275 C130 310 140 370 185 385 C230 398 270 330 292 240 Z"/>
+  <path stroke-width="4" d="M292 215 C250 250 210 300 190 360 M292 222 C250 240 200 265 160 300"/>
+  <!-- haori spots along the edges -->
+  <g fill="white" stroke="none">
+   <circle cx="88" cy="48" r="9"/><circle cx="62" cy="80" r="8"/><circle cx="66" cy="122" r="8"/><circle cx="104" cy="160" r="8"/>
+   <circle cx="140" cy="36" r="7"/><circle cx="172" cy="282" r="7"/><circle cx="158" cy="330" r="7"/><circle cx="186" cy="370" r="7"/>
+  </g>
+ </g>
+ <use href="#w" transform="translate(600 0) scale(-1 1)"/>
+ <!-- body + antennae -->
+ <path stroke-width="12" d="M300 175 L300 300"/>
+ <circle cx="300" cy="168" r="11" fill="white" stroke="none"/>
+ <path stroke-width="4" d="M296 160 C280 120 262 100 240 92 M304 160 C320 120 338 100 360 92"/>
+ <circle cx="240" cy="92" r="6" fill="white" stroke="none"/><circle cx="360" cy="92" r="6" fill="white" stroke="none"/>
+</g></svg>

@@ -1,29 +1,24 @@
-// fastfetch – Shinobu Kochō. Portrait left, quiet list right. Made by Claude.
+// fastfetch – Shinobu Kochō: a butterfly, her name, a short list. Made by Claude.
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": { "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 30, "height": 14, "padding": { "top": 1, "left": 3, "right": 5 } }, // LOGO (Settings → Theme)
+  "logo": { "type": "file-raw", "source": "~/.config/fastfetch/butterfly.txt", "padding": { "top": 2, "left": 3, "right": 5 } }, // LOGO (Settings → Theme)
   "display": {
-    "separator": "  ",
-    "color": { "keys": "#a28ae8", "separator": "#403a5c", "output": "#efeaf8" },
-    "key": { "width": 11 },
-    "bar": { "char": { "elapsed": "▰", "total": "▱" }, "border": { "left": "", "right": "" }, "width": 10, "color": { "elapsed": "#e39ec0", "total": "#403a5c" } },
+    "separator": "   ",
+    "color": { "keys": "#e39ec0", "output": "#efeaf8" },
+    "key": { "width": 6 },
     "percent": { "type": 3, "color": { "green": "#8fd6b8", "yellow": "#eec48e", "red": "#ec6f8f" } }
   },
   "modules": [
     "break",
-    { "type": "custom", "format": "{#1;38;2;227;158;192}胡 蝶 し の ぶ" },
-    { "type": "custom", "format": "{#38;2;64;58;92}─────────────────────────────────" },
-    { "type": "os",       "key": "  os",     "format": "{pretty-name}" },
-    { "type": "wm",       "key": "  wm",     "format": "{pretty-name} {version}" },
-    { "type": "shell",    "key": "  shell",  "format": "{pretty-name}" },
-    { "type": "terminal", "key": "  term",   "format": "{pretty-name}" },
-    { "type": "uptime",   "key": "  up" },
+    { "type": "custom", "format": "{#1;38;2;162;138;232}胡 蝶 し の ぶ" },
     "break",
-    { "type": "cpu",      "key": "  cpu",    "keyColor": "#e39ec0", "format": "{name}  {#38;2;128;122;156}{temperature}", "temp": true },
-    { "type": "gpu",      "key": "  gpu",    "keyColor": "#e39ec0", "format": "{name}" },
-    { "type": "memory",   "key": "  ram",    "keyColor": "#e39ec0", "format": "{used} of {total}  {percentage}" },
-    { "type": "disk",     "key": "  disk",   "keyColor": "#e39ec0", "folders": "/", "format": "{size-used} of {size-total}  {size-percentage}" },
+    { "type": "os",       "key": "os",   "format": "{name}" },
+    { "type": "kernel",   "key": "ker",  "format": "{release}" },
+    { "type": "wm",       "key": "wm",   "format": "{pretty-name}" },
+    { "type": "shell",    "key": "sh",   "format": "{pretty-name}" },
+    { "type": "memory",   "key": "mem",  "format": "{used} · {percentage}" },
+    { "type": "uptime",   "key": "up" },
     "break",
-    { "type": "custom", "format": "{#38;2;162;138;232}󱖉  {#38;2;227;158;192}󱖉  {#38;2;127;196;227}󱖉  {#38;2;143;214;184}󱖉  {#38;2;238;196;142}󱖉  {#38;2;236;111;143}󱖉" }
+    { "type": "custom", "format": "{#38;2;162;138;232}●  {#38;2;227;158;192}●  {#38;2;127;196;227}●  {#38;2;143;214;184}●  {#38;2;238;196;142}●  {#38;2;236;111;143}●" }
   ]
 }

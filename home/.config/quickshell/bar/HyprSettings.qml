@@ -494,7 +494,7 @@ Scope {
                             width: parent.width; title: "Terminal art (fastfetch)"; icon: "\u{f018d}"
                             SetChoice {
                                 label: "Shown next to your system info"; current: Settings.get("fetch_logo"); onPicked: v => Settings.set("fetch_logo", v)
-                                options: [["portrait", "Shinobu portrait"], ["picture", "My picture"], ["ascii", "Text art"], ["distro", "CachyOS logo"]]
+                                options: [["butterfly", "Butterfly"], ["portrait", "Shinobu portrait"], ["picture", "My picture"], ["ascii", "Text art"], ["distro", "CachyOS logo"]]
                             }
                             Row {
                                 visible: Settings.get("fetch_logo") === "ascii"; spacing: 8
