@@ -13,6 +13,9 @@ home_paths=(
   .config/systemd/user/weekly-checkup.service .config/systemd/user/weekly-checkup.timer
   .local/bin/audio-fx.sh .local/bin/weekly-checkup.sh
   .config/spicetify/Themes/TokyoNight .config/vesktop/settings/quickCss.css
+  .config/gtk-3.0/settings.ini .config/gtk-3.0/gtk.css .config/gtk-4.0/settings.ini .config/gtk-4.0/gtk.css
+  .local/share/color-schemes/TokyoNight.colors .icons/default/index.theme
+  .config/starship.toml .config/fastfetch/config.jsonc .config/btop/btop.conf .config/fish/config.fish
   .local/share/sddm-themes/tokyo-night-yu
   Downloads/Optiv10/OptiScaler.ini Downloads/Optiv10/README-Optiv10.txt Downloads/Optiv10/install-optiv10.sh
 )

@@ -1,0 +1,49 @@
+# Tokyo Night prompt. Made by Claude.
+add_newline = true
+format = """
+[](#7aa2f7)$os$username[](bg:#3d59a1 fg:#7aa2f7)$directory[](fg:#3d59a1 bg:#292e42)$git_branch$git_status[](fg:#292e42 bg:#1f2335)$cmd_duration[ ](fg:#1f2335)
+$character"""
+
+[os]
+disabled = false
+style = "bg:#7aa2f7 fg:#16161e"
+format = "[$symbol]($style)"
+[os.symbols]
+Arch = "󰣇 "
+CachyOS = "󰣇 "
+Linux = " "
+
+[username]
+show_always = true
+style_user = "bg:#7aa2f7 fg:#16161e bold"
+format = "[$user ]($style)"
+
+[directory]
+style = "bg:#3d59a1 fg:#e0e6ff"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+[directory.substitutions]
+"Downloads" = "󰇚 "
+"Games" = "󰊗 "
+"dotfiles" = " "
+".config" = " "
+
+[git_branch]
+symbol = ""
+style = "bg:#292e42 fg:#bb9af7"
+format = "[ $symbol $branch ]($style)"
+
+[git_status]
+style = "bg:#292e42 fg:#e0af68"
+format = "[($all_status$ahead_behind )]($style)"
+
+[cmd_duration]
+min_time = 2000
+style = "bg:#1f2335 fg:#565f89"
+format = "[  $duration ]($style)"
+
+[character]
+success_symbol = "[❯](bold #7aa2f7)"
+error_symbol = "[❯](bold #f7768e)"
+vimcmd_symbol = "[❮](bold #9ece6a)"

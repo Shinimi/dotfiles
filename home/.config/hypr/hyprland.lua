@@ -79,7 +79,7 @@ end)
 
 
 ---------------------------------------------------------------- ENVIRONMENT
-hl.env("XCURSOR_THEME", "breeze_cursors")
+hl.env("XCURSOR_THEME", "capitaine-cursors")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("QT_QPA_PLATFORMTHEME", "kde")          -- KDE apps keep your Breeze Dark look
