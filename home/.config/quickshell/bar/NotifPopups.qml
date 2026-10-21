@@ -6,9 +6,10 @@ import Quickshell.Wayland
 PanelWindow {
     required property var screen
     visible: Notifs.popups.count > 0
-    anchors { top: true; right: true }
+    readonly property bool center: Settings.cur("notif_center")
+    anchors { top: true; right: !center }
     margins.top: Theme.barHeight + 10
-    margins.right: 10
+    margins.right: center ? 0 : 10
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.namespace: "qsbar-notifications"

@@ -10,9 +10,9 @@ Item {
     RowLayout {
         anchors.fill: parent
         Column {
-            Layout.fillWidth: true; spacing: 1
-            Label { text: r.label; color: Theme.fgDim; font.pixelSize: 12 }
-            Label { visible: r.desc !== ""; text: r.desc; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal }
+            Layout.fillWidth: true; Layout.rightMargin: 8; spacing: 1
+            Label { width: parent.width; elide: Text.ElideRight; text: r.label; color: Theme.fgDim; font.pixelSize: 12 }
+            Label { width: parent.width; elide: Text.ElideRight; visible: r.desc !== ""; text: r.desc; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal }
         }
         Rectangle {
             width: 42; height: 24; radius: 12

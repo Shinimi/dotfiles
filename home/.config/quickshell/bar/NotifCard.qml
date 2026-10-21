@@ -29,7 +29,7 @@ Rectangle {
 
     Timer {
         running: card.popup && !card.critical && !hover.containsMouse
-        interval: card.notif && card.notif.expireTimeout > 0 ? card.notif.expireTimeout : 5000
+        interval: Settings.cur("notif_timeout") * 1000
         onTriggered: card.close(false)
     }
     MouseArea {

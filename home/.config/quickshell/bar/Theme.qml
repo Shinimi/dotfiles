@@ -7,7 +7,7 @@ Singleton {
     readonly property color bg:      "#1a1b26"
     // translucent surfaces (Hyprland blurs what's behind them); text colors stay solid
     // glass level (0-100) comes from the Hyprland settings panel
-    readonly property real glass: Settings.get("glass") / 100
+    readonly property real glass: Settings.cur("glass") / 100
     readonly property color barBg:   Qt.rgba(0.102, 0.106, 0.149, 1 - glass * 0.70)
     readonly property color panel:   Qt.rgba(0.102, 0.106, 0.149, 1 - glass * 0.45)
     readonly property color card:    Qt.rgba(0.141, 0.157, 0.231, 0.80 - glass * 0.45)

@@ -1,4 +1,4 @@
-// System settings (SUPER + comma): sidebar + pages. Changes apply live and are saved. Made by Claude.
+// System settings (SUPER + comma): sidebar + pages. Changes wait for Apply (Ctrl+S); Discard throws them away. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -13,9 +13,21 @@ Scope {
     property int page: 0
     readonly property string qsDir: Quickshell.env("HOME") + "/.config/quickshell/bar"
     readonly property var pages: [
-        ["\u{f03d8}", "Appearance"], ["\u{f0e09}", "Theme"], ["\u{f0c8a}", "Glass & blur"], ["\u{f037d}", "Mouse & keyboard"],
-        ["\u{f0379}", "Display"], ["\u{f057e}", "Sound"], ["\u{f0425}", "Power & lock"], ["\u{f0493}", "System"]
+        ["\u{f03d8}", "Appearance"], ["\u{f0d4a}", "Effects"], ["\u{f0e09}", "Theme"], ["\u{f0c8a}", "Glass & blur"],
+        ["\u{f0e9e}", "Bar & notifications"], ["\u{f037d}", "Mouse & keyboard"], ["\u{f0379}", "Display"],
+        ["\u{f057e}", "Sound"], ["\u{f0425}", "Power & lock"], ["\u{f0493}", "System"]
     ]
+    readonly property var keyPage: ({
+        accent: 0, border_spin: 0, border_angle: 0, gaps_in: 0, gaps_out: 0, border_size: 0, rounding: 0, layout: 0, smart_split: 0, snap: 0, resize_on_border: 0,
+        glow: 1, glow_range: 1, glow_strength: 1, shadows: 1, shadow_range: 1, shadow_tint: 1, dim_inactive: 1, dim_strength: 1, animations: 1, anim_speed: 1, ws_anim: 1,
+        folder_color: 2, icon_base: 2, cursor_theme: 2, cursor_size: 2, ui_font: 2, ui_font_size: 2,
+        opacity_active: 3, opacity_inactive: 3, glass: 3, blur: 3, blur_size: 3, blur_passes: 3, vibrancy: 3, blur_brightness: 3, blur_noise: 3, blur_xray: 3, blur_popups: 3,
+        clock_seconds: 4, clock_12h: 4, clock_date: 4, bar_weather: 4, bar_media: 4, notif_timeout: 4, notif_center: 4,
+        sensitivity: 5, accel_flat: 5, natural_scroll: 5, scroll_factor: 5, follow_mouse: 5, middle_scroll: 5, middle_paste: 5, focus_on_activate: 5,
+        repeat_rate: 5, repeat_delay: 5, kb_layout: 5, numlock: 5, hide_cursor_typing: 5, cursor_hide_after: 5, ws_back_forth: 5, swallow: 5,
+        night_temp: 6, vibrance: 6, monitors: 6, lock_minutes: 8, screen_off_after: 8, mouse_wakes: 8
+    })
+    function pageDirty(i) { return Settings.changedKeys.some(k => keyPage[k] === i) }
     function toggle() { visible = !visible }
     function open(p) { page = p; visible = true }
     function exec(cmd) { visible = false; Quickshell.execDetached(cmd) }
@@ -26,8 +38,10 @@ Scope {
         function toggle(): void { root.toggle() }
         function open(page: int): void { root.open(page) }
         function set(key: string, value: string): void {
-            Settings.set(key, value === "true" ? true : value === "false" ? false : isNaN(Number(value)) ? value : Number(value))
+            Settings.setNow(key, value === "true" ? true : value === "false" ? false : isNaN(Number(value)) ? value : Number(value))
         }
+        function apply(): void { Settings.apply() }
+        function discard(): void { Settings.discard() }
     }
 
     // ---- data for the Display / System pages ----
@@ -82,17 +96,27 @@ Scope {
     }
     property var undoMonitors: null
     property int countdown: 15
+    property var lastGoodMonitors: null
     function monChange(field, val) {
-        if (undoMonitors === null) {
+        if (lastGoodMonitors === null) {
             const snap = {}
-            for (const m of monitors) snap[m.name] = Object.assign({}, liveCfg(m), (Settings.get("monitors") || {})[m.name] || {})
-            undoMonitors = snap
+            for (const m of monitors) snap[m.name] = Object.assign({}, liveCfg(m), (Settings.cur("monitors") || {})[m.name] || {})
+            lastGoodMonitors = snap
         }
         Settings.setMon(selMon, field, val, liveCfg(selInfo))
-        countdown = 15; revertTimer.restart(); monsLater.restart()
+    }
+    Connections {
+        target: Settings
+        function onApplied(keys) {
+            if (keys.indexOf("monitors") >= 0 && root.lastGoodMonitors !== null) {
+                root.undoMonitors = root.lastGoodMonitors; root.lastGoodMonitors = null
+                root.countdown = 15; revertTimer.restart(); root.page = 6
+            }
+            monsLater.restart()
+        }
     }
     function keepMonitors() { undoMonitors = null; revertTimer.stop() }
-    function revertMonitors() { if (undoMonitors) Settings.set("monitors", undoMonitors); undoMonitors = null; revertTimer.stop(); monsLater.restart() }
+    function revertMonitors() { if (undoMonitors) Settings.setNow("monitors", undoMonitors); undoMonitors = null; revertTimer.stop(); monsLater.restart() }
     Timer { id: revertTimer; interval: 1000; repeat: true; onTriggered: { root.countdown--; if (root.countdown <= 0) root.revertMonitors() } }
     Timer { id: monsLater; interval: 2500; onTriggered: mons.running = true }
 
@@ -123,6 +147,7 @@ Scope {
             anchors.fill: parent; radius: 22; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
             focus: true
             Keys.onEscapePressed: root.visible = false
+            Keys.onPressed: e => { if ((e.modifiers & Qt.ControlModifier) && e.key === Qt.Key_S) { Settings.apply(); e.accepted = true } }
             Keys.onUpPressed: root.page = Math.max(0, root.page - 1)
             Keys.onDownPressed: root.page = Math.min(root.pages.length - 1, root.page + 1)
 
@@ -165,6 +190,8 @@ Scope {
                                 Label { width: 18; text: modelData[0]; color: cur ? Theme.blue : Theme.muted; font.pixelSize: 15; anchors.verticalCenter: parent.verticalCenter }
                                 Label { text: modelData[1]; color: cur ? Theme.fg : Theme.fgDim; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
                             }
+                            Rectangle { visible: root.pageDirty(index); anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                                        width: 7; height: 7; radius: 4; color: Theme.yellow }
                             MouseArea { id: nm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = index }
                         }
                     }
@@ -173,14 +200,34 @@ Scope {
                     anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 16 }
                     spacing: 8
                     SetButton { width: parent.width; icon: "\u{f0450}"; text: "Reset to defaults"; accent: Theme.muted; onClicked: Settings.reset() }
-                    Label { width: parent.width; horizontalAlignment: Text.AlignHCenter; text: "changes apply instantly"; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal }
+                    Label { width: parent.width; horizontalAlignment: Text.AlignHCenter; text: Settings.dirty ? "Ctrl+S applies" : "everything is applied"; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal }
+                }
+            }
+
+            // ================= apply bar =================
+            Rectangle {
+                id: applyBar
+                anchors { left: side.right; right: parent.right; bottom: parent.bottom; margins: 14 }
+                height: Settings.dirty ? 56 : 0; radius: 14; clip: true
+                color: Qt.rgba(0.48, 0.64, 0.97, 0.12); border.width: Settings.dirty ? 1 : 0; border.color: Qt.rgba(0.48, 0.64, 0.97, 0.5)
+                Behavior on height { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                RowLayout {
+                    anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 10; spacing: 10
+                    Rectangle { width: 9; height: 9; radius: 5; color: Theme.yellow }
+                    Column {
+                        Layout.fillWidth: true
+                        Label { text: Settings.changedKeys.length + (Settings.changedKeys.length === 1 ? " change" : " changes") + " not applied yet"; font.pixelSize: 13 }
+                        Label { text: "Apply to see them · Ctrl+S"; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal }
+                    }
+                    SetButton { icon: "\u{f0156}"; text: "Discard"; accent: Theme.red; onClicked: { Settings.discard(); root.lastGoodMonitors = null } }
+                    SetButton { icon: "\u{f012c}"; text: "Apply"; primary: true; onClicked: Settings.apply() }
                 }
             }
 
             // ================= page =================
             Flickable {
                 id: flick
-                anchors { left: side.right; right: parent.right; top: parent.top; bottom: parent.bottom; margins: 24 }
+                anchors { left: side.right; right: parent.right; top: parent.top; bottom: applyBar.top; margins: 24; bottomMargin: 10 }
                 contentHeight: pageCol.implicitHeight; clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 Connections { target: root; function onPageChanged() { flick.contentY = 0; fadeIn.restart() } }
@@ -195,9 +242,10 @@ Scope {
                         Label { text: root.pages[root.page][1]; font.pixelSize: 22; font.weight: Font.Bold }
                         Label {
                             color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal
-                            text: ["Colours, borders, gaps and motion", "Icons, folders, cursor and fonts", "How see-through windows and panels are",
-                                   "Pointer speed, focus and typing", "Resolution, refresh rate and colour",
-                                   "Devices, clean mic and headset EQ", "Performance, auto-lock and sleep",
+                            text: ["Colours, borders, gaps and window layout", "Glow, shadows, dimming and animations", "Icons, folders, cursor and fonts",
+                                   "How see-through windows and panels are", "Clock, bar items and pop-ups",
+                                   "Pointer, scrolling, typing and focus", "Resolution, refresh rate and colour",
+                                   "Devices, clean mic and headset EQ (changes here are instant)", "Performance, auto-lock and screens off",
                                    "About this PC and maintenance"][root.page]
                         }
                     }
@@ -233,6 +281,7 @@ Scope {
                                 }
                             }
                             SetToggle { label: "Rotating border"; desc: "the focused window's gradient slowly turns"; key: "border_spin" }
+                            SetSlider { visible: !Settings.get("border_spin"); label: "Gradient angle"; key: "border_angle"; from: 0; to: 360; step: 15; suffix: "°" }
                         }
                         Row {
                             width: parent.width; spacing: 14
@@ -244,13 +293,57 @@ Scope {
                                 SetSlider { label: "Corner rounding"; key: "rounding"; from: 0; to: 20; suffix: " px" }
                             }
                             SetSection {
-                                width: (parent.width - 14) / 2; title: "Motion & depth"; icon: "\u{f0d4a}"
-                                SetToggle { label: "Animations"; desc: "smooth open, close and workspace slides"; key: "animations" }
+                                width: (parent.width - 14) / 2; title: "Windows"; icon: "\u{f05b4}"
+                                SetChoice {
+                                    label: "Tiling layout"; desc: "how new windows are placed on the main screen"
+                                    current: Settings.get("layout"); onPicked: v => Settings.set("layout", v)
+                                    options: [["dwindle", "Spiral"], ["master", "Main + stack"], ["scrolling", "Scrolling"]]
+                                }
+                                SetToggle { label: "Smart split"; desc: "split towards where the mouse is"; key: "smart_split" }
+                                SetToggle { label: "Snap floating windows"; desc: "to edges and other windows"; key: "snap" }
+                                SetToggle { label: "Resize by dragging borders"; key: "resize_on_border" }
+                                SetButton { icon: "\u{f02e9}"; text: "Wallpaper"; onClicked: root.exec(["qs", "ipc", "-p", root.qsDir, "call", "wallpaper", "toggle"]) }
+                            }
+                        }
+                    }
+
+                    // ---------- Effects ----------
+                    Column {
+                        visible: root.page === 1; width: parent.width; spacing: 14
+                        Row {
+                            width: parent.width; spacing: 14
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Glow"; icon: "\u{f0335}"
+                                SetToggle { label: "Window glow"; desc: "soft accent-coloured light around the focused window"; key: "glow" }
+                                SetSlider { visible: Settings.get("glow"); label: "Glow size"; key: "glow_range"; from: 4; to: 40; suffix: " px" }
+                                SetSlider { visible: Settings.get("glow"); label: "Glow strength"; key: "glow_strength"; from: 10; to: 100; step: 5; suffix: "%" }
+                            }
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Shadows"; icon: "\u{f0ee8}"
                                 SetToggle { label: "Shadows"; desc: "soft drop shadow under windows"; key: "shadows" }
+                                SetSlider { visible: Settings.get("shadows"); label: "Shadow size"; key: "shadow_range"; from: 2; to: 30; suffix: " px" }
+                                SetToggle { visible: Settings.get("shadows"); label: "Accent-tinted shadow"; desc: "uses your accent colour instead of black"; key: "shadow_tint" }
+                            }
+                        }
+                        Row {
+                            width: parent.width; spacing: 14
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Focus"; icon: "\u{f0f08}"
                                 SetToggle { label: "Dim unfocused windows"; desc: "makes the active window stand out"; key: "dim_inactive" }
-                                Row {
-                                    spacing: 8; topPadding: 6
-                                    SetButton { icon: "\u{f02e9}"; text: "Wallpaper"; onClicked: root.exec(["qs", "ipc", "-p", root.qsDir, "call", "wallpaper", "toggle"]) }
+                                SetSlider { visible: Settings.get("dim_inactive"); label: "Dim amount"; key: "dim_strength"; from: 5; to: 50; suffix: "%" }
+                            }
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Animations"; icon: "\u{f0d4a}"
+                                SetToggle { label: "Animations"; desc: "open, close and workspace motion"; key: "animations" }
+                                SetChoice {
+                                    visible: Settings.get("animations"); label: "Speed"; accent: Theme.cyan
+                                    current: Settings.get("anim_speed"); onPicked: v => Settings.set("anim_speed", v)
+                                    options: [["slow", "Relaxed"], ["normal", "Normal"], ["fast", "Snappy"]]
+                                }
+                                SetChoice {
+                                    visible: Settings.get("animations"); label: "Workspace switch"; accent: Theme.purple
+                                    current: Settings.get("ws_anim"); onPicked: v => Settings.set("ws_anim", v)
+                                    options: [["slidefade", "Slide + fade"], ["slide", "Slide"], ["slidevert", "Vertical"], ["fade", "Fade"]]
                                 }
                             }
                         }
@@ -258,7 +351,7 @@ Scope {
 
                     // ---------- Theme ----------
                     Column {
-                        visible: root.page === 1; width: parent.width; spacing: 14
+                        visible: root.page === 2; width: parent.width; spacing: 14
                         SetSection {
                             width: parent.width; title: "Icons"; icon: "\u{f02e9}"
                             SetChoice {
@@ -331,7 +424,7 @@ Scope {
 
                     // ---------- 1 Glass ----------
                     Row {
-                        visible: root.page === 2; width: parent.width; spacing: 14
+                        visible: root.page === 3; width: parent.width; spacing: 14
                         SetSection {
                             width: (parent.width - 14) / 2; title: "Transparency"; icon: "\u{f0c8a}"
                             SetSlider { label: "Focused window"; key: "opacity_active"; from: 50; to: 100; suffix: "%" }
@@ -344,31 +437,83 @@ Scope {
                             SetSlider { label: "Blur strength"; key: "blur_size"; from: 1; to: 14 }
                             SetSlider { label: "Blur quality"; key: "blur_passes"; from: 1; to: 4 }
                             SetSlider { label: "Colour vibrancy"; key: "vibrancy"; from: 0; to: 60; suffix: "%" }
+                            SetSlider { label: "Background brightness"; key: "blur_brightness"; from: 50; to: 110; suffix: "%" }
+                            SetSlider { label: "Grain"; key: "blur_noise"; from: 0; to: 10; suffix: "%" }
+                            SetToggle { label: "See wallpaper through windows (x-ray)"; key: "blur_xray" }
+                            SetToggle { label: "Blur menus and pop-ups"; key: "blur_popups" }
                         }
                     }
 
-                    // ---------- 2 Input ----------
+                    // ---------- Bar & notifications ----------
                     Row {
-                        visible: root.page === 3; width: parent.width; spacing: 14
+                        visible: root.page === 4; width: parent.width; spacing: 14
                         SetSection {
-                            width: (parent.width - 14) / 2; title: "Mouse"; icon: "\u{f037d}"
-                            SetSlider { label: "Mouse speed"; key: "sensitivity"; from: -1; to: 1; step: 0.05; decimals: 2 }
-                            SetToggle { label: "Focus follows mouse"; key: "follow_mouse" }
-                            SetToggle { label: "Middle-click scrolling"; desc: "hold middle button + move"; key: "middle_scroll" }
-                            SetToggle { label: "Focus on activate"; desc: "apps can pull you to them"; key: "focus_on_activate" }
+                            width: (parent.width - 14) / 2; title: "Bar"; icon: "\u{f0e9e}"
+                            SetToggle { label: "Show seconds"; key: "clock_seconds" }
+                            SetToggle { label: "12-hour clock"; desc: "3:45 PM instead of 15:45"; key: "clock_12h" }
+                            SetToggle { label: "Show the date"; key: "clock_date" }
+                            SetToggle { label: "Show the weather"; key: "bar_weather" }
+                            SetToggle { label: "Show what's playing"; key: "bar_media" }
                         }
                         SetSection {
-                            width: (parent.width - 14) / 2; title: "Keyboard"; icon: "\u{f030c}"
-                            SetSlider { label: "Key repeat speed"; key: "repeat_rate"; from: 10; to: 60; suffix: " /s" }
-                            SetSlider { label: "Delay before repeat"; key: "repeat_delay"; from: 150; to: 800; step: 10; suffix: " ms" }
-                            Label { text: "Layout: Turkish Q"; color: Theme.muted; font.pixelSize: 11 }
-                            SetButton { icon: "\u{f030c}"; text: "Show all shortcuts"; onClicked: root.exec([Quickshell.env("HOME") + "/.config/hypr/scripts/keybinds.sh"]) }
+                            width: (parent.width - 14) / 2; title: "Notifications"; icon: "\u{f009a}"
+                            SetSlider { label: "Pop-ups stay for"; key: "notif_timeout"; from: 2; to: 15; suffix: " s" }
+                            SetChoice {
+                                label: "Pop-up position"; current: Settings.get("notif_center") ? "c" : "r"
+                                options: [["r", "Top right"], ["c", "Top centre"]]
+                                onPicked: v => Settings.set("notif_center", v === "c")
+                            }
+                            SetSwitch { label: "Do not disturb"; desc: "hide pop-ups (instant)"; on: Notifs.dnd; accent: Theme.purple; onToggled: Notifs.dnd = !Notifs.dnd }
+                        }
+                    }
+
+                    // ---------- Mouse & keyboard ----------
+                    Column {
+                        visible: root.page === 5; width: parent.width; spacing: 14
+                        Row {
+                            width: parent.width; spacing: 14
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Mouse"; icon: "\u{f037d}"
+                                SetSlider { label: "Mouse speed"; key: "sensitivity"; from: -1; to: 1; step: 0.05; decimals: 2 }
+                                SetToggle { label: "Raw input (no acceleration)"; desc: "best for games and aiming"; key: "accel_flat" }
+                                SetSlider { label: "Scroll speed"; key: "scroll_factor"; from: 0.2; to: 3; step: 0.1; decimals: 1; suffix: "×" }
+                                SetToggle { label: "Natural scrolling"; desc: "content follows your finger, like a phone"; key: "natural_scroll" }
+                                SetToggle { label: "Middle-click scrolling"; desc: "hold middle button + move"; key: "middle_scroll" }
+                                SetToggle { label: "Middle-click paste"; key: "middle_paste" }
+                            }
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Keyboard"; icon: "\u{f030c}"
+                                SetChoice {
+                                    label: "Layout"; current: Settings.get("kb_layout"); onPicked: v => Settings.set("kb_layout", v)
+                                    options: [["tr", "Turkish Q"], ["us", "US"], ["tr,us", "Turkish + US"]]
+                                }
+                                SetSlider { label: "Key repeat speed"; key: "repeat_rate"; from: 10; to: 60; suffix: " /s" }
+                                SetSlider { label: "Delay before repeat"; key: "repeat_delay"; from: 150; to: 800; step: 10; suffix: " ms" }
+                                SetToggle { label: "Num Lock on at start"; key: "numlock" }
+                                SetButton { icon: "\u{f030c}"; text: "Show all shortcuts"; onClicked: root.exec([Quickshell.env("HOME") + "/.config/hypr/scripts/keybinds.sh"]) }
+                            }
+                        }
+                        Row {
+                            width: parent.width; spacing: 14
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Focus"; icon: "\u{f0f08}"
+                                SetToggle { label: "Focus follows mouse"; key: "follow_mouse" }
+                                SetToggle { label: "Focus on activate"; desc: "apps can pull you to them"; key: "focus_on_activate" }
+                                SetToggle { label: "Workspace back-and-forth"; desc: "pressing the current workspace's key goes back"; key: "ws_back_forth" }
+                                SetToggle { label: "Terminal swallowing"; desc: "kitty hides while an app it opened is running"; key: "swallow" }
+                            }
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Pointer"; icon: "\u{f01bf}"
+                                SetToggle { label: "Hide pointer while typing"; key: "hide_cursor_typing" }
+                                SetSlider { label: "Hide pointer when idle"; key: "cursor_hide_after"; from: 0; to: 30; suffix: " s" }
+                                Label { text: "0 s = never"; color: Theme.muted; font.pixelSize: 10 }
+                            }
                         }
                     }
 
                     // ---------- Display ----------
                     Column {
-                        visible: root.page === 4; width: parent.width; spacing: 14
+                        visible: root.page === 6; width: parent.width; spacing: 14
 
                         Rectangle {   // "keep these settings?" after a screen change
                             visible: root.undoMonitors !== null
@@ -468,7 +613,7 @@ Scope {
 
                     // ---------- 4 Sound ----------
                     Column {
-                        visible: root.page === 5; width: parent.width; spacing: 14
+                        visible: root.page === 7; width: parent.width; spacing: 14
                         Row {
                             width: parent.width; spacing: 14
                             SetSection {
@@ -503,7 +648,7 @@ Scope {
 
                     // ---------- 5 Power & lock ----------
                     Column {
-                        visible: root.page === 6; width: parent.width; spacing: 14
+                        visible: root.page === 8; width: parent.width; spacing: 14
                         SetSection {
                             width: parent.width; title: "Power profile"; icon: "\u{f0e7}"
                             SetChoice {
@@ -516,7 +661,9 @@ Scope {
                         SetSection {
                             width: parent.width; title: "Lock & screen off"; icon: "\u{f033e}"
                             SetSlider { label: "Lock after"; key: "lock_minutes"; from: 2; to: 60; suffix: " min" }
-                            Label { text: "Screens turn off one minute after locking. Full-screen games and videos never lock."; color: Theme.muted; font.pixelSize: 11; width: parent.width; wrapMode: Text.WordWrap }
+                            SetSlider { label: "Screens off after locking"; key: "screen_off_after"; from: 1; to: 30; suffix: " min" }
+                            SetToggle { label: "Moving the mouse wakes the screens"; desc: "otherwise only a key press does"; key: "mouse_wakes" }
+                            Label { text: "Full-screen games and videos never lock."; color: Theme.muted; font.pixelSize: 11; width: parent.width; wrapMode: Text.WordWrap }
                             SetSwitch { label: "Keep awake"; desc: "pause auto-lock and screen-off until you turn this off"; on: SysState.awake; accent: Theme.cyan; onToggled: SysState.toggleAwake() }
                             Row {
                                 spacing: 8; topPadding: 4
@@ -528,7 +675,7 @@ Scope {
 
                     // ---------- 6 System ----------
                     Column {
-                        visible: root.page === 7; width: parent.width; spacing: 14
+                        visible: root.page === 9; width: parent.width; spacing: 14
                         Rectangle {
                             width: parent.width; height: 120; radius: 16; color: Theme.card; border.width: 1; border.color: "#14c0caf5"
                             Row {

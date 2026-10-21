@@ -1,4 +1,6 @@
-// Loads/saves ~/.config/hypr/settings.json and applies it to Hyprland (debounced). Made by Claude.
+// Settings store for ~/.config/hypr/settings.json. The settings panel edits a draft; nothing changes
+// until Apply (then it's saved and apply-settings.sh pushes it to Hyprland, the bar and the theme).
+// get() = draft (what the panel shows), cur() = applied (what the bar uses). Made by Claude.
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -7,32 +9,72 @@ import Quickshell.Io
 Singleton {
     id: s
     readonly property string file: Quickshell.env("HOME") + "/.config/hypr/settings.json"
-    readonly property var defaults: ({ gaps_in: 4, gaps_out: 8, border_size: 2, rounding: 10, opacity_active: 90, opacity_inactive: 80,
-        blur: true, blur_size: 7, blur_passes: 3, shadows: true, animations: true, sensitivity: 0.4, follow_mouse: true,
-        middle_scroll: true, focus_on_activate: true, night_temp: 4500, glass: 60,
-        accent: "tokyo", border_spin: true, dim_inactive: false, repeat_rate: 35, repeat_delay: 300, lock_minutes: 10, vibrancy: 18,
-        vibrance: 100, monitors: ({}), folder_color: "blue", icon_base: "Papirus-Dark", cursor_theme: "capitaine-cursors",
-        cursor_size: 24, ui_font: "Noto Sans", ui_font_size: 10 })
-    property var v: defaults
+    readonly property var defaults: ({
+        // windows & look
+        gaps_in: 4, gaps_out: 8, border_size: 2, rounding: 10, accent: "tokyo", border_spin: true, border_angle: 45,
+        glow: false, glow_range: 14, glow_strength: 40, shadows: true, shadow_range: 6, shadow_tint: false,
+        dim_inactive: false, dim_strength: 12, layout: "dwindle", smart_split: false, snap: true, resize_on_border: true,
+        // motion
+        animations: true, anim_speed: "normal", ws_anim: "slidefade",
+        // glass
+        opacity_active: 90, opacity_inactive: 80, glass: 60, blur: true, blur_size: 7, blur_passes: 3, vibrancy: 18,
+        blur_brightness: 85, blur_noise: 2, blur_xray: false, blur_popups: true,
+        // input
+        sensitivity: 0.4, accel_flat: true, natural_scroll: false, scroll_factor: 1.0, follow_mouse: true,
+        middle_scroll: true, middle_paste: true, focus_on_activate: true, repeat_rate: 35, repeat_delay: 300,
+        kb_layout: "tr", numlock: true, hide_cursor_typing: false, cursor_hide_after: 0, ws_back_forth: false, swallow: false,
+        // display
+        night_temp: 4500, vibrance: 100, monitors: ({}),
+        // theme
+        folder_color: "blue", icon_base: "Papirus-Dark", cursor_theme: "capitaine-cursors", cursor_size: 24,
+        ui_font: "Noto Sans", ui_font_size: 10,
+        // bar & notifications
+        clock_seconds: false, clock_12h: false, clock_date: true, bar_weather: true, bar_media: true,
+        notif_timeout: 5, notif_center: false,
+        // power
+        lock_minutes: 10, screen_off_after: 1, mouse_wakes: false
+    })
+    property var v: defaults        // applied
+    property var draft: defaults    // being edited
     property bool loaded: false
+    readonly property var changedKeys: {
+        const out = []
+        for (const k in draft) if (JSON.stringify(draft[k]) !== JSON.stringify(v[k])) out.push(k)
+        return out
+    }
+    readonly property bool dirty: changedKeys.length > 0
+    signal applied(var keys)
 
-    function get(k) { return v[k] !== undefined ? v[k] : defaults[k] }
-    function set(k, val) { const n = Object.assign({}, v); n[k] = val; v = n; save.restart() }
-    // monitors: { "DP-1": { mode, cm, bitdepth, vrr }, ... }
-    function setMon(name, field, val, cur) {
+    function get(k) { return draft[k] !== undefined ? draft[k] : defaults[k] }
+    function cur(k) { return v[k] !== undefined ? v[k] : defaults[k] }
+    function set(k, val) { const n = Object.assign({}, draft); n[k] = val; draft = n }
+    function setMon(name, field, val, live) {
         const all = Object.assign({}, get("monitors"))
-        all[name] = Object.assign({}, cur || {}, all[name] || {}); all[name][field] = val
+        all[name] = Object.assign({}, live || {}, all[name] || {}); all[name][field] = val
         set("monitors", all)
     }
-    function reset() { v = Object.assign({}, defaults); save.restart() }
+    function apply() {
+        if (!dirty) return
+        const keys = changedKeys
+        v = Object.assign({}, draft); save.restart(); applied(keys)
+    }
+    function discard() { draft = Object.assign({}, v) }
+    function reset() { draft = Object.assign({}, defaults) }
+    // for scripts (qs ipc … settings set): change and apply at once
+    function setNow(k, val) { set(k, val); apply() }
 
     Process {
         running: true
         command: ["cat", s.file]
-        stdout: StdioCollector { onStreamFinished: { try { s.v = Object.assign({}, s.defaults, JSON.parse(this.text)) } catch (e) {} s.loaded = true } }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try { s.v = Object.assign({}, s.defaults, JSON.parse(this.text)) } catch (e) {}
+                s.draft = Object.assign({}, s.v); s.loaded = true
+            }
+        }
     }
     Timer {
-        id: save; interval: 350
+        id: save; interval: 150
         onTriggered: Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" > \"$2\" && \"$3\"", "sh",
             JSON.stringify(s.v, null, 2), s.file, Quickshell.env("HOME") + "/.config/hypr/scripts/apply-settings.sh"])
     }

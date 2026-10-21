@@ -6,11 +6,16 @@ H="$HOME/.config/hypr"; S="$HOME/.local/state/hypr-settings"; mkdir -p "$S"
 python3 -I - "$H/settings.json" "$H/settings.lua" "$H/hypridle.conf" "$S" "$H/shaders" <<'PY'
 import json,sys,re,os
 jf,luaf,idle,state,shd=sys.argv[1:]
-d={"gaps_in":4,"gaps_out":8,"border_size":2,"rounding":10,"opacity_active":90,"opacity_inactive":80,"blur":True,
-   "blur_size":7,"blur_passes":3,"shadows":True,"animations":True,"sensitivity":0.4,"follow_mouse":True,
-   "middle_scroll":True,"focus_on_activate":True,"night_temp":4500,"glass":60,"accent":"tokyo","border_spin":True,
-   "dim_inactive":False,"repeat_rate":35,"repeat_delay":300,"lock_minutes":10,"vibrancy":18,"vibrance":100,
-   "monitors":{}}
+d={"gaps_in":4,"gaps_out":8,"border_size":2,"rounding":10,"accent":"tokyo","border_spin":True,"border_angle":45,
+   "glow":False,"glow_range":14,"glow_strength":40,"shadows":True,"shadow_range":6,"shadow_tint":False,
+   "dim_inactive":False,"dim_strength":12,"layout":"dwindle","smart_split":False,"snap":True,"resize_on_border":True,
+   "animations":True,"anim_speed":"normal","ws_anim":"slidefade",
+   "opacity_active":90,"opacity_inactive":80,"glass":60,"blur":True,"blur_size":7,"blur_passes":3,"vibrancy":18,
+   "blur_brightness":85,"blur_noise":2,"blur_xray":False,"blur_popups":True,
+   "sensitivity":0.4,"accel_flat":True,"natural_scroll":False,"scroll_factor":1.0,"follow_mouse":True,"middle_scroll":True,
+   "middle_paste":True,"focus_on_activate":True,"repeat_rate":35,"repeat_delay":300,"kb_layout":"tr","numlock":True,
+   "hide_cursor_typing":False,"cursor_hide_after":0,"ws_back_forth":False,"swallow":False,
+   "night_temp":4500,"vibrance":100,"monitors":{},"lock_minutes":10,"screen_off_after":1,"mouse_wakes":False}
 s=dict(d); s.update(json.load(open(jf))); b=lambda v: "true" if v else "false"
 pal={"tokyo":["7aa2f7","bb9af7","7dcfff","7aa2f7"],"storm":["7aa2f7","7dcfff"],"sakura":["f7768e","bb9af7"],
      "matcha":["9ece6a","73daca"],"sunset":["ff9e64","e0af68","f7768e"],"mono":["c0caf5","565f89"]}
@@ -35,25 +40,45 @@ void main() {{
 }}
 ''')
 
+acc=pal.get(s["accent"],pal["tokyo"])
+ga=f'{int(s["glow_strength"]*255/100):02x}'
+glowcols=", ".join(f'"rgba({c}{ga})"' for c in acc[:2])
+shadow_col=f'rgba({acc[0]}55)' if s["shadow_tint"] else "rgba(000000aa)"
+# animation speed: Hyprland "speed" is a duration, so fast = smaller numbers
+f={"slow":1.6,"normal":1.0,"fast":0.6}.get(s["anim_speed"],1.0)
+ws_style={"slidefade":"slidefade 12%","slide":"slide","fade":"fade","slidevert":"slidevert"}.get(s["ws_anim"],"slidefade 12%")
+an=lambda leaf,sp,bz,st=None: f'hl.animation({{ leaf = "{leaf}", enabled = true, speed = {sp*f:.2f}, bezier = "{bz}"'+(f', style = "{st}"' if st else '')+' })\n'
+anims=(an("windows",4,"overshot")+an("windowsIn",3.5,"overshot","popin 80%")+an("windowsOut",2.5,"smoothOut","popin 80%")+
+       an("windowsMove",4,"overshot","slide")+an("fade",3,"snappy")+an("layers",3,"snappy","fade")+
+       an("workspaces",4,"easeInOut",ws_style)+an("specialWorkspace",4,"overshot","slidevert"))
 main=f'''hl.config({{
     general = {{ gaps_in = {int(s["gaps_in"])}, gaps_out = {int(s["gaps_out"])}, border_size = {int(s["border_size"])},
-                col = {{ active_border = {{ colors = {{ {cols} }}, angle = 45 }} }} }},
+                layout = "{s["layout"]}", resize_on_border = {b(s["resize_on_border"])}, snap = {{ enabled = {b(s["snap"])} }},
+                col = {{ active_border = {{ colors = {{ {cols} }}, angle = {int(s["border_angle"])} }} }} }},
+    dwindle = {{ smart_split = {b(s["smart_split"])} }},
     decoration = {{
         rounding = {int(s["rounding"])},
         active_opacity = {s["opacity_active"]/100:.2f}, inactive_opacity = {s["opacity_inactive"]/100:.2f},
-        dim_inactive = {b(s["dim_inactive"])}, dim_strength = 0.12,
-        blur = {{ enabled = {b(s["blur"])}, size = {int(s["blur_size"])}, passes = {int(s["blur_passes"])}, vibrancy = {s["vibrancy"]/100:.2f} }},
-        shadow = {{ enabled = {b(s["shadows"])} }},
+        dim_inactive = {b(s["dim_inactive"])}, dim_strength = {s["dim_strength"]/100:.2f},
+        blur = {{ enabled = {b(s["blur"])}, size = {int(s["blur_size"])}, passes = {int(s["blur_passes"])}, vibrancy = {s["vibrancy"]/100:.2f},
+                 brightness = {s["blur_brightness"]/100:.2f}, noise = {s["blur_noise"]/100:.3f}, xray = {b(s["blur_xray"])}, popups = {b(s["blur_popups"])} }},
+        shadow = {{ enabled = {b(s["shadows"])}, range = {int(s["shadow_range"])}, color = "{shadow_col}" }},
+        glow = {{ enabled = {b(s["glow"])}, range = {int(s["glow_range"])}, color = {{ colors = {{ {glowcols} }}, angle = 45 }} }},
         screen_shader = "{shader}",
     }},
     animations = {{ enabled = {b(s["animations"])} }},
-    input = {{ sensitivity = {float(s["sensitivity"]):.2f}, follow_mouse = {1 if s["follow_mouse"] else 0},
+    input = {{ sensitivity = {float(s["sensitivity"]):.2f}, accel_profile = "{'flat' if s['accel_flat'] else 'adaptive'}",
+              natural_scroll = {b(s["natural_scroll"])}, scroll_factor = {float(s["scroll_factor"]):.2f},
+              follow_mouse = {1 if s["follow_mouse"] else 0}, kb_layout = "{s["kb_layout"]}", numlock_by_default = {b(s["numlock"])},
               repeat_rate = {int(s["repeat_rate"])}, repeat_delay = {int(s["repeat_delay"])},
               scroll_method = "{'on_button_down' if s['middle_scroll'] else '2fg'}" }},
-    misc = {{ focus_on_activate = {b(s["focus_on_activate"])} }},
+    cursor = {{ hide_on_key_press = {b(s["hide_cursor_typing"])}, inactive_timeout = {int(s["cursor_hide_after"])} }},
+    binds = {{ workspace_back_and_forth = {b(s["ws_back_forth"])} }},
+    misc = {{ focus_on_activate = {b(s["focus_on_activate"])}, middle_click_paste = {b(s["middle_paste"])},
+             enable_swallow = {b(s["swallow"])}, swallow_regex = "^(kitty)$", mouse_move_enables_dpms = {b(s["mouse_wakes"])} }},
 }})
 hl.animation({{ leaf = "borderangle", enabled = {b(s["border_spin"])}, speed = 60, bezier = "linear", style = "loop" }})
-'''
+'''+anims
 # monitors (position/scale stay as in hyprland.lua)
 pos={"DP-1":("0x0",1),"DP-2":("2560x0",1)}
 mon=""
@@ -68,7 +93,7 @@ open(os.path.join(state,"monitors.lua.new"),'w').write(mon)
 # auto-lock time (screens go off one minute later)
 t=open(idle).read(); m=int(s["lock_minutes"])
 t=re.sub(r'timeout = \d+\s+# \d+ min: lock', f'timeout = {m*60}                                  # {m} min: lock', t)
-t=re.sub(r'timeout = \d+\s+# \d+ min: screens off', f'timeout = {m*60+60}                                  # {m+1} min: screens off', t)
+t=re.sub(r'timeout = \d+\s+# \d+ min: screens off', f'timeout = {m*60+int(s["screen_off_after"])*60}                                  # {m+int(s["screen_off_after"])} min: screens off', t)
 open(idle,'w').write(t)
 
 # desktop theme (applied below only when it changed)

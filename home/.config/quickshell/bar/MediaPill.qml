@@ -7,7 +7,7 @@ Pill {
     property alias popup: panel
     readonly property var players: Mpris.players.values
     readonly property var player: players.find(p => p.isPlaying) || players.find(p => p.identity === "Spotify") || players[0] || null
-    visible: player !== null && player.trackTitle !== ""
+    visible: Settings.cur("bar_media") && player !== null && player.trackTitle !== ""
     active: panel.visible
     Label { text: pill.player && pill.player.isPlaying ? "" : ""; color: Theme.green }
     Label {
