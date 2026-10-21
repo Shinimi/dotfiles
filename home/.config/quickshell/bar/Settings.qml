@@ -24,7 +24,7 @@ Singleton {
         middle_scroll: true, middle_paste: true, focus_on_activate: true, repeat_rate: 35, repeat_delay: 300,
         kb_layout: "tr", numlock: true, hide_cursor_typing: false, cursor_hide_after: 0, ws_back_forth: false, swallow: false,
         // display
-        night_temp: 4500, vibrance: 100, monitors: ({}),
+        night_temp: 4500, night_auto: false, night_from: 21, night_to: 7, vibrance: 100, monitors: ({}),
         // theme
         folder_color: "blue", icon_base: "Papirus-Dark", cursor_theme: "capitaine-cursors", cursor_size: 24,
         ui_font: "Noto Sans", ui_font_size: 10,
@@ -32,7 +32,7 @@ Singleton {
         clock_seconds: false, clock_12h: false, clock_date: true, bar_weather: true, bar_media: true,
         notif_timeout: 5, notif_center: false,
         // power
-        lock_minutes: 10, screen_off_after: 1, mouse_wakes: false
+        lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true
     })
     property var v: defaults        // applied
     property var draft: defaults    // being edited

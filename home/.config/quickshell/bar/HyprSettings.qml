@@ -25,7 +25,7 @@ Scope {
         clock_seconds: 4, clock_12h: 4, clock_date: 4, bar_weather: 4, bar_media: 4, notif_timeout: 4, notif_center: 4,
         sensitivity: 5, accel_flat: 5, natural_scroll: 5, scroll_factor: 5, follow_mouse: 5, middle_scroll: 5, middle_paste: 5, focus_on_activate: 5,
         repeat_rate: 5, repeat_delay: 5, kb_layout: 5, numlock: 5, hide_cursor_typing: 5, cursor_hide_after: 5, ws_back_forth: 5, swallow: 5,
-        night_temp: 6, vibrance: 6, monitors: 6, lock_minutes: 8, screen_off_after: 8, mouse_wakes: 8
+        night_temp: 6, night_auto: 6, night_from: 6, night_to: 6, vibrance: 6, monitors: 6, lock_minutes: 8, screen_off_after: 8, mouse_wakes: 8, game_mode: 8
     })
     function pageDirty(i) { return Settings.changedKeys.some(k => keyPage[k] === i) }
     function toggle() { visible = !visible }
@@ -607,6 +607,9 @@ Scope {
                                 width: (parent.width - 14) / 2; title: "Night light"; icon: "\u{f0594}"
                                 SetSwitch { label: "Night light"; desc: "warmer colours at night"; on: SysState.night; accent: Theme.yellow; onToggled: SysState.toggleNight() }
                                 SetSlider { label: "Warmth"; key: "night_temp"; from: 2500; to: 6500; step: 100; suffix: " K" }
+                                SetToggle { label: "On a schedule"; desc: "on in the evening, off in the morning"; key: "night_auto" }
+                                SetSlider { visible: Settings.get("night_auto"); label: "Turn on at"; key: "night_from"; from: 17; to: 23; suffix: ":00" }
+                                SetSlider { visible: Settings.get("night_auto"); label: "Turn off at"; key: "night_to"; from: 4; to: 10; suffix: ":00" }
                             }
                         }
                     }
@@ -657,6 +660,7 @@ Scope {
                                 options: [["power-saver", "\u{f032a}  Quiet"], ["balanced", "\u{f05d1}  Balanced"], ["performance", "\u{f04c5}  Performance"]]
                                 onPicked: v => SysState.setProfile(v)
                             }
+                            SetToggle { label: "Automatic game mode"; desc: "Performance + Do not disturb while a game is open"; key: "game_mode" }
                         }
                         SetSection {
                             width: parent.width; title: "Lock & screen off"; icon: "\u{f033e}"

@@ -29,6 +29,7 @@
 --    SUPER + SHIFT + C       color picker        SUPER + SHIFT + P  screens off / on
 --    CTRL + ALT + Delete / M task manager (btop)
 --    Print                   region screenshot   CTRL + Print       full screen   ALT + Print  window
+--    SUPER + SHIFT + R       fix desktop (reload + restart bar/wallpaper/etc. if they died)
 --    SUPER + SHIFT + /  or  SUPER + F1   show this list
 -- ============================================================================
 
@@ -164,7 +165,11 @@ hl.config({
         focus_on_activate = true,
         middle_click_paste = true,
         key_press_enables_dpms = true,
+        allow_session_lock_restore = true,  -- if the lock screen ever crashes, a new one can take over
+        disable_autoreload = true,          -- settings apply live; no surprise reloads (SUPER+SHIFT+R reloads)
     },
+    render = { new_render_scheduling = true },  -- smoother frame pacing when the GPU is busy
+    ecosystem = { no_update_news = true, no_donation_nag = true },
 })
 
 
@@ -201,6 +206,18 @@ hl.workspace_rule({ workspace = "name:side", monitor = "DP-2", default = true, p
                     layout = "master", layout_opts = { orientation = "left" } })
 -- Side screen layout: Discord big on the left (66%), Spotify / others in a slim column on the right
 hl.config({ master = { mfact = 0.66, new_status = "slave", orientation = "left" } })
+-- Game mode: Do not disturb + Performance while a game is open (toggle in Settings → Power & lock)
+local function is_game(w) return w and w.class and (w.class:match("^steam_app_%d+$") or w.class == "cs2" or w.class == "gamescope") end
+local gamemode = os.getenv("HOME") .. "/.local/bin/gamemode.sh"
+hl.on("window.open", function(w) if is_game(w) then hl.exec_cmd(gamemode .. " on") end end)
+hl.on("window.close", function(w)
+    if not is_game(w) then return end
+    for _, o in ipairs(hl.get_windows() or {}) do
+        if o.address ~= w.address and is_game(o) then return end
+    end
+    hl.exec_cmd(gamemode .. " off")
+end)
+
 hl.on("window.open", function(w)
     if not w then return end
     local ws = w.workspace
@@ -285,7 +302,7 @@ b("SUPER + ALT + N",        run(scripts .. "/nightlight.sh"))
 b("SUPER + ALT + I",        run(scripts .. "/idle-inhibit.sh"))
 b("SUPER + SHIFT + Slash",  run(scripts .. "/keybinds.sh"))
 b("SUPER + F1",             run(scripts .. "/keybinds.sh"))
-b("SUPER + SHIFT + R",      run("hyprctl reload"))
+b("SUPER + SHIFT + R",      run(os.getenv("HOME") .. "/.local/bin/hypr-doctor.sh --fix"))   -- reload + restart anything that died
 
 -- Alt+Tab workspace switcher (hold Alt, tap Tab, release Alt)
 local qsAlt = "qs ipc -p ~/.config/quickshell/bar call alttab "

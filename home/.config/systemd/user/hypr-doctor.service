@@ -1,0 +1,5 @@
+[Unit]
+Description=Bring back desktop pieces that died (bar, wallpaper, auto-lock, clipboard). Made by Claude.
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/hypr-doctor.sh

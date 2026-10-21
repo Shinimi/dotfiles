@@ -79,7 +79,7 @@ fi
 # ---------------------------------------------------------------- services & theme
 step "Services and theme"
 systemctl --user daemon-reload
-for u in audio-fx.service spicetify-refresh.service remember-volume.service backup-game-saves.timer weekly-checkup.timer fixfuxi-volume.timer; do
+for u in audio-fx.service spicetify-refresh.service remember-volume.service backup-game-saves.timer weekly-checkup.timer fixfuxi-volume.timer hypr-doctor.timer; do
   [ -f "$HOME/.config/systemd/user/$u" ] && systemctl --user enable "$u" >/dev/null 2>&1 && ok "$u"
 done
 # headset volume fix also runs whenever the Fuxi-H3 is plugged in

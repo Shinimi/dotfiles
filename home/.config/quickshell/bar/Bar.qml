@@ -47,6 +47,7 @@ PanelWindow {
         function media(): void { mediaPill.popup.toggle() }
         function notifications(): void { statusPill.popup.toggle() }
         function control(): void { statusPill.popup.toggle() }
+        function dnd(on: bool): void { Notifs.dnd = on }
         function timer(minutes: int): void { Timers.resetTimer(); Timers.setMinutes(minutes); Timers.toggleTimer() }
         function timerReset(): void { Timers.resetTimer() }
         function clearNotifications(): void { Notifs.clearAll() }
