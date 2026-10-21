@@ -16,8 +16,9 @@
 --    SUPER + R               toggle split        SUPER + [ / ]      preselect left / right
 --    SUPER + arrows / HJKL   move focus          + SHIFT            move window
 --    SUPER + CTRL + arrows / HJKL  focus monitor + SHIFT + CTRL     move window to monitor
---    SUPER + 1..9            workspace           SUPER + SHIFT + 1..9  send window there
---                            (1-4 = main 1440p screen, 5-9 = side screen)
+--    SUPER + 1..9, 0         workspace 1-10      SUPER + SHIFT + 1..0  send window there
+--    SUPER + ALT + 1..0      workspace 11-20     (+ SHIFT  send window there)
+--                            (all on the main screen; the side screen has one fixed workspace)
 --    SUPER + U / I, PgDn/PgUp next / prev workspace  (+ SHIFT move window)
 --    SUPER + SHIFT + S       screenshot a region (copied automatically, like Windows 11)
 --    SUPER + S               scratchpad          SUPER + CTRL + SHIFT + S  send to scratchpad
@@ -168,15 +169,17 @@ hl.config({
 
 
 ---------------------------------------------------------------- WORKSPACES
--- 1-4 always exist on the main 1440p screen (shown in the bar); 5-9 live on the side screen.
-for i = 1, 9 do
+-- Main 1440p screen gets every numbered workspace (1-20); 1-4 always exist (shown in the bar).
+for i = 1, 20 do
     hl.workspace_rule({
         workspace  = tostring(i),
-        monitor    = (i <= 4) and "DP-1" or "DP-2",
-        default    = (i == 1 or i == 5),
-        persistent = (i <= 4 or i == 5),
+        monitor    = "DP-1",
+        default    = (i == 1),
+        persistent = (i <= 4),
     })
 end
+-- Side screen: one fixed workspace, no switching.
+hl.workspace_rule({ workspace = "name:side", monitor = "DP-2", default = true, persistent = true })
 
 
 ---------------------------------------------------------------- WINDOW RULES
@@ -267,9 +270,15 @@ for key, d in pairs({ left = "l", right = "r", H = "l", J = "d", K = "u", L = "r
 end
 
 -- Workspaces
-for i = 1, 9 do
-    b("SUPER + " .. i,          hl.dsp.focus({ workspace = tostring(i) }))
-    b("SUPER + SHIFT + " .. i,  hl.dsp.window.move({ workspace = tostring(i) }))
+for i = 1, 10 do                                        -- SUPER + 1..9, 0  ->  workspaces 1..10
+    local key = i % 10
+    b("SUPER + " .. key,          hl.dsp.focus({ workspace = tostring(i) }))
+    b("SUPER + SHIFT + " .. key,  hl.dsp.window.move({ workspace = tostring(i) }))
+end
+for i = 11, 20 do                                       -- SUPER + ALT + 1..9, 0  ->  workspaces 11..20
+    local key = (i - 10) % 10
+    b("SUPER + ALT + " .. key,          hl.dsp.focus({ workspace = tostring(i) }))
+    b("SUPER + ALT + SHIFT + " .. key,  hl.dsp.window.move({ workspace = tostring(i) }))
 end
 b("SUPER + Page_Down",          hl.dsp.focus({ workspace = "e+1" }))
 b("SUPER + Page_Up",            hl.dsp.focus({ workspace = "e-1" }))
