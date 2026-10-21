@@ -17,6 +17,7 @@ home_paths=(
   .local/share/color-schemes/TokyoNight.colors .icons/default/index.theme
   .config/starship.toml .config/fastfetch/config.jsonc .config/btop/btop.conf .config/fish/config.fish
   .local/share/tokyo-night-chrome .config/helium-browser-flags.conf
+  .config/systemd/user/fixfuxi-volume.service .config/systemd/user/fixfuxi-volume.timer fixfuxi
   .local/share/sddm-themes/tokyo-night-yu
   Downloads/Optiv10/OptiScaler.ini Downloads/Optiv10/README-Optiv10.txt Downloads/Optiv10/install-optiv10.sh
 )

@@ -268,10 +268,11 @@ Scope {
                                         Label { anchors.centerIn: parent; text: modelData.name === "DP-1" ? "Main" : "Side"; color: modelData.focused ? Theme.blue : Theme.muted; font.pixelSize: 12 }
                                     }
                                     Column {
-                                        x: 190; anchors.verticalCenter: parent.verticalCenter; spacing: 4
-                                        Label { text: modelData.model || modelData.name; font.pixelSize: 14; font.weight: Font.Bold }
+                                        x: modelData.width > 2000 ? 186 : 160; width: parent.width - x - 14
+                                        anchors.verticalCenter: parent.verticalCenter; spacing: 4
+                                        Label { width: parent.width; elide: Text.ElideRight; text: modelData.model || modelData.name; font.pixelSize: 14; font.weight: Font.Bold }
                                         Label { text: modelData.width + " × " + modelData.height + " · " + Math.round(modelData.refreshRate) + " Hz"; color: Theme.blue; font.pixelSize: 12 }
-                                        Label { text: modelData.name + " · scale " + modelData.scale + " · VRR " + (modelData.vrr ? "on" : "off"); color: Theme.muted; font.pixelSize: 11 }
+                                        Label { width: parent.width; wrapMode: Text.WordWrap; text: modelData.name + " · VRR " + (modelData.vrr ? "on" : "off") + "\n" + (modelData.name === "DP-1" ? "Workspaces 1–20" : "Discord + Spotify"); color: Theme.muted; font.pixelSize: 11; lineHeight: 1.2 }
                                     }
                                 }
                             }

@@ -15,5 +15,12 @@
   "middle_scroll": true,
   "focus_on_activate": true,
   "night_temp": 4500,
-  "glass": 60
+  "glass": 60,
+  "accent": "tokyo",
+  "border_spin": true,
+  "dim_inactive": false,
+  "repeat_rate": 45,
+  "repeat_delay": 400,
+  "lock_minutes": 10,
+  "vibrancy": 18
 }

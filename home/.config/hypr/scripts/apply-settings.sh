@@ -40,7 +40,9 @@ t=re.sub(r'(timeout = \d+)\s+# (\d+ min: lock)', r'\1                           
 open(p,'w').write(t)
 print(m)
 PY
-hyprctl reload >/dev/null
+# apply live (a full reload makes open panels drop the next click); fall back to reload if eval fails
+code=$(grep -v '^--' "$H/settings.lua" | tr '\n' ' ')
+hyprctl eval "$code" 2>/dev/null | grep -qx ok || hyprctl reload >/dev/null
 # night light: apply new temperature if it's on
 if pgrep -x hyprsunset >/dev/null; then pkill -x hyprsunset; t=$(python3 -I -c "import json;print(json.load(open('$H/settings.json')).get('night_temp',4500))"); setsid hyprsunset -t "$t" >/dev/null 2>&1 & fi
 # auto-lock: restart hypridle so a new time applies (only if it's running, i.e. "keep awake" is off)

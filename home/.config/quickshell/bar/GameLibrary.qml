@@ -39,6 +39,7 @@ Scope {
     }
 
     PanelWindow {
+        id: libWin
         visible: root.visible; screen: root.screen
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay
@@ -62,7 +63,7 @@ Scope {
                     Label { text: "Esc to close"; color: Theme.line; font.pixelSize: 10 }
                 }
                 Grid {
-                    columns: parent.parent.parent.cols
+                    columns: libWin.cols
                     columnSpacing: 16; rowSpacing: 16
                     Repeater {
                         model: root.games

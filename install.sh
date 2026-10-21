@@ -79,9 +79,11 @@ fi
 # ---------------------------------------------------------------- services & theme
 step "Services and theme"
 systemctl --user daemon-reload
-for u in audio-fx.service spicetify-refresh.service remember-volume.service backup-game-saves.timer weekly-checkup.timer; do
+for u in audio-fx.service spicetify-refresh.service remember-volume.service backup-game-saves.timer weekly-checkup.timer fixfuxi-volume.timer; do
   [ -f "$HOME/.config/systemd/user/$u" ] && systemctl --user enable "$u" >/dev/null 2>&1 && ok "$u"
 done
+# headset volume fix also runs whenever the Fuxi-H3 is plugged in
+systemctl --user add-wants 'dev-snd-by\x2did-usb\x2dXiiSound_Technology_Corporation_Fuxi\x2dH3\x2d00.device' fixfuxi-volume.service >/dev/null 2>&1 || true
 gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark 2>/dev/null || true
 gsettings set org.gnome.desktop.interface color-scheme prefer-dark 2>/dev/null || true
 gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark 2>/dev/null || true

@@ -1,0 +1,12 @@
+[Unit]
+Description=FixFuxi - Reapply headset output volume
+After=wireplumber.service pipewire.service
+Wants=wireplumber.service pipewire.service
+
+[Service]
+Type=oneshot
+ExecStart=/home/yu/fixfuxi/FixFuxiH3.sh --volume-only
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

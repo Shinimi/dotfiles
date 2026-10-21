@@ -20,7 +20,8 @@ Item {
         border.width: 3; border.color: s.accent
     }
     MouseArea {
-        anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+        anchors.fill: parent; anchors.topMargin: -6; anchors.bottomMargin: -6; cursorShape: Qt.PointingHandCursor
+        preventStealing: true   // don't let a scrolling page grab the drag
         function set(mx) { s.moved(Math.max(0, Math.min(1, mx / s.width))) }
         onPressed: m => set(m.x)
         onPositionChanged: m => { if (pressed) set(m.x) }

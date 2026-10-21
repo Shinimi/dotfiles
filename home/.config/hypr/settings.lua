@@ -11,7 +11,7 @@ hl.config({
     },
     animations = { enabled = true },
     input = { sensitivity = 0.40, follow_mouse = 1,
-              repeat_rate = 35, repeat_delay = 300,
+              repeat_rate = 45, repeat_delay = 400,
               scroll_method = "on_button_down" },
     misc = { focus_on_activate = true },
 })
