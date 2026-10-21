@@ -11,8 +11,9 @@ t=re.sub(r'(wallpaper \{\s*monitor = '+re.escape(m)+r'\s*path = )[^\n]*', lambda
 open(p,'w').write(t)
 PY
 done
-# keep the lock screen background in sync
+# keep the lock screen background in sync (unless a lock picture was chosen on purpose)
 for m in "${mons[@]}"; do
+  [ "$m" = DP-1 ] && [ -e "$HOME/.config/hypr/.lock-wallpaper-fixed" ] && continue
   python3 -I - "$HOME/.config/hypr/hyprlock.conf" "$m" "$img" <<'PY'
 import sys,re
 p,m,img=sys.argv[1:]; t=open(p).read()

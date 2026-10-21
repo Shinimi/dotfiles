@@ -30,6 +30,7 @@ PKGS=(
   # look
   papirus-icon-theme capitaine-cursors adw-gtk-theme ttf-jetbrains-mono-nerd inter-font noto-fonts noto-fonts-emoji plymouth
   # terminal & gaming
+  otf-geist-mono-nerd ttf-victor-mono-nerd noto-fonts-cjk
   fish starship fastfetch chafa btop mangohud scx-tools ddcutil
   # apps
   vesktop-bin git github-cli
@@ -55,6 +56,7 @@ if ask "Copy configs into your home folder? (old files go to $B)"; then
   # Waterfox theme goes into whatever profile this install created
   wf=$(ls -d "$HOME"/.waterfox/*.default-release 2>/dev/null | head -1 || true)
   if [ -n "$wf" ] && [ -d "$R/extras/waterfox" ]; then rsync -a "$R/extras/waterfox/" "$wf/"; ok "Waterfox theme"; fi
+  mkdir -p "$HOME/Pictures/wallpaper"; cp -n "$R"/extras/wallpapers/* "$HOME/Pictures/wallpaper/" 2>/dev/null || true
   ok "configs (backup: $B)"
 fi
 

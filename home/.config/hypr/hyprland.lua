@@ -177,7 +177,7 @@ hl.config({
     group = {
         col = { border_active = { colors = { "rgba(e49bd8ff)", "rgba(b69cf0ff)" }, angle = 45 }, border_inactive = "rgba(4a3f63aa)" },
         groupbar = {
-            enabled = true, height = 24, font_family = "JetBrainsMono Nerd Font", font_size = 11,
+            enabled = true, height = 24, font_family = "GeistMono Nerd Font", font_size = 11,
             gradients = true, rounding = 8, gradient_rounding = 8, round_only_edges = false,
             indicator_height = 0, gaps_in = 4, gaps_out = 6, keep_upper_gap = true, text_padding = 10,
             text_color = "rgba(13111cff)", text_color_inactive = "rgba(c9bddfff)",

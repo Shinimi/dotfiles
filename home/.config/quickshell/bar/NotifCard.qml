@@ -12,10 +12,16 @@ Rectangle {
     readonly property bool critical: notif && notif.urgency === NotificationUrgency.Critical
     width: parent ? parent.width : 340
     implicitHeight: col.implicitHeight + 24
-    radius: 12
+    radius: 14
     color: popup ? Theme.panel : "#661a1726"
     border.width: 1
     border.color: critical ? Theme.red : (popup ? Theme.glassLine : "transparent")
+    Rectangle {   // butterfly-pink accent on the left edge
+        visible: card.popup
+        x: 6; anchors.verticalCenter: parent.verticalCenter
+        width: 3; height: parent.height - 24; radius: 2
+        gradient: Gradient { GradientStop { position: 0; color: Theme.purple } GradientStop { position: 1; color: Theme.blue } }
+    }
 
     // Deferred: removing the card rebuilds the list, which must not happen inside the card's own handler
     function close(dismiss) {

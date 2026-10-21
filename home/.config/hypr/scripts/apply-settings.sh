@@ -195,7 +195,7 @@ if mode=="ascii": subprocess.run([os.path.expanduser("~/.local/bin/fetch-ascii.s
 if mode in ("portrait","picture"):
     pic=os.path.expanduser("~/.config/fastfetch/shinobu-portrait.png") if mode=="portrait" else os.path.expanduser("~/.face.icon")
     subprocess.run([os.path.expanduser("~/.local/bin/fetch-logo.sh"),pic],capture_output=True)
-logo={"portrait":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 34, "height": 15, "padding": { "top": 1, "left": 3, "right": 5 } }',
+logo={"portrait":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 30, "height": 14, "padding": { "top": 1, "left": 3, "right": 4 } }',
       "ascii":'{ "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }',
       "picture":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 34, "height": 15, "padding": { "top": 1, "left": 3, "right": 5 } }',
       "distro":'{ "type": "builtin", "color": { "1": "#b69cf0", "2": "#e49bd8" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
