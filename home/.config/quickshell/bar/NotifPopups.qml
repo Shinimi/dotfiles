@@ -5,7 +5,7 @@ import Quickshell.Wayland
 
 PanelWindow {
     required property var screen
-    visible: Notifs.popups.length > 0
+    visible: Notifs.popups.count > 0
     anchors { top: true; right: true }
     margins.top: Theme.barHeight + 10
     margins.right: 10
@@ -20,7 +20,12 @@ PanelWindow {
         width: parent.width; spacing: 8
         Repeater {
             model: Notifs.popups
-            NotifCard { required property var modelData; notif: modelData; popup: true }
+            NotifCard {
+                required property int nid
+                notif: Notifs.notifById(nid)
+                popup: true
+                visible: notif !== null
+            }
         }
     }
 }

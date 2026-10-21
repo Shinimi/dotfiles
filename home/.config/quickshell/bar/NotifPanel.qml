@@ -33,19 +33,14 @@ BarPopup {
             Label { anchors.horizontalCenter: parent.horizontalCenter; text: "You're all caught up"; color: Theme.muted }
         }
     }
-    Flickable {
+    ListView {
         visible: Notifs.count > 0
         width: parent.width
-        height: Math.min(list.implicitHeight, 460)
-        contentHeight: list.implicitHeight
+        height: Math.min(contentHeight, 460)
         clip: true
-        Column {
-            id: list
-            width: parent.width; spacing: 8
-            Repeater {
-                model: Notifs.list.slice().reverse()
-                NotifCard { required property var modelData; notif: modelData }
-            }
-        }
+        spacing: 8
+        verticalLayoutDirection: ListView.BottomToTop      // newest on top
+        model: Notifs.model
+        delegate: NotifCard { required property var modelData; notif: modelData; width: ListView.view ? ListView.view.width : 360 }
     }
 }

@@ -7,7 +7,7 @@ import Quickshell.Services.Notifications
 
 Rectangle {
     id: card
-    required property var notif
+    property var notif: null
     property bool popup: false
     readonly property bool critical: notif && notif.urgency === NotificationUrgency.Critical
     width: parent ? parent.width : 340
@@ -19,8 +19,12 @@ Rectangle {
 
     // Deferred: removing the card rebuilds the list, which must not happen inside the card's own handler
     function close(dismiss) {
-        const n = card.notif
-        Qt.callLater(() => { if (dismiss && n) n.dismiss(); Notifs.removePopup(n) })
+        if (!card.notif) return
+        const id = card.notif.id
+        Qt.callLater(() => {
+            Notifs.removePopup(id)
+            if (dismiss) { const n = Notifs.notifById(id); if (n) n.dismiss() }
+        })
     }
 
     Timer {
@@ -69,7 +73,7 @@ Rectangle {
                     color: aMouse.containsMouse ? Theme.bgHover : Theme.bgAlt; border.width: 1; border.color: Theme.line
                     Label { id: aLabel; anchors.centerIn: parent; text: modelData.text; font.pixelSize: 11 }
                     MouseArea { id: aMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: { modelData.invoke(); card.close(false) } }
+                        onClicked: { if (card.notif) modelData.invoke(); card.close(false) } }
                 }
             }
         }
