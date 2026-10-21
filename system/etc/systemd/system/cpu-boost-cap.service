@@ -1,0 +1,10 @@
+[Unit]
+Description=Cap CPU boost at 4.2 GHz (Ryzen 7 5700X) for lower temps. Made by Claude.
+After=multi-user.target power-profiles-daemon.service
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq; do echo 4200000 > $f; done'
+ExecStop=/bin/sh -c 'for c in /sys/devices/system/cpu/cpu*/cpufreq; do cat $c/cpuinfo_max_freq > $c/scaling_max_freq; done'
+[Install]
+WantedBy=multi-user.target

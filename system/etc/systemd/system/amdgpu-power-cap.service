@@ -1,0 +1,10 @@
+[Unit]
+Description=Cap AMD GPU power to 160 W (RX 9060 XT reference TBP) for lower temps/noise. Made by Claude.
+After=systemd-udev-settle.service multi-user.target
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/sh -c 'for d in /sys/class/drm/card*/device; do [ "$(cat $d/vendor 2>/dev/null)" = 0x1002 ] || continue; for f in $d/hwmon/hwmon*/power1_cap; do echo 160000000 > $f; done; done'
+ExecStop=/bin/sh -c 'for d in /sys/class/drm/card*/device; do [ "$(cat $d/vendor 2>/dev/null)" = 0x1002 ] || continue; for f in $d/hwmon/hwmon*/power1_cap; do cat ${f}_default > $f; done; done'
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+[SddmGreeterTheme]
+Name=Tokyo Night (yu)
+Description=Custom Tokyo Night login for yu's CachyOS. Made by Claude.
+Author=Claude
+Type=sddm-theme
+Version=1.0
+Website=
+Screenshot=
+MainScript=Main.qml
+ConfigFile=theme.conf
+QtVersion=6

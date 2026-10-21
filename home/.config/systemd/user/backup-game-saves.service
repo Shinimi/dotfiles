@@ -1,0 +1,7 @@
+[Unit]
+Description=Back up game saves (Proton prefixes + Steam Cloud local copies)
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/backup-game-saves.sh
+Nice=10
+IOSchedulingClass=idle

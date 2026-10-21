@@ -1,0 +1,10 @@
+[Unit]
+Description=Remember and restore the headset volume. Made by Claude.
+After=wireplumber.service pipewire-pulse.service
+Wants=wireplumber.service
+[Service]
+ExecStart=%h/.local/bin/remember-volume.sh
+Restart=on-failure
+RestartSec=3
+[Install]
+WantedBy=default.target
