@@ -1,0 +1,10 @@
+[Unit]
+Description=Re-apply Clean mic / Headset EQ choices at login. Made by Claude.
+After=wireplumber.service pipewire-pulse.service
+Wants=wireplumber.service
+[Service]
+Type=oneshot
+ExecStartPre=/bin/sleep 3
+ExecStart=%h/.local/bin/audio-fx.sh restore
+[Install]
+WantedBy=default.target

@@ -20,7 +20,7 @@ BarPopup {
     property bool awake: false
     property bool perf: false
     function refresh() { state.running = true }
-    onVisibleChanged: if (visible) refresh()
+    onVisibleChanged: if (visible) { refresh(); fxState.running = true }
     Process {
         id: state
         command: ["sh", "-c", "pgrep -x hyprsunset >/dev/null && echo n1 || echo n0; pgrep -x hypridle >/dev/null && echo a0 || echo a1; powerprofilesctl get"]
@@ -32,6 +32,16 @@ BarPopup {
         }
     }
     Timer { id: later; interval: 500; onTriggered: cc.refresh() }
+    property var fx: ({ mic: false, eq: false, preset: "flat" })
+    readonly property string fxCmd: Quickshell.env("HOME") + "/.local/bin/audio-fx.sh"
+    Process {
+        id: fxState
+        command: [cc.fxCmd, "status"]
+        stdout: StdioCollector { onStreamFinished: { try { cc.fx = JSON.parse(this.text) } catch (e) {} } }
+    }
+    Timer { id: fxLater; interval: 400; onTriggered: fxState.running = true }
+    function fxRun(args) { Quickshell.execDetached([cc.fxCmd].concat(args)); fxLater.restart() }
+
     function run(cmd) { Quickshell.execDetached(cmd); later.restart() }
     function speed(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + " MB/s" : b >= 1024 ? Math.round(b / 1024) + " KB/s" : b + " B/s" }
 
@@ -94,6 +104,42 @@ BarPopup {
                                     color: cur ? Theme.bg : Theme.fgDim; font.pixelSize: 10 }
                             MouseArea { id: dMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                 onClicked: Pipewire.preferredDefaultAudioSink = modelData }
+                        }
+                    }
+                }
+                RowLayout {     // Clean mic + EQ switches
+                    width: parent.width; spacing: 8
+                    Repeater {
+                        model: [["mic", "\uf130", "Clean mic", Theme.purple], ["eq", "\uf1de", "Headset EQ", Theme.cyan]]
+                        Rectangle {
+                            required property var modelData
+                            readonly property bool on: !!cc.fx[modelData[0]]
+                            Layout.fillWidth: true; height: 32; radius: 10
+                            color: on ? modelData[3] : (fxMouse.containsMouse ? "#33c0caf5" : "#661a1b26")
+                            Behavior on color { ColorAnimation { duration: 140 } }
+                            Row {
+                                anchors.centerIn: parent; spacing: 8
+                                Label { text: modelData[1]; color: on ? Theme.bg : modelData[3]; font.pixelSize: 11 }
+                                Label { text: modelData[2]; color: on ? Theme.bg : Theme.fgDim; font.pixelSize: 11 }
+                            }
+                            MouseArea { id: fxMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                onClicked: { const n = Object.assign({}, cc.fx); n[modelData[0]] = !on; cc.fx = n; cc.fxRun([modelData[0], on ? "off" : "on"]) } }
+                        }
+                    }
+                }
+                Row {           // EQ presets
+                    visible: !!cc.fx.eq
+                    width: parent.width; spacing: 6
+                    Repeater {
+                        model: [["flat", "Flat"], ["music", "Music"], ["games", "Games"], ["bass", "Bass"]]
+                        Rectangle {
+                            required property var modelData
+                            readonly property bool cur: cc.fx.preset === modelData[0]
+                            width: (parent.width - 18) / 4; height: 26; radius: 13
+                            color: cur ? Theme.cyan : (pMouse.containsMouse ? "#33c0caf5" : "#661a1b26")
+                            Label { anchors.centerIn: parent; text: modelData[1]; color: cur ? Theme.bg : Theme.fgDim; font.pixelSize: 10 }
+                            MouseArea { id: pMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                onClicked: { const n = Object.assign({}, cc.fx); n.preset = modelData[0]; cc.fx = n; cc.fxRun(["preset", modelData[0]]) } }
                         }
                     }
                 }

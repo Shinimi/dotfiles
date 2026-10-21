@@ -190,7 +190,20 @@ for i = 1, 20 do
     })
 end
 -- Side screen: one fixed workspace, no switching.
-hl.workspace_rule({ workspace = "name:side", monitor = "DP-2", default = true, persistent = true })
+hl.workspace_rule({ workspace = "name:side", monitor = "DP-2", default = true, persistent = true,
+                    layout = "master", layout_opts = { orientation = "left" } })
+-- Side screen layout: Discord big on the left (66%), Spotify / others in a slim column on the right
+hl.config({ master = { mfact = 0.66, new_status = "slave", orientation = "left" } })
+hl.on("window.open", function(w)
+    if not w then return end
+    local ws = w.workspace
+    if not ws or ws.name ~= "side" then return end
+    local prev = hl.get_active_window()
+    hl.dispatch(hl.dsp.focus({ window = "address:" .. w.address }))
+    if w.class == "vesktop" then hl.dispatch(hl.dsp.layout("swapwithmaster master")) end
+    hl.dispatch(hl.dsp.layout("mfact exact 0.66"))          -- keep the 2/3 : 1/3 split
+    if prev and prev.address ~= w.address then hl.dispatch(hl.dsp.focus({ window = "address:" .. prev.address })) end
+end)
 
 
 ---------------------------------------------------------------- WINDOW RULES
@@ -216,8 +229,8 @@ end
 -- Glass: these stay fully solid (games, video players, fullscreen)
 hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|org.kde.gwenview|com.obsproject.Studio)$" }, opacity = "1.0 override 1.0 override" })
 hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true }, opacity = "1.0 override 1.0 override" })
--- kitty draws its own transparent background, so its text stays perfectly crisp
-hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty)$" }, opacity = "1.0 override 1.0 override" })
+-- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
+hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop)$" }, opacity = "1.0 override 1.0 override" })
 -- blur behind the bar, panels and pop-ups
 hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji))$" }, blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })

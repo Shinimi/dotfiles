@@ -9,6 +9,10 @@ home_paths=(
   .config/systemd/user/backup-game-saves.service .config/systemd/user/backup-game-saves.timer
   .config/systemd/user/remember-volume.service
   .local/bin/backup-game-saves.sh .local/bin/remember-volume.sh
+  .config/systemd/user/audio-fx.service .config/systemd/user/spicetify-refresh.service
+  .config/systemd/user/weekly-checkup.service .config/systemd/user/weekly-checkup.timer
+  .local/bin/audio-fx.sh .local/bin/weekly-checkup.sh
+  .config/spicetify/Themes/TokyoNight .config/vesktop/settings/quickCss.css
   .local/share/sddm-themes/tokyo-night-yu
   Downloads/Optiv10/OptiScaler.ini Downloads/Optiv10/README-Optiv10.txt Downloads/Optiv10/install-optiv10.sh
 )

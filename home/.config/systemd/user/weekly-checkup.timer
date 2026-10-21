@@ -1,0 +1,8 @@
+[Unit]
+Description=Run the system check-up every Sunday at noon
+[Timer]
+OnCalendar=Sun 12:00
+Persistent=true
+RandomizedDelaySec=10min
+[Install]
+WantedBy=timers.target

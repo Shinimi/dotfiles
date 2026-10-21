@@ -1,0 +1,7 @@
+[Unit]
+Description=Re-apply the Spotify theme after spotify-launcher updates Spotify. Made by Claude.
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'spicetify backup apply -q -n >/dev/null 2>&1 || true'
+[Install]
+WantedBy=default.target

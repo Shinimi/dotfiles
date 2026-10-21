@@ -10,7 +10,7 @@ Column {
     width: parent ? parent.width : 300
     spacing: 8
     // app playback streams (Quickshell marks them isStream + isSink); mic captures are excluded
-    readonly property var streams: Pipewire.nodes.values.filter(n => n.isStream && n.isSink && n.audio)
+    readonly property var streams: Pipewire.nodes.values.filter(n => n.isStream && n.isSink && n.audio && !(n.name || "").startsWith("effect_"))
     PwObjectTracker { objects: root.streams }
 
     // group streams by application name

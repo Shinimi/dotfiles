@@ -1,0 +1,5 @@
+[Unit]
+Description=Weekly system check-up (one notification). Made by Claude.
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/weekly-checkup.sh
