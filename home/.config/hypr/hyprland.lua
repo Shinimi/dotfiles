@@ -19,7 +19,8 @@
 --    SUPER + 1..9            workspace           SUPER + SHIFT + 1..9  send window there
 --                            (1-4 = main 1440p screen, 5-9 = side screen)
 --    SUPER + U / I, PgDn/PgUp next / prev workspace  (+ SHIFT move window)
---    SUPER + S               scratchpad          SUPER + SHIFT + S  send to scratchpad
+--    SUPER + SHIFT + S       screenshot a region (copied automatically, like Windows 11)
+--    SUPER + S               scratchpad          SUPER + CTRL + SHIFT + S  send to scratchpad
 --    SUPER + minus / equal   narrower / wider    + SHIFT            shorter / taller
 --    SUPER + mouse L / R     drag / resize
 --    SUPER + ALT + L         lock screen         SUPER + SHIFT + E  log out
@@ -283,7 +284,8 @@ b("SUPER + SHIFT + Page_Up",    hl.dsp.window.move({ workspace = "e-1" }))
 b("SUPER + SHIFT + U",          hl.dsp.window.move({ workspace = "e+1" }))
 b("SUPER + SHIFT + I",          hl.dsp.window.move({ workspace = "e-1" }))
 b("SUPER + S",                  hl.dsp.workspace.toggle_special())
-b("SUPER + SHIFT + S",          hl.dsp.window.move({ workspace = "special", follow = false }))
+b("SUPER + CTRL + SHIFT + S",   hl.dsp.window.move({ workspace = "special", follow = false }))
+b("SUPER + SHIFT + S",          run(scripts .. "/screenshot.sh region"))   -- Win11-style snip
 b("SUPER + CTRL + S",           hl.dsp.window.move({ workspace = "+0" }))
 b("SUPER + mouse_down",         hl.dsp.focus({ workspace = "e+1" }))
 b("SUPER + mouse_up",           hl.dsp.focus({ workspace = "e-1" }))
