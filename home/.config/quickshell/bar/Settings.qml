@@ -21,7 +21,7 @@ Singleton {
         blur_brightness: 85, blur_noise: 2, blur_xray: false, blur_popups: true,
         // input
         sensitivity: 0.4, accel_flat: true, natural_scroll: false, scroll_factor: 1.0, follow_mouse: true,
-        middle_scroll: true, middle_paste: true, focus_on_activate: true, repeat_rate: 35, repeat_delay: 300,
+        middle_scroll: true, scroll_mode: "autoscroll", middle_paste: true, focus_on_activate: true, repeat_rate: 35, repeat_delay: 300,
         kb_layout: "tr", numlock: true, hide_cursor_typing: false, cursor_hide_after: 0, ws_back_forth: false, swallow: false,
         // display
         night_temp: 4500, night_auto: false, night_from: 21, night_to: 7, vibrance: 100, monitors: ({}),
@@ -30,7 +30,7 @@ Singleton {
         ui_font: "Noto Sans", ui_font_size: 10,
         // bar & notifications
         clock_seconds: false, clock_12h: false, clock_date: true, bar_weather: true, bar_media: true,
-        notif_timeout: 5, notif_center: false,
+        notif_timeout: 5, notif_center: false, desktop_clock: true, desktop_clock_pos: "left",
         // power
         lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true,
         // account, wallpaper, apps, time

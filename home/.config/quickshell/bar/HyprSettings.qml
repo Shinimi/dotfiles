@@ -46,8 +46,8 @@ Scope {
         glow: "effects", glow_range: "effects", glow_strength: "effects", shadows: "effects", shadow_range: "effects", shadow_tint: "effects", dim_inactive: "effects", dim_strength: "effects", animations: "effects", anim_speed: "effects", ws_anim: "effects",
         folder_color: "theme", icon_base: "theme", cursor_theme: "theme", cursor_size: "theme", ui_font: "theme", ui_font_size: "theme",
         opacity_active: "glass", opacity_inactive: "glass", glass: "glass", blur: "glass", blur_size: "glass", blur_passes: "glass", vibrancy: "glass", blur_brightness: "glass", blur_noise: "glass", blur_xray: "glass", blur_popups: "glass",
-        clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_weather: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar",
-        sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", middle_paste: "input", focus_on_activate: "input",
+        clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_weather: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
+        sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", scroll_mode: "input", middle_paste: "input", focus_on_activate: "input",
         repeat_rate: "input", repeat_delay: "input", kb_layout: "input", numlock: "input", hide_cursor_typing: "input", cursor_hide_after: "input", ws_back_forth: "input", swallow: "input",
         night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", monitors: "display", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power"
 ,
@@ -519,6 +519,12 @@ Scope {
                             SetToggle { label: "Show the date"; key: "clock_date" }
                             SetToggle { label: "Show the weather"; key: "bar_weather" }
                             SetToggle { label: "Show what's playing"; key: "bar_media" }
+                            SetToggle { label: "Desktop clock"; desc: "big clock, weather and music on the wallpaper"; key: "desktop_clock" }
+                            SetChoice {
+                                visible: Settings.get("desktop_clock"); label: "Desktop clock position"
+                                current: Settings.get("desktop_clock_pos"); onPicked: v => Settings.set("desktop_clock_pos", v)
+                                options: [["left", "Bottom left"], ["center", "Top centre"]]
+                            }
                         }
                         SetSection {
                             width: (parent.width - 14) / 2; title: "Notifications"; icon: "\u{f009a}"
@@ -543,7 +549,11 @@ Scope {
                                 SetToggle { label: "Raw input (no acceleration)"; desc: "best for games and aiming"; key: "accel_flat" }
                                 SetSlider { label: "Scroll speed"; key: "scroll_factor"; from: 0.2; to: 3; step: 0.1; decimals: 1; suffix: "×" }
                                 SetToggle { label: "Natural scrolling"; desc: "content follows your finger, like a phone"; key: "natural_scroll" }
-                                SetToggle { label: "Middle-click scrolling"; desc: "hold middle button + move"; key: "middle_scroll" }
+                                SetChoice {
+                                    label: "Middle-click scrolling"; desc: "Windows style: click the wheel, move to scroll, click to stop"
+                                    current: Settings.get("scroll_mode"); onPicked: v => Settings.set("scroll_mode", v)
+                                    options: [["autoscroll", "Windows (click & move)"], ["hold", "Hold & drag"]]
+                                }
                                 SetToggle { label: "Middle-click paste"; key: "middle_paste" }
                             }
                             SetSection {

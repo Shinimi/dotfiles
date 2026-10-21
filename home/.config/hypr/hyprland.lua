@@ -1,8 +1,11 @@
--- ============================================================================
---  Hyprland config for yu's CachyOS PC  (Hyprland 0.56, Lua config)
---  Ryzen 7 5700X + RX 9060 XT | Valkyrie 1440p144 (DP-1) + ViewSonic 1080p165 (DP-2)
---  Theme: Tokyo Night glass, smooth animations, rotating gradient border.
---  Made by Claude. Wiki: https://wiki.hypr.land/Configuring/Start/
+-- ╭──────────────────────────────────────────────────────────────────────────╮
+-- │   ▄▄▄ ▄▄  yu's Hyprland · Tokyo Night glass                              │
+-- │   █ █ █   CachyOS · Hyprland 0.56 (Lua) · Ryzen 7 5700X · RX 9060 XT    │
+-- │   ▀ ▀ ▀   Valkyrie 1440p144 (DP-1) + ViewSonic 1080p165 (DP-2)           │
+-- │                                                                          │
+-- │   Most look & feel lives in Settings (SUPER + ,) → settings.lua.         │
+-- │   Edit by hand? press SUPER + SHIFT + R afterwards.     made by Claude   │
+-- ╰──────────────────────────────────────────────────────────────────────────╯
 --
 --  KEYBINDS — DankMaterialShell layout  (SUPER = Windows key)
 --    SUPER + T / Return      terminal (kitty)

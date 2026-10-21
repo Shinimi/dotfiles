@@ -97,6 +97,7 @@ if command -v kwriteconfig6 >/dev/null; then
 fi
 command -v spicetify >/dev/null && { spicetify config current_theme TokyoNight >/dev/null 2>&1; spicetify backup apply -q -n >/dev/null 2>&1 || true; }
 [ "$(basename "${SHELL:-}")" = fish ] || { ask "Make fish your shell?" && chsh -s /usr/bin/fish; }
+[ -f "$HOME/.face.icon" ] && "$HOME/.local/bin/fetch-logo.sh"
 ok "theme"
 
 printf '\n%sAll done.%s Log out and pick Hyprland on the login screen.\n' "$green" "$off"

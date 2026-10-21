@@ -71,7 +71,7 @@ main=f'''hl.config({{
               natural_scroll = {b(s["natural_scroll"])}, scroll_factor = {float(s["scroll_factor"]):.2f},
               follow_mouse = {1 if s["follow_mouse"] else 0}, kb_layout = "{s["kb_layout"]}", numlock_by_default = {b(s["numlock"])},
               repeat_rate = {int(s["repeat_rate"])}, repeat_delay = {int(s["repeat_delay"])},
-              scroll_method = "{'on_button_down' if s['middle_scroll'] else '2fg'}" }},
+              scroll_method = "{'on_button_down' if s.get('scroll_mode','autoscroll') == 'hold' else 'no_scroll'}" }},
     cursor = {{ hide_on_key_press = {b(s["hide_cursor_typing"])}, inactive_timeout = {int(s["cursor_hide_after"])} }},
     binds = {{ workspace_back_and_forth = {b(s["ws_back_forth"])} }},
     misc = {{ focus_on_activate = {b(s["focus_on_activate"])}, middle_click_paste = {b(s["middle_paste"])},
@@ -167,6 +167,7 @@ U=$(busctl --system call org.freedesktop.Accounts /org/freedesktop/Accounts org.
 if a=$(todo avatar) && [ -f "$a" ]; then
   magick "$a" -auto-orient -resize 512x512^ -gravity center -extent 512x512 "PNG:$HOME/.face.icon" 2>/dev/null && cp "$HOME/.face.icon" "$HOME/.face"
   [ -n "$U" ] && busctl --system call org.freedesktop.Accounts "$U" org.freedesktop.Accounts.User SetIconFile s "$HOME/.face.icon" >/dev/null 2>&1
+  "$HOME/.local/bin/fetch-logo.sh"
 fi
 if n=$(todo user_name) && [ -n "$n" ] && [ -n "$U" ]; then busctl --system call org.freedesktop.Accounts "$U" org.freedesktop.Accounts.User SetRealName s "$n" >/dev/null 2>&1; fi
 w=$(todo wall_main) && [ -f "$w" ] && "$HOME/.config/quickshell/bar/setwall.sh" DP-1 "$w"
