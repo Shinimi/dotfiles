@@ -1,4 +1,4 @@
-// Tokyo Night login screen for yu's CachyOS (SDDM, Qt 6). Made by Claude.
+// 胡蝶しのぶ login screen for yu's CachyOS (SDDM, Qt 6) – matches the lock screen. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -21,7 +21,8 @@ Item {
     readonly property color purple:  "#e39ec0"
     readonly property color yellow:  "#eec48e"
     readonly property color red:     "#ec6f8f"
-    readonly property string font:   config.font || "JetBrainsMono Nerd Font"
+    readonly property string font:   "GeistMono Nerd Font"
+    readonly property string jp:     "Noto Serif CJK JP"
 
     // the big screen gets the login card; other screens just the wallpaper + clock
     readonly property bool isMain: typeof primaryScreen === "undefined" ? true : primaryScreen || root.width >= 2500
@@ -82,198 +83,125 @@ Item {
         function onLoginSucceeded() { fadeOut.start() }
     }
 
-    // ---------- background ----------
+    // ---------- background: the art stays sharp; a soft shade on the right for the text ----------
     Image {
-        id: wall
         anchors.fill: parent
         source: root.isMain ? config.background : (config.background2 || config.background)
         fillMode: Image.PreserveAspectCrop
         asynchronous: false
-        visible: false
     }
-    MultiEffect {
-        anchors.fill: wall
-        source: wall
-        blurEnabled: true
-        blur: root.isMain ? 0.55 : 0.25
-        blurMax: 64
-        brightness: -0.18
-        saturation: 0.05
-    }
-    Rectangle {   // soft vignette so text always reads well
+    Rectangle {
         anchors.fill: parent
         gradient: Gradient {
-            GradientStop { position: 0.0; color: "#6613121c" }
-            GradientStop { position: 0.45; color: "#2213121c" }
-            GradientStop { position: 1.0; color: "#cc0d0c13" }
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0.0;  color: "#000d0c13" }
+            GradientStop { position: 0.55; color: "#110d0c13" }
+            GradientStop { position: 1.0;  color: "#990d0c13" }
         }
     }
 
-    // ---------- clock ----------
     property date now: new Date()
     Timer { interval: 1000; running: true; repeat: true; onTriggered: root.now = new Date() }
-    Column {
-        id: clock
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: parent.top
-        anchors.topMargin: parent.height * (root.isMain ? 0.10 : 0.36)
-        spacing: 2
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatTime(root.now, "HH:mm")
-            color: root.fg; font.family: root.font; font.pixelSize: root.isMain ? 128 : 110; font.weight: Font.Bold
-            layer.enabled: true
-            layer.effect: MultiEffect { shadowEnabled: true; shadowColor: "#aa000000"; shadowBlur: 0.8; shadowVerticalOffset: 4 }
-        }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatDate(root.now, "dddd, d MMMM")
-            color: root.blue; font.family: root.font; font.pixelSize: 24; font.weight: Font.DemiBold
-        }
+
+    // side screens: just a quiet clock
+    Text {
+        visible: !root.isMain
+        anchors.centerIn: parent
+        text: Qt.formatTime(root.now, "HH:mm")
+        color: "#bbefeaf8"; font.family: root.font; font.pixelSize: 96; font.weight: Font.Light
     }
 
-    // ---------- login card ----------
-    Item {
-        id: cardWrap
+    // ---------- right-hand column (same layout as the lock screen) ----------
+    Text {   // her name, vertical
         visible: root.isMain
-        width: 420; height: card.height
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: clock.bottom; anchors.topMargin: 70
-
-        SequentialAnimation {
-            id: shake
-            loops: 1
-            NumberAnimation { target: card; property: "x"; to: -14; duration: 45 }
-            NumberAnimation { target: card; property: "x"; to: 12; duration: 45 }
-            NumberAnimation { target: card; property: "x"; to: -8; duration: 45 }
-            NumberAnimation { target: card; property: "x"; to: 5; duration: 45 }
-            NumberAnimation { target: card; property: "x"; to: 0; duration: 45 }
-        }
-
-        Rectangle {
-            id: card
-            width: parent.width
-            height: content.implicitHeight + 64
-            radius: 26
-            color: root.bg
-            border.width: 1; border.color: root.line
+        anchors.right: parent.right; anchors.rightMargin: 110
+        anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: -150
+        text: "胡\n蝶\nし\nの\nぶ"; lineHeight: 1.05
+        color: root.purple; font.family: root.jp; font.pixelSize: 36; font.weight: Font.Bold
+        horizontalAlignment: Text.AlignHCenter
+    }
+    Column {
+        id: col
+        visible: root.isMain
+        width: 480
+        anchors.right: parent.right; anchors.rightMargin: 230
+        anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: -120
+        spacing: 14
+        Text {
+            anchors.right: parent.right
+            text: Qt.formatTime(root.now, "HH:mm")
+            color: root.fg; font.family: root.font; font.pixelSize: 176; font.weight: Font.Light
             layer.enabled: true
-            layer.effect: MultiEffect { shadowEnabled: true; shadowColor: "#99000000"; shadowBlur: 1.0; shadowVerticalOffset: 10 }
+            layer.effect: MultiEffect { shadowEnabled: true; shadowColor: "#880d0c13"; shadowBlur: 0.9; shadowVerticalOffset: 3 }
+        }
+        Text {
+            anchors.right: parent.right; anchors.rightMargin: 8
+            text: Qt.formatDate(root.now, "dddd  ·  d MMMM").toLowerCase()
+            color: root.blue; font.family: root.font; font.pixelSize: 23
+        }
+        Item { width: 1; height: 26 }
+        Rectangle { anchors.right: parent.right; anchors.rightMargin: 8; width: 470; height: 1; color: "#55e39ec0" }
+        Item { width: 1; height: 18 }
 
-            ColumnLayout {
-                id: content
-                anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top
-                anchors.margins: 32
-                spacing: 18
-
-                // avatar with gradient ring
-                Item {
-                    Layout.alignment: Qt.AlignHCenter
-                    width: 108; height: 108
-                    Rectangle {
-                        anchors.fill: parent; radius: width / 2
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0; color: root.blue }
-                            GradientStop { position: 1; color: root.purple }
-                        }
-                        RotationAnimation on rotation { from: 0; to: 360; duration: 12000; loops: Animation.Infinite }
+        Item {
+            id: cardWrap
+            anchors.right: parent.right; anchors.rightMargin: 8
+            width: 470; height: 62
+            SequentialAnimation {
+                id: shake
+                NumberAnimation { target: card; property: "x"; to: -14; duration: 45 }
+                NumberAnimation { target: card; property: "x"; to: 12; duration: 45 }
+                NumberAnimation { target: card; property: "x"; to: -8; duration: 45 }
+                NumberAnimation { target: card; property: "x"; to: 5; duration: 45 }
+                NumberAnimation { target: card; property: "x"; to: 0; duration: 45 }
+            }
+            Item {
+                id: card
+                width: parent.width; height: parent.height
+                TextField {
+                    id: password
+                    anchors.fill: parent
+                    echoMode: TextInput.Password
+                    passwordCharacter: "●"
+                    placeholderText: "password"
+                    placeholderTextColor: root.muted
+                    color: root.fg
+                    font.family: root.font; font.pixelSize: 18
+                    leftPadding: 58; rightPadding: 64
+                    selectByMouse: true
+                    focus: root.isMain
+                    enabled: !root.busy
+                    onAccepted: root.doLogin()
+                    onTextChanged: if (text.length) root.errorText = ""
+                    background: Rectangle {
+                        radius: height / 2
+                        color: "#aa0d0c13"
+                        border.width: 1
+                        border.color: root.errorText ? root.red : (password.activeFocus ? root.purple : "#66a28ae8")
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
                     }
+                    Text { x: 22; anchors.verticalCenter: parent.verticalCenter; text: "\u{f1589}"; color: root.purple; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 20 }
                     Rectangle {
-                        anchors.centerIn: parent; width: 98; height: 98; radius: 49; color: root.bgAlt
-                        Image {
-                            id: avatarImg
-                            anchors.fill: parent; anchors.margins: 3
-                            source: root.avatar; fillMode: Image.PreserveAspectCrop
-                            visible: false
-                        }
-                        Rectangle { id: avatarMask; anchors.fill: avatarImg; radius: width / 2; visible: false; layer.enabled: true }
-                        MultiEffect {
-                            anchors.fill: avatarImg; source: avatarImg
-                            maskEnabled: true; maskSource: avatarMask
-                            visible: avatarImg.status === Image.Ready
-                        }
-                        Text {
-                            anchors.centerIn: parent
-                            visible: avatarImg.status !== Image.Ready
-                            text: (root.realName || root.userName).charAt(0).toUpperCase()
-                            color: root.fg; font.family: root.font; font.pixelSize: 44; font.weight: Font.Bold
-                        }
-                    }
-                }
-
-                Column {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 2
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.realName || root.userName; color: root.fg; font.family: root.font; font.pixelSize: 22; font.weight: Font.Bold }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: "@" + root.userName + (sddm.hostName ? " · " + sddm.hostName : ""); color: root.muted; font.family: root.font; font.pixelSize: 13 }
-                }
-
-                // password row
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 10
-                    TextField {
-                        id: password
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 50
-                        echoMode: reveal.checked ? TextInput.Normal : TextInput.Password
-                        passwordCharacter: "●"
-                        placeholderText: "Password"
-                        placeholderTextColor: root.muted
-                        color: root.fg
-                        font.family: root.font; font.pixelSize: 15
-                        leftPadding: 46; rightPadding: 44
-                        selectByMouse: true
-                        focus: root.isMain
-                        enabled: !root.busy
-                        onAccepted: root.doLogin()
-                        onTextChanged: if (text.length) root.errorText = ""
-                        background: Rectangle {
-                            radius: 14
-                            color: root.bgAlt
-                            border.width: password.activeFocus ? 2 : 1
-                            border.color: root.errorText ? root.red : (password.activeFocus ? root.blue : root.line)
-                            Behavior on border.color { ColorAnimation { duration: 150 } }
-                        }
-                        Text { x: 16; anchors.verticalCenter: parent.verticalCenter; text: ""; color: password.activeFocus ? root.blue : root.muted; font.family: root.font; font.pixelSize: 16 }
-                        Item {
-                            id: reveal
-                            property bool checked: false
-                            width: 36; height: parent.height
-                            anchors.right: parent.right; anchors.rightMargin: 4
-                            Text { anchors.centerIn: parent; text: reveal.checked ? "" : ""; color: revealMouse.containsMouse ? root.fg : root.muted; font.family: root.font; font.pixelSize: 15 }
-                            MouseArea { id: revealMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: reveal.checked = !reveal.checked }
-                        }
-                    }
-                    Rectangle {
-                        Layout.preferredWidth: 50; Layout.preferredHeight: 50
-                        radius: 14
-                        color: root.busy ? root.line : (goMouse.containsMouse ? "#b5a2f2" : root.blue)
+                        anchors.right: parent.right; anchors.rightMargin: 7; anchors.verticalCenter: parent.verticalCenter
+                        width: 48; height: 48; radius: 24
+                        color: root.busy ? root.line : (goMouse.containsMouse ? "#f0b9d3" : root.purple)
                         Behavior on color { ColorAnimation { duration: 120 } }
                         Text {
                             anchors.centerIn: parent
-                            text: root.busy ? "" : ""
-                            color: root.bg; font.family: root.font; font.pixelSize: 18
+                            text: root.busy ? "\u{f0450}" : "\u{f0054}"
+                            color: "#0d0c13"; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 20
                             RotationAnimation on rotation { running: root.busy; from: 0; to: 360; duration: 900; loops: Animation.Infinite }
                         }
                         MouseArea { id: goMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.doLogin() }
                     }
                 }
-
-                // status line
-                Item {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 18
-                    Text {
-                        anchors.centerIn: parent
-                        text: root.errorText ? "  " + root.errorText
-                              : (keyboard.capsLock ? "  Caps Lock is on" : "Welcome back")
-                        color: root.errorText ? root.red : (keyboard.capsLock ? root.yellow : root.muted)
-                        font.family: root.font; font.pixelSize: 12
-                    }
-                }
             }
+        }
+        Text {
+            anchors.right: parent.right; anchors.rightMargin: 30
+            text: root.errorText ? root.errorText : (keyboard.capsLock ? "caps lock is on" : (root.realName || root.userName))
+            color: root.errorText ? root.red : (keyboard.capsLock ? root.yellow : root.muted)
+            font.family: root.font; font.pixelSize: 14
         }
     }
 
@@ -283,8 +211,8 @@ Item {
         signal clicked()
         height: 40; radius: 12
         width: chipRow.implicitWidth + 28
-        color: chipMouse.containsMouse ? root.bgHover : root.bg
-        border.width: 1; border.color: root.line
+        color: chipMouse.containsMouse ? "#552a2640" : "#330d0c13"
+        border.width: 1; border.color: "#33a28ae8"
         Behavior on color { ColorAnimation { duration: 120 } }
         Row {
             id: chipRow; anchors.centerIn: parent; spacing: 10
