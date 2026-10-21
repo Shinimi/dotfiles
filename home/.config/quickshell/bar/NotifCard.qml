@@ -13,9 +13,9 @@ Rectangle {
     width: parent ? parent.width : 340
     implicitHeight: col.implicitHeight + 24
     radius: 12
-    color: popup ? Theme.bg : Theme.bgAlt
+    color: popup ? Theme.panel : "#661a1b26"
     border.width: 1
-    border.color: critical ? Theme.red : (popup ? Theme.line : "transparent")
+    border.color: critical ? Theme.red : (popup ? Theme.glassLine : "transparent")
 
     // Deferred: removing the card rebuilds the list, which must not happen inside the card's own handler
     function close(dismiss) {

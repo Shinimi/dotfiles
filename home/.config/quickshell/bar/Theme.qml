@@ -5,6 +5,11 @@ import Quickshell
 
 Singleton {
     readonly property color bg:      "#1a1b26"
+    // translucent surfaces (Hyprland blurs what's behind them); text colors stay solid
+    readonly property color barBg:   "#a61a1b26"   // ~65%
+    readonly property color panel:   "#d91a1b26"   // ~85%
+    readonly property color card:    "#9924283b"   // cards inside panels
+    readonly property color glassLine: "#40c0caf5" // soft light edge
     readonly property color bgAlt:   "#24283b"
     readonly property color bgHover: "#292e42"
     readonly property color border:  "#292e42"

@@ -50,7 +50,7 @@ Scope {
         implicitHeight: Math.ceil(root.games.length / cols) * 300 + 90
 
         Rectangle {
-            anchors.fill: parent; radius: 20; color: Theme.bg; border.width: 1; border.color: Theme.line
+            anchors.fill: parent; radius: 20; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
             focus: true
             Keys.onEscapePressed: root.visible = false
             ColumnLayout {

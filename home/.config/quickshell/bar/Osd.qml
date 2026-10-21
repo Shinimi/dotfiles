@@ -31,7 +31,7 @@ Scope {
         implicitWidth: 300; implicitHeight: 52
         mask: Region {}
         Rectangle {
-            anchors.fill: parent; radius: 16; color: Theme.bg; border.width: 1; border.color: Theme.line
+            anchors.fill: parent; radius: 16; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
             readonly property real v: root.sink && root.sink.audio ? root.sink.audio.volume : 0
             readonly property bool m: root.sink && root.sink.audio ? root.sink.audio.muted : false
             Row {

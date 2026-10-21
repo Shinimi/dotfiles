@@ -106,10 +106,10 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 8,
+        rounding       = 10,
         rounding_power = 2,
-        active_opacity   = 1.0,   -- solid windows, no transparency
-        inactive_opacity = 1.0,
+        active_opacity   = 0.94,  -- glass: slightly see-through, blurred behind
+        inactive_opacity = 0.86,
         dim_inactive     = false,
         shadow = {
             enabled      = true,
@@ -117,7 +117,18 @@ hl.config({
             render_power = 3,
             color        = 0xaa000000,
         },
-        blur = { enabled = false },  -- nothing is transparent, so no blur needed
+        blur = {
+            enabled   = true,
+            size      = 7,
+            passes    = 3,
+            noise     = 0.02,
+            contrast  = 1.0,
+            brightness = 0.85,     -- darken the blurred background so text stays readable
+            vibrancy  = 0.18,
+            new_optimizations = true,
+            xray      = false,
+            popups    = true,
+        },
     },
 
     animations = { enabled = true },
@@ -201,6 +212,15 @@ for _, cls in ipairs({ "^(pavucontrol|org.pulseaudio.pavucontrol)$", "^(nm-conne
     hl.window_rule({ name = "float-" .. cls, match = { class = cls }, float = true })
 end
 
+
+-- Glass: these stay fully solid (games, videos, browsers, fullscreen)
+hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|helium|librewolf|waterfox|firefox|zen|chromium|org.kde.gwenview|com.obsproject.Studio)$" }, opacity = "1.0 override 1.0 override" })
+hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true }, opacity = "1.0 override 1.0 override" })
+-- kitty draws its own transparent background, so its text stays perfectly crisp
+hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty)$" }, opacity = "1.0 override 1.0 override" })
+-- blur behind the bar, panels and pop-ups
+hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji))$" }, blur = true, ignore_alpha = 0.2 })
+hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
 
 -- Games open on workspace 5; Steam popups float; Discord + Spotify live on the side screen
 hl.window_rule({ name = "games-own-workspace", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, workspace = "5" })

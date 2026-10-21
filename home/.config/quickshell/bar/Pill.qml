@@ -14,9 +14,9 @@ Rectangle {
     implicitHeight: Theme.pillHeight
     implicitWidth: row.implicitWidth + padding * 2
     radius: Theme.radius
-    color: active ? Theme.bgHover : (hovered ? Theme.bgHover : Theme.bg)
-    border.width: 1
-    border.color: active ? Theme.line : Theme.border
+    // pills sit on the translucent bar: no box of their own, only a soft highlight
+    color: active ? "#3dc0caf5" : (hovered ? "#24c0caf5" : "transparent")
+    border.width: 0
     Behavior on color { ColorAnimation { duration: 120 } }
 
     MouseArea {

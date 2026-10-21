@@ -68,7 +68,7 @@ Scope {
         implicitWidth: 460; implicitHeight: 520
 
         Rectangle {
-            anchors.fill: parent; radius: 18; color: Theme.bg; border.width: 1; border.color: Theme.line
+            anchors.fill: parent; radius: 18; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 16; spacing: 12
                 TextField {

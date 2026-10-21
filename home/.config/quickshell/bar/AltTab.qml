@@ -96,7 +96,7 @@ Scope {
         implicitHeight: 230
 
         Rectangle {
-            anchors.fill: parent; radius: 18; color: Theme.bg; border.width: 1; border.color: Theme.line
+            anchors.fill: parent; radius: 18; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
             focus: true
             Keys.onPressed: e => {
                 if (e.key === Qt.Key_Tab || e.key === Qt.Key_Right) { root.move(1); e.accepted = true }
@@ -117,7 +117,7 @@ Scope {
                         required property int index
                         readonly property bool selected: index === root.sel
                         width: 200; height: 180; radius: 14
-                        color: selected ? Theme.bgHover : Theme.bgAlt
+                        color: selected ? "#4d7aa2f7" : Theme.card
                         border.width: selected ? 2 : 1
                         border.color: selected ? Theme.blue : Theme.border
                         scale: selected ? 1.0 : 0.94

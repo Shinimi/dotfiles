@@ -13,7 +13,7 @@ BarPopup {
     RowLayout {
         width: parent.width; spacing: 14
         ClippingRectangle {
-            width: 84; height: 84; radius: 12; color: Theme.bgAlt
+            width: 84; height: 84; radius: 12; color: Theme.card
             Image { anchors.fill: parent; source: popup.player ? popup.player.trackArtUrl : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true }
             Label { anchors.centerIn: parent; visible: !popup.player || !popup.player.trackArtUrl; text: ""; font.pixelSize: 28; color: Theme.muted }
         }

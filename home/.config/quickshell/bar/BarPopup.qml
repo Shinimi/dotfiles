@@ -61,9 +61,9 @@ Scope {
             id: frame
             anchors.fill: parent
             radius: 14
-            color: Theme.bg
+            color: Theme.panel
             border.width: 1
-            border.color: Theme.line
+            border.color: Theme.glassLine
             opacity: root.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 140 } }
             focus: true

@@ -19,7 +19,7 @@ BarPopup {
     // weather
     Rectangle {
         visible: Weather.ready
-        width: parent.width; height: wcol.implicitHeight + 20; radius: 12; color: Theme.bgAlt
+        width: parent.width; height: wcol.implicitHeight + 20; radius: 12; color: Theme.card
         Column {
             id: wcol
             anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 10

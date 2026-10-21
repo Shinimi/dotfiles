@@ -8,7 +8,7 @@ Rectangle {
     property color accent: Theme.cyan
     readonly property color tempColor: temp >= 85 ? Theme.red : temp >= 70 ? Theme.yellow : Theme.green
     implicitHeight: col.implicitHeight + 24
-    radius: 12; color: Theme.bgAlt
+    radius: 12; color: Theme.card
     Column {
         id: col
         anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top

@@ -58,7 +58,7 @@ Scope {
         implicitWidth: 1000; implicitHeight: 640
 
         Rectangle {
-            anchors.fill: parent; radius: 16; color: Theme.bg; border.width: 1; border.color: Theme.line
+            anchors.fill: parent; radius: 16; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
             focus: true
             Keys.onEscapePressed: root.visible = false
 

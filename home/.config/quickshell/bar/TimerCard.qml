@@ -7,7 +7,7 @@ Rectangle {
     property int tab: Timers.swActive && !Timers.timerActive ? 1 : 0
     width: parent ? parent.width : 280
     height: col.implicitHeight + 24
-    radius: 12; color: Theme.bgAlt
+    radius: 12; color: Theme.card
 
     component Btn: Rectangle {
         property string text; property bool primary: false; property bool on: false; signal hit()
