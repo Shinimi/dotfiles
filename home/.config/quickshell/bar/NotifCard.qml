@@ -13,7 +13,7 @@ Rectangle {
     width: parent ? parent.width : 340
     implicitHeight: col.implicitHeight + 24
     radius: 14
-    color: popup ? Theme.panel : "#661a1726"
+    color: popup ? Theme.panel : "#6613121c"
     border.width: 1
     border.color: critical ? Theme.red : (popup ? Theme.glassLine : "transparent")
     Rectangle {   // butterfly-pink accent on the left edge

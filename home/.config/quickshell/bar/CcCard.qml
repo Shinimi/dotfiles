@@ -9,7 +9,7 @@ Rectangle {
     width: parent ? parent.width : 300
     height: cardCol.implicitHeight + 24
     radius: 14; color: Theme.card
-    border.width: 1; border.color: "#14ece4f6"
+    border.width: 1; border.color: "#14efeaf8"
     Column {
         id: cardCol
         x: 12; y: 12; width: parent.width - 24; spacing: 10

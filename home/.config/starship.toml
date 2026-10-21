@@ -1,49 +1,32 @@
-# Tokyo Night prompt. Made by Claude.
+# starship · Shinobu Kochō — a butterfly, the folder, git. Made by Claude.
 add_newline = true
-format = """
-[](#b69cf0)$os$username[](bg:#6b52a8 fg:#b69cf0)$directory[](fg:#6b52a8 bg:#2d2640)$git_branch$git_status[](fg:#2d2640 bg:#221d30)$cmd_duration[ ](fg:#221d30)
+format = """[󱖉](bold #e39ec0) $directory$git_branch$git_status$cmd_duration
 $character"""
 
-[os]
-disabled = false
-style = "bg:#b69cf0 fg:#13111c"
-format = "[$symbol]($style)"
-[os.symbols]
-Arch = "󰣇 "
-CachyOS = "󰣇 "
-Linux = " "
-
-[username]
-show_always = true
-style_user = "bg:#b69cf0 fg:#13111c bold"
-format = "[$user ]($style)"
-
 [directory]
-style = "bg:#6b52a8 fg:#f4eeff"
-format = "[ $path ]($style)"
+style = "bold #a28ae8"
+format = "[$path]($style)[$read_only]($read_only_style) "
 truncation_length = 3
 truncation_symbol = "…/"
-[directory.substitutions]
-"Downloads" = "󰇚 "
-"Games" = "󰊗 "
-"dotfiles" = " "
-".config" = " "
+read_only = " 󰌾"
+read_only_style = "#ec6f8f"
+home_symbol = "~"
 
 [git_branch]
-symbol = ""
-style = "bg:#2d2640 fg:#e49bd8"
-format = "[ $symbol $branch ]($style)"
+symbol = " "
+style = "#7fc4e3"
+format = "[$symbol$branch]($style) "
 
 [git_status]
-style = "bg:#2d2640 fg:#f0c98a"
+style = "#eec48e"
 format = "[($all_status$ahead_behind )]($style)"
 
 [cmd_duration]
 min_time = 2000
-style = "bg:#221d30 fg:#7d7299"
-format = "[  $duration ]($style)"
+style = "italic #807a9c"
+format = "[ $duration]($style)"
 
 [character]
-success_symbol = "[❯](bold #b69cf0)"
-error_symbol = "[❯](bold #f27a9e)"
-vimcmd_symbol = "[❮](bold #9fdcc0)"
+success_symbol = "[❯](#e39ec0)"
+error_symbol = "[❯](#ec6f8f)"
+vimcmd_symbol = "[❮](#8fd6b8)"

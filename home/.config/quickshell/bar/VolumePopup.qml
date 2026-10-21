@@ -33,7 +33,7 @@ BarPopup {
             onHit: if (sink) sink.audio.muted = !sink.audio.muted
         }
         Slider {
-            Layout.fillWidth: true; accent: Theme.green
+            Layout.fillWidth: true; accent: Theme.blue
             value: sink ? sink.audio.volume : 0
             onMoved: v => { if (sink) { sink.audio.muted = false; sink.audio.volume = v } }
         }

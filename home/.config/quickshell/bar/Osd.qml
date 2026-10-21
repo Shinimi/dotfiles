@@ -36,12 +36,12 @@ Scope {
             readonly property bool m: root.sink && root.sink.audio ? root.sink.audio.muted : false
             Row {
                 anchors.centerIn: parent; spacing: 14
-                Label { text: parent.parent.m ? "" : ""; color: parent.parent.m ? Theme.muted : Theme.green; font.pixelSize: 16; width: 20 }
+                Label { text: parent.parent.m ? "" : ""; color: parent.parent.m ? Theme.muted : Theme.blue; font.pixelSize: 16; width: 20 }
                 Rectangle {
                     width: 190; height: 8; radius: 4; color: Theme.bgAlt; anchors.verticalCenter: parent.verticalCenter
                     Rectangle {
                         width: Math.max(height, parent.width * Math.min(1, parent.parent.parent.v)); height: parent.height; radius: 4
-                        color: parent.parent.parent.m ? Theme.muted : Theme.green
+                        color: parent.parent.parent.m ? Theme.muted : Theme.blue
                         Behavior on width { NumberAnimation { duration: 90 } }
                     }
                 }

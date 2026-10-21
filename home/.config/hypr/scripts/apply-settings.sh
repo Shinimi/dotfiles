@@ -17,8 +17,8 @@ d={"gaps_in":4,"gaps_out":8,"border_size":2,"rounding":10,"accent":"tokyo","bord
    "hide_cursor_typing":False,"cursor_hide_after":0,"ws_back_forth":False,"swallow":False,
    "night_temp":4500,"vibrance":100,"monitors":{},"lock_minutes":10,"screen_off_after":1,"mouse_wakes":False}
 s=dict(d); s.update(json.load(open(jf))); b=lambda v: "true" if v else "false"
-pal={"tokyo":["b69cf0","e49bd8","8fd3e0","b69cf0"],"storm":["b69cf0","8fd3e0"],"sakura":["f27a9e","e49bd8"],
-     "matcha":["9fdcc0","7fcfc4"],"sunset":["f5a98a","f0c98a","f27a9e"],"mono":["ece4f6","7d7299"]}
+pal={"tokyo":["a28ae8","e39ec0","7fc4e3","a28ae8"],"storm":["a28ae8","7fc4e3"],"sakura":["ec6f8f","e39ec0"],
+     "matcha":["8fd6b8","6fb8d6"],"sunset":["f2ad94","eec48e","ec6f8f"],"mono":["efeaf8","807a9c"]}
 cols=", ".join(f'"rgba({c}ff)"' for c in pal.get(s["accent"],pal["tokyo"]))
 
 # colour vibrance: a tiny screen shader, only used when not 100%
@@ -198,7 +198,7 @@ if mode in ("portrait","picture"):
 logo={"portrait":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 30, "height": 14, "padding": { "top": 1, "left": 3, "right": 4 } }',
       "ascii":'{ "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }',
       "picture":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 34, "height": 15, "padding": { "top": 1, "left": 3, "right": 5 } }',
-      "distro":'{ "type": "builtin", "color": { "1": "#b69cf0", "2": "#e49bd8" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
+      "distro":'{ "type": "builtin", "color": { "1": "#a28ae8", "2": "#e39ec0" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
 p=os.path.expanduser("~/.config/fastfetch/config.jsonc"); c=open(p).read()
 c=re.sub(r'  "logo": .*// LOGO \(Settings → Theme\)', lambda m: f'  "logo": {logo}, // LOGO (Settings → Theme)', c)
 open(p,'w').write(c); open(f,'w').write(key)

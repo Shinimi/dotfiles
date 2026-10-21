@@ -1,8 +1,8 @@
 /* Tokyo Night for Waterfox's own pages (new tab, settings). Made by Claude. */
 @-moz-document url-prefix("about:") {
-  :root { --in-content-page-background: #1a1726 !important; --in-content-box-background: #221d30 !important;
-          --in-content-text-color: #ece4f6 !important; --in-content-primary-button-background: #b69cf0 !important;
-          --in-content-primary-button-text-color: #13111c !important; --in-content-accent-color: #b69cf0 !important;
-          --newtab-background-color: #1a1726 !important; --newtab-background-color-secondary: #221d30 !important;
-          --newtab-text-primary-color: #ece4f6 !important; --newtab-primary-action-background: #b69cf0 !important; }
+  :root { --in-content-page-background: #13121c !important; --in-content-box-background: #1b1928 !important;
+          --in-content-text-color: #efeaf8 !important; --in-content-primary-button-background: #a28ae8 !important;
+          --in-content-primary-button-text-color: #0d0c13 !important; --in-content-accent-color: #a28ae8 !important;
+          --newtab-background-color: #13121c !important; --newtab-background-color-secondary: #1b1928 !important;
+          --newtab-text-primary-color: #efeaf8 !important; --newtab-primary-action-background: #a28ae8 !important; }
 }

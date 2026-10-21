@@ -20,10 +20,10 @@ Column {
             Rectangle {
                 id: dr
                 required property var modelData
-                width: (pg.width - 14) / 2; height: 96; radius: 16; color: Theme.card; border.width: 1; border.color: "#14ece4f6"
+                width: (pg.width - 14) / 2; height: 96; radius: 16; color: Theme.card; border.width: 1; border.color: "#14efeaf8"
                 Row {
                     x: 16; anchors.verticalCenter: parent.verticalCenter; spacing: 14
-                    Rectangle { width: 46; height: 46; radius: 14; color: dr.modelData.healthy ? Qt.rgba(0.62, 0.86, 0.75, 0.16) : Qt.rgba(0.95, 0.48, 0.62, 0.2)
+                    Rectangle { width: 46; height: 46; radius: 14; color: dr.modelData.healthy ? Qt.rgba(0.56, 0.84, 0.72, 0.16) : Qt.rgba(0.93, 0.44, 0.56, 0.2)
                         Label { anchors.centerIn: parent; text: "\u{f02ca}"; color: dr.modelData.healthy ? Theme.green : Theme.red; font.pixelSize: 22 } }
                     Column {
                         anchors.verticalCenter: parent.verticalCenter; spacing: 3

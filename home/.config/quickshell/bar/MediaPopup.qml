@@ -34,7 +34,7 @@ BarPopup {
         visible: popup.player && popup.player.lengthSupported && popup.player.length > 0
         Slider {
             value: popup.player && popup.player.length > 0 ? popup.player.position / popup.player.length : 0
-            accent: Theme.green
+            accent: Theme.purple
             onMoved: v => { if (popup.player && popup.player.canSeek) popup.player.position = v * popup.player.length }
         }
         RowLayout {
@@ -52,7 +52,7 @@ BarPopup {
                 readonly property bool main: modelData[1] === "toggle"
                 width: main ? 48 : 38; height: width; radius: width / 2
                 anchors.verticalCenter: parent.verticalCenter
-                color: main ? Theme.green : (cMouse.containsMouse ? Theme.bgHover : Theme.bgAlt)
+                color: main ? Theme.purple : (cMouse.containsMouse ? Theme.bgHover : Theme.bgAlt)
                 Label {
                     anchors.centerIn: parent
                     text: main ? (popup.player && popup.player.isPlaying ? "" : "") : modelData[0]

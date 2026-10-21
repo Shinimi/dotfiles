@@ -189,14 +189,14 @@ Scope {
                 x: 0; y: 0; width: 260; height: parent.height
                 radius: 22; color: "#33000000"
                 Rectangle { anchors.right: parent.right; width: 22; height: parent.height; color: "#33000000" } // square right edge
-                Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: "#14ece4f6" }
+                Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: "#14efeaf8" }
 
                 Column {
                     id: sideTop
                     x: 16; y: 20; width: parent.width - 32; spacing: 14
                     Rectangle {   // you
                         width: parent.width; height: 62; radius: 16
-                        color: root.page === "account" ? Qt.rgba(0.71, 0.61, 0.94, 0.18) : (um.containsMouse ? "#1eece4f6" : "#22000000")
+                        color: root.page === "account" ? Qt.rgba(0.64, 0.54, 0.91, 0.18) : (um.containsMouse ? "#1eefeaf8" : "#22000000")
                         Row {
                             x: 10; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                             Avatar { size: 42; radius: 21; pick: Settings.get("avatar") }
@@ -215,7 +215,7 @@ Scope {
                         onTextEdited: { root.search = text; if (root.shownPages.length) root.page = root.shownPages[0][0] }
                         Keys.onEscapePressed: { text = ""; root.search = "" }
                         color: Theme.fg; font.family: Theme.font; font.pixelSize: 12; leftPadding: 34
-                        background: Rectangle { radius: 11; color: "#331a1726"; border.width: find.activeFocus ? 2 : 1; border.color: find.activeFocus ? Theme.blue : "#1eece4f6" }
+                        background: Rectangle { radius: 11; color: "#3313121c"; border.width: find.activeFocus ? 2 : 1; border.color: find.activeFocus ? Theme.blue : "#1eefeaf8" }
                         Label { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 14 }
                     }
                 }
@@ -235,7 +235,7 @@ Scope {
                         required property var modelData
                         readonly property bool cur: root.page === modelData[0]
                         width: nav.width; height: 36; radius: 11
-                        color: cur ? Qt.rgba(0.71, 0.61, 0.94, 0.18) : (nm.containsMouse ? "#1eece4f6" : "transparent")
+                        color: cur ? Qt.rgba(0.64, 0.54, 0.91, 0.18) : (nm.containsMouse ? "#1eefeaf8" : "transparent")
                         Behavior on color { ColorAnimation { duration: 120 } }
                         Rectangle { visible: cur; x: 0; anchors.verticalCenter: parent.verticalCenter; width: 3; height: 16; radius: 2; color: Theme.blue }
                         Row {
@@ -261,8 +261,8 @@ Scope {
                 id: applyBar
                 anchors { left: side.right; right: parent.right; bottom: parent.bottom; margins: 14 }
                 height: 58; radius: 15
-                color: Settings.dirty ? Qt.rgba(0.71, 0.61, 0.94, 0.12) : "#22000000"
-                border.width: 1; border.color: Settings.dirty ? Qt.rgba(0.71, 0.61, 0.94, 0.5) : "#14ece4f6"
+                color: Settings.dirty ? Qt.rgba(0.64, 0.54, 0.91, 0.12) : "#22000000"
+                border.width: 1; border.color: Settings.dirty ? Qt.rgba(0.64, 0.54, 0.91, 0.5) : "#14efeaf8"
                 Behavior on color { ColorAnimation { duration: 160 } }
                 RowLayout {
                     anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 10; spacing: 10
@@ -328,9 +328,9 @@ Scope {
                             Row {
                                 spacing: 10
                                 Repeater {
-                                    model: [["tokyo", "Kochō", ["#b69cf0", "#e49bd8", "#8fd3e0"]], ["storm", "Wisteria", ["#b69cf0", "#8fd3e0"]],
-                                            ["sakura", "Sakura", ["#f27a9e", "#e49bd8"]], ["matcha", "Matcha", ["#9fdcc0", "#7fcfc4"]],
-                                            ["sunset", "Sunset", ["#f5a98a", "#f0c98a", "#f27a9e"]], ["mono", "Mono", ["#ece4f6", "#7d7299"]]]
+                                    model: [["tokyo", "Kochō", ["#a28ae8", "#e39ec0", "#7fc4e3"]], ["storm", "Wisteria", ["#a28ae8", "#7fc4e3"]],
+                                            ["sakura", "Sakura", ["#ec6f8f", "#e39ec0"]], ["matcha", "Matcha", ["#8fd6b8", "#6fb8d6"]],
+                                            ["sunset", "Sunset", ["#f2ad94", "#eec48e", "#ec6f8f"]], ["mono", "Mono", ["#efeaf8", "#807a9c"]]]
                                     Column {
                                         id: sw
                                         required property var modelData
@@ -442,7 +442,7 @@ Scope {
                                             required property string modelData
                                             readonly property bool cur: Settings.get("folder_color") === modelData
                                             width: 57; height: 70; radius: 12
-                                            color: cur ? Qt.rgba(0.71, 0.61, 0.94, 0.16) : (fcm.containsMouse ? "#1eece4f6" : "transparent")
+                                            color: cur ? Qt.rgba(0.64, 0.54, 0.91, 0.16) : (fcm.containsMouse ? "#1eefeaf8" : "transparent")
                                             border.width: cur ? 1 : 0; border.color: Theme.blue
                                             Image { x: 10; y: 6; width: 36; height: 36; sourceSize.width: 72; source: "file:///usr/share/icons/Papirus/48x48/places/folder-" + fc.modelData + ".svg" }
                                             Label { anchors.horizontalCenter: parent.horizontalCenter; y: 48; text: fc.modelData; color: fc.cur ? Theme.fg : Theme.muted; font.pixelSize: 10 }
@@ -479,7 +479,7 @@ Scope {
                                             required property string modelData
                                             readonly property bool cur: Settings.get("ui_font") === modelData
                                             width: parent.width; height: 34; radius: 10
-                                            color: cur ? Qt.rgba(0.71, 0.61, 0.94, 0.16) : (fom.containsMouse ? "#1eece4f6" : "#331a1726")
+                                            color: cur ? Qt.rgba(0.64, 0.54, 0.91, 0.16) : (fom.containsMouse ? "#1eefeaf8" : "#3313121c")
                                             border.width: cur ? 1 : 0; border.color: Theme.blue
                                             Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: fo.modelData + " — The quick brown fox"; font.family: fo.modelData; font.pixelSize: 13; color: fo.cur ? Theme.fg : Theme.fgDim }
                                             MouseArea { id: fom; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Settings.set("ui_font", fo.modelData) }
@@ -611,7 +611,7 @@ Scope {
                         Rectangle {   // "keep these settings?" after a screen change
                             visible: root.undoMonitors !== null
                             width: parent.width; height: 58; radius: 14
-                            color: Qt.rgba(0.94, 0.79, 0.54, 0.14); border.width: 1; border.color: Theme.yellow
+                            color: Qt.rgba(0.93, 0.77, 0.56, 0.14); border.width: 1; border.color: Theme.yellow
                             RowLayout {
                                 anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 12; spacing: 10
                                 Label { text: "\u{f0026}"; color: Theme.yellow; font.pixelSize: 18 }
@@ -634,8 +634,8 @@ Scope {
                                     required property var modelData
                                     readonly property bool sel: root.selMon === modelData.name
                                     width: (parent.width - 14) / 2; height: 112; radius: 14
-                                    color: sel ? Qt.rgba(0.71, 0.61, 0.94, 0.12) : (mcm.containsMouse ? "#1eece4f6" : Theme.card)
-                                    border.width: 1; border.color: sel ? Theme.blue : "#14ece4f6"
+                                    color: sel ? Qt.rgba(0.64, 0.54, 0.91, 0.12) : (mcm.containsMouse ? "#1eefeaf8" : Theme.card)
+                                    border.width: 1; border.color: sel ? Theme.blue : "#14efeaf8"
                                     Behavior on color { ColorAnimation { duration: 120 } }
                                     MouseArea { id: mcm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.selMon = monCard.modelData.name }
                                     Rectangle {
@@ -774,7 +774,7 @@ Scope {
                     Column {
                         visible: root.page === "about"; width: parent.width; spacing: 14
                         Rectangle {
-                            width: parent.width; height: 120; radius: 16; color: Theme.card; border.width: 1; border.color: "#14ece4f6"
+                            width: parent.width; height: 120; radius: 16; color: Theme.card; border.width: 1; border.color: "#14efeaf8"
                             Row {
                                 x: 22; anchors.verticalCenter: parent.verticalCenter; spacing: 20
                                 Label { text: "\u{f08c7}"; font.pixelSize: 64; color: Theme.blue; anchors.verticalCenter: parent.verticalCenter }

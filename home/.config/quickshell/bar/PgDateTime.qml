@@ -15,7 +15,7 @@ Column {
     }
     Timer { id: again; interval: 1500; onTriggered: load.running = true }
     Rectangle {
-        width: parent.width; height: 140; radius: 18; color: Theme.card; border.width: 1; border.color: "#14ece4f6"
+        width: parent.width; height: 140; radius: 18; color: Theme.card; border.width: 1; border.color: "#14efeaf8"
         Column {
             anchors.centerIn: parent; spacing: 4
             Label { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDateTime(clk.date, Settings.get("clock_12h") ? "h:mm:ss AP" : "HH:mm:ss"); font.pixelSize: 44; font.weight: Font.Bold }

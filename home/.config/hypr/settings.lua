@@ -2,7 +2,7 @@
 hl.config({
     general = { gaps_in = 5, gaps_out = 14, border_size = 2,
                 layout = "dwindle", resize_on_border = true, snap = { enabled = true },
-                col = { active_border = { colors = { "rgba(b69cf0ff)", "rgba(e49bd8ff)", "rgba(8fd3e0ff)", "rgba(b69cf0ff)" }, angle = 45 } } },
+                col = { active_border = { colors = { "rgba(a28ae8ff)", "rgba(e39ec0ff)", "rgba(7fc4e3ff)", "rgba(a28ae8ff)" }, angle = 45 } } },
     dwindle = { smart_split = false },
     decoration = {
         rounding = 14,
@@ -10,8 +10,8 @@ hl.config({
         dim_inactive = false, dim_strength = 0.12,
         blur = { enabled = true, size = 8, passes = 3, vibrancy = 0.22,
                  brightness = 0.85, noise = 0.020, xray = false, popups = true },
-        shadow = { enabled = true, range = 16, color = "rgba(b69cf055)" },
-        glow = { enabled = false, range = 14, color = { colors = { "rgba(b69cf066)", "rgba(e49bd866)" }, angle = 45 } },
+        shadow = { enabled = true, range = 16, color = "rgba(a28ae855)" },
+        glow = { enabled = false, range = 14, color = { colors = { "rgba(a28ae866)", "rgba(e39ec066)" }, angle = 45 } },
         screen_shader = "",
     },
     animations = { enabled = true },

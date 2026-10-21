@@ -4,27 +4,27 @@ import QtQuick
 import Quickshell
 
 Singleton {
-    readonly property color bg:      "#1a1726"
+    readonly property color bg:      "#13121c"
     // translucent surfaces (Hyprland blurs what's behind them); text colors stay solid
     // glass level (0-100) comes from the Hyprland settings panel
     readonly property real glass: Settings.cur("glass") / 100
-    readonly property color barBg:   Qt.rgba(0.102, 0.09, 0.149, 1 - glass * 0.70)
-    readonly property color panel:   Qt.rgba(0.102, 0.09, 0.149, 1 - glass * 0.45)
-    readonly property color card:    Qt.rgba(0.145, 0.125, 0.2, 0.80 - glass * 0.45)
-    readonly property color glassLine: "#40ece4f6" // soft light edge
-    readonly property color bgAlt:   "#252033"
-    readonly property color bgHover: "#2d2640"
-    readonly property color border:  "#2d2640"
-    readonly property color line:    "#4a3f63"
-    readonly property color fg:      "#ece4f6"
-    readonly property color fgDim:   "#c9bddf"
-    readonly property color muted:   "#7d7299"
-    readonly property color blue:    "#b69cf0"
-    readonly property color cyan:    "#8fd3e0"
-    readonly property color purple:  "#e49bd8"
-    readonly property color green:   "#9fdcc0"
-    readonly property color yellow:  "#f0c98a"
-    readonly property color red:     "#f27a9e"
+    readonly property color barBg:   Qt.rgba(0.07, 0.07, 0.11, 1 - glass * 0.70)
+    readonly property color panel:   Qt.rgba(0.07, 0.07, 0.11, 1 - glass * 0.45)
+    readonly property color card:    Qt.rgba(0.13, 0.12, 0.20, 0.80 - glass * 0.45)
+    readonly property color glassLine: "#40efeaf8" // soft light edge
+    readonly property color bgAlt:   "#221f33"
+    readonly property color bgHover: "#2a2640"
+    readonly property color border:  "#2a2640"
+    readonly property color line:    "#403a5c"
+    readonly property color fg:      "#efeaf8"
+    readonly property color fgDim:   "#cfc8e2"
+    readonly property color muted:   "#807a9c"
+    readonly property color blue:    "#a28ae8"
+    readonly property color cyan:    "#7fc4e3"
+    readonly property color purple:  "#e39ec0"
+    readonly property color green:   "#8fd6b8"
+    readonly property color yellow:  "#eec48e"
+    readonly property color red:     "#ec6f8f"
 
     function fileUrl(p) { return p ? "file://" + p.split("/").map(encodeURIComponent).join("/") : "" }
     readonly property string font:   "GeistMono Nerd Font"

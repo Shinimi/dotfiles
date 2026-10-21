@@ -9,7 +9,7 @@ Pill {
     readonly property var player: players.find(p => p.isPlaying) || players.find(p => p.identity === "Spotify") || players[0] || null
     visible: Settings.cur("bar_media") && player !== null && player.trackTitle !== ""
     active: panel.visible
-    Label { text: pill.player && pill.player.isPlaying ? "" : ""; color: Theme.green }
+    Label { text: pill.player && pill.player.isPlaying ? "" : ""; color: Theme.purple }
     Label {
         text: pill.player ? (pill.player.trackArtist ? pill.player.trackArtist + " – " : "") + pill.player.trackTitle : ""
         elide: Text.ElideRight; width: Math.min(implicitWidth, 260); color: Theme.fgDim

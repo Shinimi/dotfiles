@@ -4,7 +4,7 @@
 dir="$HOME/Pictures/Screenshots"; mkdir -p "$dir"
 f="$dir/$(date +%Y-%m-%d_%H-%M-%S).png"
 case "$1" in
-  region) g=$(slurp -b 1a172688 -c b69cf0ff -w 2) || exit 0; grim -g "$g" "$f" ;;
+  region) g=$(slurp -b 13121c88 -c a28ae8ff -w 2) || exit 0; grim -g "$g" "$f" ;;
   window) g=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'); grim -g "$g" "$f" ;;
   *)      grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" "$f" ;;
 esac

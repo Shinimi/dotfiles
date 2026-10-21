@@ -20,7 +20,7 @@ Column {
     }
 
     Rectangle {
-        width: parent.width; height: 150; radius: 18; color: Theme.card; border.width: 1; border.color: "#14ece4f6"
+        width: parent.width; height: 150; radius: 18; color: Theme.card; border.width: 1; border.color: "#14efeaf8"
         Row {
             x: 24; anchors.verticalCenter: parent.verticalCenter; spacing: 22
             Avatar { size: 104; pick: Settings.get("avatar"); radius: 52 }

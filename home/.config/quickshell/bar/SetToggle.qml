@@ -16,7 +16,7 @@ Item {
         }
         Rectangle {
             width: 42; height: 24; radius: 12
-            color: r.on ? Theme.blue : "#4dece4f6"
+            color: r.on ? Theme.blue : "#4defeaf8"
             Behavior on color { ColorAnimation { duration: 140 } }
             Rectangle {
                 width: 18; height: 18; radius: 9; color: Theme.fg; y: 3

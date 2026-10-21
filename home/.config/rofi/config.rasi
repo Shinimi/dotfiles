@@ -16,20 +16,20 @@ configuration {
   me-accept-entry: "MousePrimary";
 }
 * {
-  bg:      #13111ce6;
-  surface: #252033cc;
-  hl:      #b69cf02e;
-  fg:      #ece4f6;
-  dim:     #7d7299;
-  lilac:   #b69cf0;
-  pink:    #e49bd8;
+  bg:      #0d0c13e6;
+  surface: #221f33cc;
+  hl:      #a28ae82e;
+  fg:      #efeaf8;
+  dim:     #807a9c;
+  lilac:   #a28ae8;
+  pink:    #e39ec0;
   background-color: transparent;
   text-color: @fg;
 }
 window {
   width: 860px; height: 520px;
   background-color: @bg;
-  border: 1px; border-color: #e49bd855; border-radius: 22px;
+  border: 1px; border-color: #e39ec055; border-radius: 22px;
 }
 mainbox { orientation: horizontal; children: [ art, side ]; }
 art {
@@ -40,7 +40,7 @@ art {
 side { orientation: vertical; padding: 22px 22px 18px 22px; spacing: 14px; children: [ inputbar, listview, mode-switcher ]; }
 inputbar {
   background-color: @surface; border-radius: 14px; padding: 12px 14px; spacing: 12px;
-  border: 1px; border-color: #b69cf033;
+  border: 1px; border-color: #a28ae833;
   children: [ textbox-icon, entry ];
 }
 prompt { enabled: false; }
@@ -53,11 +53,11 @@ entry { placeholder: "Search apps…"; placeholder-color: @dim; vertical-align: 
 listview { lines: 7; columns: 1; spacing: 6px; scrollbar: false; fixed-height: true; }
 element { padding: 9px 12px; border-radius: 12px; spacing: 14px; cursor: pointer; }
 element normal.normal, element alternate.normal, element normal.active, element alternate.active { background-color: transparent; text-color: @fg; }
-element selected.normal, element selected.active { background-color: @hl; text-color: @lilac; border: 1px; border-color: #b69cf055; }
-element normal.urgent, element alternate.urgent, element selected.urgent { text-color: #f27a9e; }
+element selected.normal, element selected.active { background-color: @hl; text-color: @lilac; border: 1px; border-color: #a28ae855; }
+element normal.urgent, element alternate.urgent, element selected.urgent { text-color: #ec6f8f; }
 element-icon { size: 26px; vertical-align: 0.5; }
 element-text { text-color: inherit; vertical-align: 0.5; }
 mode-switcher { spacing: 8px; }
 button { padding: 8px; border-radius: 10px; background-color: @surface; text-color: @dim; font: "GeistMono Nerd Font 13"; cursor: pointer; }
-button selected { background-color: #e49bd8; text-color: #13111c; }
+button selected { background-color: #e39ec0; text-color: #0d0c13; }
 message { background-color: @surface; border-radius: 10px; padding: 8px; }
