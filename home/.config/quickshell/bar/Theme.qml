@@ -26,6 +26,7 @@ Singleton {
     readonly property color yellow:  "#e0af68"
     readonly property color red:     "#f7768e"
 
+    function fileUrl(p) { return p ? "file://" + p.split("/").map(encodeURIComponent).join("/") : "" }
     readonly property string font:   "JetBrainsMono Nerd Font"
     readonly property int fontSize:  12
     readonly property int barHeight: 32

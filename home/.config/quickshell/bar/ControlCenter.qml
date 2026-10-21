@@ -39,15 +39,10 @@ BarPopup {
     // ---------- header ----------
     RowLayout {
         width: parent.width; spacing: 12
-        Rectangle {
-            width: 46; height: 46; radius: 15
-            gradient: Gradient { orientation: Gradient.Horizontal
-                GradientStop { position: 0; color: Theme.blue } GradientStop { position: 1; color: Theme.purple } }
-            Label { anchors.centerIn: parent; text: "\u{f08c7}"; color: Theme.bg; font.pixelSize: 22 }
-        }
+        Avatar { size: 46 }
         Column {
             Layout.fillWidth: true; spacing: 2
-            Label { text: cc.greeting + ", yu"; font.pixelSize: 16; font.weight: Font.Bold }
+            Label { text: cc.greeting + ", " + Settings.cur("user_name"); font.pixelSize: 16; font.weight: Font.Bold }
             Label {
                 text: "\u{f0954}  up " + Stats.d.uptime + (Updates.total > 0 ? "   ·   \u{f06b0}  " + Updates.total + " updates" : "   ·   \u{f012c}  up to date")
                 color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal

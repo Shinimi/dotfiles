@@ -2,12 +2,12 @@
 # lock-info.sh greeting|weather|music – small text snippets for hyprlock. Made by Claude.
 case "$1" in
   greeting)
-    h=$(date +%H); n=$(getent passwd "$USER" | cut -d: -f5 | cut -d, -f1); n=${n:-$USER}
+    h=$(date +%-H); n=$(python3 -I -c "import json,os;print(json.load(open(os.path.expanduser('~/.config/hypr/settings.json'))).get('user_name',''))" 2>/dev/null); n=${n:-$USER}
     if   [ "$h" -lt 5 ];  then g="Good night"
     elif [ "$h" -lt 12 ]; then g="Good morning"
     elif [ "$h" -lt 18 ]; then g="Good afternoon"
     else g="Good evening"; fi
-    echo "$g, ${n,,}" ;;
+    echo "$g, $n" ;;
   weather)
     c="$HOME/.cache/lock-weather.txt"
     if [ ! -s "$c" ] || [ -n "$(find "$c" -mmin +30)" ]; then

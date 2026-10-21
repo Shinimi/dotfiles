@@ -151,3 +151,35 @@ for k,v in t.items(): print(f'{k}={shlex.quote(str(v))}')")"
   dbus-send --session --type=signal /KIconLoader org.kde.KIconLoader.iconChanged int32:0 2>/dev/null
 fi
 rm -f "$S/theme.json.new" "$S/monitors.lua.new"
+
+# ---- account, wallpapers, default apps, autostart (each only when it changed)
+python3 -I - "$H/settings.json" "$S" <<'PY'
+import json,sys,os
+s=json.load(open(sys.argv[1])); st=sys.argv[2]
+for k in ["avatar","user_name","wall_main","wall_side","default_apps","autostart"]:
+    v=json.dumps(s.get(k),sort_keys=True); f=os.path.join(st,k+".applied")
+    old=open(f).read() if os.path.exists(f) else None
+    if v!=old and s.get(k) not in (None,"",[],{}): open(os.path.join(st,k+".todo"),'w').write(json.dumps(s.get(k)))
+    open(f,'w').write(v)
+PY
+todo() { [ -f "$S/$1.todo" ] && python3 -I -c "import json,sys;v=json.load(open(sys.argv[1]));print(v if isinstance(v,str) else json.dumps(v))" "$S/$1.todo" && rm -f "$S/$1.todo"; }
+U=$(busctl --system call org.freedesktop.Accounts /org/freedesktop/Accounts org.freedesktop.Accounts FindUserByName s "$USER" 2>/dev/null | cut -d'"' -f2)
+if a=$(todo avatar) && [ -f "$a" ]; then
+  magick "$a" -auto-orient -resize 512x512^ -gravity center -extent 512x512 "PNG:$HOME/.face.icon" 2>/dev/null && cp "$HOME/.face.icon" "$HOME/.face"
+  [ -n "$U" ] && busctl --system call org.freedesktop.Accounts "$U" org.freedesktop.Accounts.User SetIconFile s "$HOME/.face.icon" >/dev/null 2>&1
+fi
+if n=$(todo user_name) && [ -n "$n" ] && [ -n "$U" ]; then busctl --system call org.freedesktop.Accounts "$U" org.freedesktop.Accounts.User SetRealName s "$n" >/dev/null 2>&1; fi
+w=$(todo wall_main) && [ -f "$w" ] && "$HOME/.config/quickshell/bar/setwall.sh" DP-1 "$w"
+w=$(todo wall_side) && [ -f "$w" ] && "$HOME/.config/quickshell/bar/setwall.sh" DP-2 "$w"
+if d=$(todo default_apps); then
+  python3 -I -c "import json,sys;[print(k,v) for k,v in json.loads(sys.argv[1]).items()]" "$d" | while read -r cat app; do
+    python3 -I "$HOME/.config/quickshell/bar/sysinfo.py" setdefault "$cat" "$app" >/dev/null; done
+fi
+# apps that open at login (run by Hyprland at start-up)
+python3 -I - "$H/settings.json" "$H/autostart.sh" <<'PY'
+import json,sys,shlex
+apps=json.load(open(sys.argv[1])).get("autostart",[]) or []
+open(sys.argv[2],'w').write("#!/usr/bin/env bash\n# Apps that open at login – chosen in Settings → Autostart. Generated, edit there. Made by Claude.\nsleep 3\n"+
+    "".join(f"gtk-launch {shlex.quote(a)} >/dev/null 2>&1 &\n" for a in apps))
+PY
+chmod +x "$H/autostart.sh"; rm -f "$S"/*.todo

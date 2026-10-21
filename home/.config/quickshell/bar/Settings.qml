@@ -32,7 +32,10 @@ Singleton {
         clock_seconds: false, clock_12h: false, clock_date: true, bar_weather: true, bar_media: true,
         notif_timeout: 5, notif_center: false,
         // power
-        lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true
+        lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true,
+        // account, wallpaper, apps, time
+        user_name: "yu", avatar: "", cc_logo: "avatar", wall_main: "", wall_side: "", default_apps: ({}), autostart: [],
+        weather_place: "", weather_label: ""
     })
     property var v: defaults        // applied
     property var draft: defaults    // being edited

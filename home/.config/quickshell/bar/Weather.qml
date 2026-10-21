@@ -27,9 +27,11 @@ Singleton {
         return ""                                                            // rain
     }
 
+    readonly property string where: Settings.cur("weather_place")
+    onWhereChanged: Qt.callLater(() => fetch.running = true)
     Process {
         id: fetch
-        command: ["curl", "-sf", "--max-time", "15", "-H", "User-Agent: curl", "https://wttr.in/37.8812,41.1351?format=j1"]
+        command: ["curl", "-sf", "--max-time", "15", "-H", "User-Agent: curl", "https://wttr.in/" + (Settings.cur("weather_place") || "37.8812,41.1351").replace(/ /g, "+") + "?format=j1"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -40,7 +42,7 @@ Singleton {
                     humidity = parseInt(c.humidity); wind = parseInt(c.windspeedKmph)
                     desc = c.weatherDesc[0].value.trim()
                     icon = iconFor(c.weatherCode, h < 6 || h >= 19)
-                    place = "Batman Merkez"
+                    place = Settings.cur("weather_label") || Settings.cur("weather_place") || "Batman Merkez"
                     days = j.weather.map(d => ({
                         date: d.date, max: parseInt(d.maxtempC), min: parseInt(d.mintempC),
                         icon: iconFor(d.hourly[4].weatherCode, false)

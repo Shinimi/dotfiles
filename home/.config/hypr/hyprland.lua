@@ -76,6 +76,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --type text  --watch cliphist store")  -- clipboard history
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme prefer-dark")
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/autostart.sh")     -- your apps (Settings → Autostart)
 end)
 
 
