@@ -12,7 +12,7 @@ Singleton {
     readonly property int count: list.length
 
     function removePopup(n) { popups = popups.filter(p => p !== n) }
-    function clearAll() { for (const n of list.slice()) n.dismiss(); popups = [] }
+    function clearAll() { const all = list.slice(); popups = []; Qt.callLater(() => { for (const n of all) n.dismiss() }) }
 
     NotificationServer {
         id: server

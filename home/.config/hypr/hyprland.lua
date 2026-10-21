@@ -69,7 +69,7 @@ local scripts     = os.getenv("HOME") .. "/.config/hypr/scripts"
 hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start hyprpolkitagent")   -- password prompts (sudo dialogs)
     hl.exec_cmd("hyprpaper")                                 -- wallpaper
-    hl.exec_cmd("qs -p ~/.config/quickshell/bar")           -- top bar (custom Quickshell)
+    hl.exec_cmd("~/.config/quickshell/bar/run.sh")          -- top bar (custom Quickshell, auto-restarts)
     hl.exec_cmd("hypridle")                                  -- lock / screen off when idle
     hl.exec_cmd("nm-applet --indicator")                     -- network tray icon
     hl.exec_cmd("wl-paste --type text  --watch cliphist store")  -- clipboard history

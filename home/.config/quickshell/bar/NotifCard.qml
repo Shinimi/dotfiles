@@ -17,17 +17,22 @@ Rectangle {
     border.width: 1
     border.color: critical ? Theme.red : (popup ? Theme.line : "transparent")
 
+    // Deferred: removing the card rebuilds the list, which must not happen inside the card's own handler
+    function close(dismiss) {
+        const n = card.notif
+        Qt.callLater(() => { if (dismiss && n) n.dismiss(); Notifs.removePopup(n) })
+    }
+
     Timer {
         running: card.popup && !card.critical && !hover.containsMouse
         interval: card.notif && card.notif.expireTimeout > 0 ? card.notif.expireTimeout : 5000
-        onTriggered: Notifs.removePopup(card.notif)
+        onTriggered: card.close(false)
     }
     MouseArea {
         id: hover; anchors.fill: parent; hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: m => {
-            if (m.button === Qt.RightButton || !card.popup) { card.notif.dismiss(); Notifs.removePopup(card.notif) }
-            else Notifs.removePopup(card.notif)
+            card.close(m.button === Qt.RightButton || !card.popup)
         }
     }
     Column {
@@ -47,7 +52,7 @@ Rectangle {
                     Label { text: card.notif ? card.notif.appName : ""; color: card.critical ? Theme.red : Theme.blue; font.pixelSize: 11; Layout.fillWidth: true; elide: Text.ElideRight }
                     Label { text: ""; color: closeMouse.containsMouse ? Theme.red : Theme.muted; font.pixelSize: 11
                         MouseArea { id: closeMouse; anchors.fill: parent; anchors.margins: -6; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                            onClicked: { card.notif.dismiss(); Notifs.removePopup(card.notif) } } }
+                            onClicked: card.close(true) } }
                 }
                 Label { width: parent.width; text: card.notif ? card.notif.summary : ""; font.weight: Font.Bold; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight }
                 Label { width: parent.width; visible: text !== ""; text: card.notif ? card.notif.body : ""; color: Theme.fgDim; font.weight: Font.Normal; textFormat: Text.StyledText; wrapMode: Text.Wrap; maximumLineCount: 4; elide: Text.ElideRight }
@@ -64,7 +69,7 @@ Rectangle {
                     color: aMouse.containsMouse ? Theme.bgHover : Theme.bgAlt; border.width: 1; border.color: Theme.line
                     Label { id: aLabel; anchors.centerIn: parent; text: modelData.text; font.pixelSize: 11 }
                     MouseArea { id: aMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: { modelData.invoke(); Notifs.removePopup(card.notif) } }
+                        onClicked: { modelData.invoke(); card.close(false) } }
                 }
             }
         }
