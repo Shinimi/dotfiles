@@ -16,6 +16,7 @@ home_paths=(
   .config/gtk-3.0/settings.ini .config/gtk-3.0/gtk.css .config/gtk-4.0/settings.ini .config/gtk-4.0/gtk.css
   .local/share/color-schemes/TokyoNight.colors .icons/default/index.theme
   .config/starship.toml .config/fastfetch/config.jsonc .config/btop/btop.conf .config/fish/config.fish
+  .local/share/tokyo-night-chrome .config/helium-browser-flags.conf
   .local/share/sddm-themes/tokyo-night-yu
   Downloads/Optiv10/OptiScaler.ini Downloads/Optiv10/README-Optiv10.txt Downloads/Optiv10/install-optiv10.sh
 )
@@ -23,6 +24,7 @@ system_paths=(
   /etc/sddm.conf.d/10-tokyo-night-yu.conf /etc/scx_loader.toml
   /etc/systemd/system/amdgpu-power-cap.service /etc/systemd/system/cpu-boost-cap.service
   /etc/systemd/system/paccache.service.d/keep2.conf
+  /usr/share/plymouth/themes/tokyo-night
 )
 for p in "${home_paths[@]}"; do
   [ -e "$H/$p" ] || continue
@@ -31,8 +33,11 @@ for p in "${home_paths[@]}"; do
 done
 for p in "${system_paths[@]}"; do
   [ -r "$p" ] || continue
-  mkdir -p "$R/system$(dirname "$p")"; cp -a "$p" "$R/system$p"
+  mkdir -p "$R/system$(dirname "$p")"; rsync -a --delete "$p" "$R/system$(dirname "$p")/"
 done
+# Waterfox theme (profile folder name differs per install)
+wf=$(ls -d "$H"/.waterfox/*.default-release 2>/dev/null | head -1)
+if [ -n "$wf" ]; then mkdir -p "$R/extras/waterfox"; rsync -a --delete "$wf/chrome" "$R/extras/waterfox/"; cp -a "$wf/user.js" "$R/extras/waterfox/" 2>/dev/null; fi
 cd "$R"
 git add -A
 if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi

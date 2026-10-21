@@ -9,7 +9,8 @@ Singleton {
     readonly property string file: Quickshell.env("HOME") + "/.config/hypr/settings.json"
     readonly property var defaults: ({ gaps_in: 4, gaps_out: 8, border_size: 2, rounding: 10, opacity_active: 90, opacity_inactive: 80,
         blur: true, blur_size: 7, blur_passes: 3, shadows: true, animations: true, sensitivity: 0.4, follow_mouse: true,
-        middle_scroll: true, focus_on_activate: true, night_temp: 4500, glass: 60 })
+        middle_scroll: true, focus_on_activate: true, night_temp: 4500, glass: 60,
+        accent: "tokyo", border_spin: true, dim_inactive: false, repeat_rate: 35, repeat_delay: 300, lock_minutes: 10, vibrancy: 18 })
     property var v: defaults
     property bool loaded: false
 

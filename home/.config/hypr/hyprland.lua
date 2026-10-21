@@ -1,7 +1,7 @@
 -- ============================================================================
 --  Hyprland config for yu's CachyOS PC  (Hyprland 0.56, Lua config)
 --  Ryzen 7 5700X + RX 9060 XT | Valkyrie 1440p144 (DP-1) + ViewSonic 1080p165 (DP-2)
---  Theme: Tokyo Night, solid windows (no transparency), snappy animations.
+--  Theme: Tokyo Night glass, smooth animations, rotating gradient border.
 --  Made by Claude. Wiki: https://wiki.hypr.land/Configuring/Start/
 --
 --  KEYBINDS — DankMaterialShell layout  (SUPER = Windows key)
@@ -97,7 +97,7 @@ hl.config({
         gaps_out = 8,
         border_size = 2,
         col = {
-            active_border   = { colors = { rgba(c.blue), rgba(c.purple) }, angle = 45 },
+            active_border   = { colors = { rgba(c.blue), rgba(c.purple), rgba(c.cyan), rgba(c.blue) }, angle = 45 },
             inactive_border = rgba(c.border, "aa"),
         },
         resize_on_border = true,
@@ -134,18 +134,25 @@ hl.config({
     animations = { enabled = true },
 })
 
--- Snappy animations: short and subtle, nothing bouncy.
-hl.curve("snappy", { type = "bezier", points = { {0.23, 1}, {0.32, 1} } })
+-- Smooth animations: quick, with a tiny overshoot; the focused border slowly rotates.
+hl.curve("snappy", { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
+hl.curve("overshot", { type = "bezier", points = { {0.05, 0.9}, {0.1, 1.05}  } })
+hl.curve("smoothOut", { type = "bezier", points = { {0.36, 0},  {0.66, -0.56} } })
+hl.curve("easeInOut", { type = "bezier", points = { {0.65, 0},  {0.35, 1}    } })
 hl.curve("linear", { type = "bezier", points = { {0, 0},    {1, 1}    } })
 
 hl.animation({ leaf = "global",      enabled = true, speed = 6,   bezier = "snappy" })
-hl.animation({ leaf = "windows",     enabled = true, speed = 3,   bezier = "snappy" })
-hl.animation({ leaf = "windowsIn",   enabled = true, speed = 2.5, bezier = "snappy", style = "popin 90%" })
-hl.animation({ leaf = "windowsOut",  enabled = true, speed = 1.5, bezier = "linear", style = "popin 90%" })
-hl.animation({ leaf = "border",      enabled = true, speed = 4,   bezier = "snappy" })
-hl.animation({ leaf = "fade",        enabled = true, speed = 2,   bezier = "snappy" })
-hl.animation({ leaf = "layers",      enabled = true, speed = 2.5, bezier = "snappy", style = "fade" })
-hl.animation({ leaf = "workspaces",  enabled = true, speed = 2.5, bezier = "snappy", style = "slide" })
+hl.animation({ leaf = "windows",     enabled = true, speed = 4,   bezier = "overshot" })
+hl.animation({ leaf = "windowsIn",   enabled = true, speed = 3.5, bezier = "overshot", style = "popin 80%" })
+hl.animation({ leaf = "windowsOut",  enabled = true, speed = 2.5, bezier = "smoothOut", style = "popin 80%" })
+hl.animation({ leaf = "windowsMove", enabled = true, speed = 4,   bezier = "overshot", style = "slide" })
+hl.animation({ leaf = "border",      enabled = true, speed = 6,   bezier = "snappy" })
+hl.animation({ leaf = "borderangle", enabled = true, speed = 60,  bezier = "linear", style = "loop" })
+hl.animation({ leaf = "fade",        enabled = true, speed = 3,   bezier = "snappy" })
+hl.animation({ leaf = "fadeDim",     enabled = true, speed = 4,   bezier = "snappy" })
+hl.animation({ leaf = "layers",      enabled = true, speed = 3,   bezier = "snappy", style = "fade" })
+hl.animation({ leaf = "workspaces",  enabled = true, speed = 4,   bezier = "easeInOut", style = "slidefade 12%" })
+hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 4, bezier = "overshot", style = "slidevert" })
 
 hl.config({
     dwindle = { preserve_split = true },
@@ -232,7 +239,7 @@ hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true },
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop)$" }, opacity = "1.0 override 1.0 override" })
 -- blur behind the bar, panels and pop-ups
-hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji))$" }, blur = true, ignore_alpha = 0.2 })
+hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media))$" }, blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
 
 -- Games open on workspace 5; Steam popups float; Discord + Spotify live on the side screen
@@ -261,7 +268,7 @@ b("SUPER + T",              run(terminal))
 b("SUPER + Return",         run(terminal))
 b("SUPER + space",          run(menu))
 b("ALT + space",            run(menu))
-b("SUPER + V",              run("cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"))
+b("SUPER + V",              run("qs ipc -p " .. os.getenv("HOME") .. "/.config/quickshell/bar call clipboard toggle"))
 b("SUPER + comma",          run("qs ipc -p ~/.config/quickshell/bar call settings toggle"))
 b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call bar control"))
 b("SUPER + CTRL + N",       run("qs ipc -p ~/.config/quickshell/bar call bar notifications"))

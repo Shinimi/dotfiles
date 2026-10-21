@@ -11,3 +11,12 @@ t=re.sub(r'(wallpaper \{\s*monitor = '+re.escape(m)+r'\s*path = )[^\n]*', lambda
 open(p,'w').write(t)
 PY
 done
+# keep the lock screen background in sync
+for m in "${mons[@]}"; do
+  python3 -I - "$HOME/.config/hypr/hyprlock.conf" "$m" "$img" <<'PY'
+import sys,re
+p,m,img=sys.argv[1:]; t=open(p).read()
+t=re.sub(r'(background \{\s*monitor = '+re.escape(m)+r'\s*path = )[^\n]*', lambda x: x.group(1)+img, t)
+open(p,'w').write(t)
+PY
+done
