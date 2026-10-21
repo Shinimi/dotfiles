@@ -101,4 +101,5 @@ BarPopup {
             }
         }
     }
+    TimerCard {}
 }

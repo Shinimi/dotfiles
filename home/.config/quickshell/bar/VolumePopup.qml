@@ -65,6 +65,8 @@ BarPopup {
         }
     }
 
+    Rectangle { width: parent.width; height: 1; color: Theme.border; visible: apps.apps.length > 0 }
+    AppVolumes { id: apps }
     Rectangle { width: parent.width; height: 1; color: Theme.border }
     Label { text: "Microphone"; color: Theme.muted; font.pixelSize: 11 }
     RowLayout {

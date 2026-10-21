@@ -24,4 +24,12 @@ ShellRoot {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         AltTab { required property var modelData; screen: modelData }
     }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        EmojiPicker { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        GameLibrary { required property var modelData; screen: modelData }
+    }
 }

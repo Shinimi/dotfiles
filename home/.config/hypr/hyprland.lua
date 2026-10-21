@@ -7,7 +7,7 @@
 --  KEYBINDS — DankMaterialShell layout  (SUPER = Windows key)
 --    SUPER + T / Return      terminal (kitty)
 --    SUPER + Space           app launcher        ALT + Space        app launcher
---    SUPER + V               clipboard history   SUPER + A          control center (notifications)
+--    SUPER + V               clipboard history   SUPER + A          control center
 --    SUPER + CTRL + N        notification center SUPER + comma      settings
 --    SUPER + Tab / O         window switcher     SUPER + X          power menu
 --    SUPER + Q               close window
@@ -202,6 +202,12 @@ for _, cls in ipairs({ "^(pavucontrol|org.pulseaudio.pavucontrol)$", "^(nm-conne
 end
 
 
+-- Games open on workspace 5; Steam popups float; Discord + Spotify live on the side screen
+hl.window_rule({ name = "games-own-workspace", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, workspace = "5" })
+hl.window_rule({ name = "steam-popups-float", match = { class = "^(steam)$", title = "^(Friends List|Steam Settings|Properties.*|.*Chat.*|Screenshot Manager|Game Servers|Players)$" }, float = true })
+hl.window_rule({ name = "discord-side", match = { class = "^(vesktop|discord)$" }, workspace = "name:side silent" })
+hl.window_rule({ name = "spotify-side", match = { class = "^(Spotify|spotify)$" }, workspace = "name:side silent" })
+
 ---------------------------------------------------------------- KEYBINDS
 -- Layout follows DankMaterialShell's defaults (duxlabs-dev/dux-shell hypr-binds.lua),
 -- with DMS panels mapped to the tools used here (rofi, swaync, hyprlock, ...).
@@ -217,7 +223,7 @@ b("SUPER + space",          run(menu))
 b("ALT + space",            run(menu))
 b("SUPER + V",              run("cliphist list | rofi -dmenu -p clipboard | cliphist decode | wl-copy"))
 b("SUPER + comma",          run("systemsettings"))
-b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call bar notifications"))
+b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call bar control"))
 b("SUPER + CTRL + N",       run("qs ipc -p ~/.config/quickshell/bar call bar notifications"))
 b("SUPER + TAB",            run("rofi -show window"))
 b("SUPER + O",              run("rofi -show window"))
@@ -225,6 +231,8 @@ b("SUPER + X",              run("qs ipc -p ~/.config/quickshell/bar call bar pow
 b("SUPER + E",              run(fileManager))
 b("SUPER + B",              run(browser))
 b("SUPER + Y",              run("qs ipc -p ~/.config/quickshell/bar call wallpaper toggle"))
+b("SUPER + period",         run("qs ipc -p ~/.config/quickshell/bar call emoji toggle"))
+b("SUPER + G",              run("qs ipc -p ~/.config/quickshell/bar call games toggle"))
 b("SUPER + SHIFT + C",      run("hyprpicker -a"))
 b("SUPER + ALT + N",        run(scripts .. "/nightlight.sh"))
 b("SUPER + ALT + I",        run(scripts .. "/idle-inhibit.sh"))

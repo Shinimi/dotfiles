@@ -12,7 +12,8 @@ Scope {
     property int padding: 16
     property int contentWidth: 300
     property bool visible: false
-    readonly property var barWindow: anchorItem.QsWindow.window
+    // the bar only lives on the main screen; look it up directly (robust across live reloads)
+    readonly property var barScreen: Quickshell.screens.find(s => s.name === "DP-1") || Quickshell.screens[0]
 
     function toggle() { visible = !visible }
     onVisibleChanged: if (visible) PopupState.current = root
@@ -24,7 +25,7 @@ Scope {
     // click-catcher below the bar line: clicking anywhere outside closes the panel
     PanelWindow {
         visible: root.visible
-        screen: root.barWindow ? root.barWindow.screen : null
+        screen: root.barScreen
         anchors { top: true; bottom: true; left: true; right: true }
         margins.top: Theme.barHeight + 6
         exclusionMode: ExclusionMode.Ignore
@@ -38,7 +39,7 @@ Scope {
     PanelWindow {
         id: panel
         visible: root.visible
-        screen: root.barWindow ? root.barWindow.screen : null
+        screen: root.barScreen
         anchors { top: true; left: true }
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Overlay

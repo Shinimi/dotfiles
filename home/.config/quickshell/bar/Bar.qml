@@ -22,6 +22,7 @@ PanelWindow {
             spacing: 6
             Launcher {}
             Workspaces {}
+            GamesPill {}
         }
         ClockPill { id: clockPill; anchors.centerIn: parent }
         Row {
@@ -31,6 +32,7 @@ PanelWindow {
             UpdatesPill {}
             StatsPill { id: statsPill }
             VolumePill { id: volumePill }
+            ControlPill { id: controlPill }
             TrayNotify { id: trayPill }
             PowerButton { id: powerPill }
         }
@@ -45,6 +47,9 @@ PanelWindow {
         function power(): void { powerPill.popup.toggle() }
         function media(): void { mediaPill.popup.toggle() }
         function notifications(): void { trayPill.popup.toggle() }
+        function control(): void { controlPill.popup.toggle() }
+        function timer(minutes: int): void { Timers.resetTimer(); Timers.setMinutes(minutes); Timers.toggleTimer() }
+        function timerReset(): void { Timers.resetTimer() }
         function clearNotifications(): void { Notifs.clearAll() }
         function setVolume(v: real): string { volumePill.sink.audio.volume = v; return "set " + v + " -> " + volumePill.sink.audio.volume }
         function status(): string { return "cal=" + clockPill.popup.visible + " stats=" + statsPill.popup.visible + " vol=" + volumePill.popup.visible + " pow=" + powerPill.popup.visible }
