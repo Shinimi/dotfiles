@@ -30,7 +30,7 @@ system_paths=(
 for p in "${home_paths[@]}"; do
   [ -e "$H/$p" ] || continue
   mkdir -p "$R/home/$(dirname "$p")"
-  rsync -a --delete --exclude '*.old' --exclude '*.before-*' --exclude '*.log' "$H/$p" "$R/home/$(dirname "$p")/"
+  rsync -a --delete --exclude '*.old' --exclude '*.before-*' --exclude '*.log' --exclude '.git' "$H/$p" "$R/home/$(dirname "$p")/"
 done
 for p in "${system_paths[@]}"; do
   [ -r "$p" ] || continue
