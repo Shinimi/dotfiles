@@ -1,19 +1,41 @@
 #!/usr/bin/env bash
-# Turns ~/.config/hypr/settings.json (written by the settings panel) into settings.lua, reloads, and
-# applies the non-Hyprland bits (night light, auto-lock time). Made by Claude.
-H="$HOME/.config/hypr"
-python3 -I - "$H/settings.json" "$H/settings.lua" "$H/hypridle.conf" <<'PY'
-import json,sys,re
+# Turns ~/.config/hypr/settings.json (written by the settings panel) into settings.lua and applies it live:
+# Hyprland options, monitors (only when they changed), colour vibrance, night light, auto-lock time,
+# and the desktop theme (icons, folder colour, cursor, font). Made by Claude.
+H="$HOME/.config/hypr"; S="$HOME/.local/state/hypr-settings"; mkdir -p "$S"
+python3 -I - "$H/settings.json" "$H/settings.lua" "$H/hypridle.conf" "$S" "$H/shaders" <<'PY'
+import json,sys,re,os
+jf,luaf,idle,state,shd=sys.argv[1:]
 d={"gaps_in":4,"gaps_out":8,"border_size":2,"rounding":10,"opacity_active":90,"opacity_inactive":80,"blur":True,
    "blur_size":7,"blur_passes":3,"shadows":True,"animations":True,"sensitivity":0.4,"follow_mouse":True,
    "middle_scroll":True,"focus_on_activate":True,"night_temp":4500,"glass":60,"accent":"tokyo","border_spin":True,
-   "dim_inactive":False,"repeat_rate":35,"repeat_delay":300,"lock_minutes":10,"vibrancy":18}
-s=dict(d); s.update(json.load(open(sys.argv[1]))); b=lambda v: "true" if v else "false"
+   "dim_inactive":False,"repeat_rate":35,"repeat_delay":300,"lock_minutes":10,"vibrancy":18,"vibrance":100,
+   "monitors":{}}
+s=dict(d); s.update(json.load(open(jf))); b=lambda v: "true" if v else "false"
 pal={"tokyo":["7aa2f7","bb9af7","7dcfff","7aa2f7"],"storm":["7aa2f7","7dcfff"],"sakura":["f7768e","bb9af7"],
      "matcha":["9ece6a","73daca"],"sunset":["ff9e64","e0af68","f7768e"],"mono":["c0caf5","565f89"]}
 cols=", ".join(f'"rgba({c}ff)"' for c in pal.get(s["accent"],pal["tokyo"]))
-lua=f'''-- Generated from settings.json by the settings panel. Edit there, not here.
-hl.config({{
+
+# colour vibrance: a tiny screen shader, only used when not 100%
+vib=int(s["vibrance"]); shader=""
+if vib!=100:
+    os.makedirs(shd,exist_ok=True); shader=os.path.join(shd,f"vibrance-{vib}.frag")
+    for f in os.listdir(shd):
+        if f.startswith("vibrance") and f!=os.path.basename(shader): os.remove(os.path.join(shd,f))
+    open(shader,"w").write(f'''#version 300 es
+// Colour vibrance for the whole screen ({vib}%). Written by apply-settings.sh. Made by Claude.
+precision highp float;
+in vec2 v_texcoord;
+uniform sampler2D tex;
+out vec4 fragColor;
+void main() {{
+    vec4 c = texture(tex, v_texcoord);
+    float l = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+    fragColor = vec4(clamp(mix(vec3(l), c.rgb, {vib/100:.2f}), 0.0, 1.0), c.a);
+}}
+''')
+
+main=f'''hl.config({{
     general = {{ gaps_in = {int(s["gaps_in"])}, gaps_out = {int(s["gaps_out"])}, border_size = {int(s["border_size"])},
                 col = {{ active_border = {{ colors = {{ {cols} }}, angle = 45 }} }} }},
     decoration = {{
@@ -22,6 +44,7 @@ hl.config({{
         dim_inactive = {b(s["dim_inactive"])}, dim_strength = 0.12,
         blur = {{ enabled = {b(s["blur"])}, size = {int(s["blur_size"])}, passes = {int(s["blur_passes"])}, vibrancy = {s["vibrancy"]/100:.2f} }},
         shadow = {{ enabled = {b(s["shadows"])} }},
+        screen_shader = "{shader}",
     }},
     animations = {{ enabled = {b(s["animations"])} }},
     input = {{ sensitivity = {float(s["sensitivity"]):.2f}, follow_mouse = {1 if s["follow_mouse"] else 0},
@@ -31,20 +54,75 @@ hl.config({{
 }})
 hl.animation({{ leaf = "borderangle", enabled = {b(s["border_spin"])}, speed = 60, bezier = "linear", style = "loop" }})
 '''
-open(sys.argv[2],'w').write(lua)
+# monitors (position/scale stay as in hyprland.lua)
+pos={"DP-1":("0x0",1),"DP-2":("2560x0",1)}
+mon=""
+for name,m in sorted((s.get("monitors") or {}).items()):
+    p,sc=pos.get(name,("auto",1))
+    mon+=(f'hl.monitor({{ output = "{name}", mode = "{m.get("mode","preferred")}", position = "{p}", scale = {sc}, '
+          f'vrr = {int(m.get("vrr",0))}, bitdepth = {int(m.get("bitdepth",8))}, cm = "{m.get("cm","srgb")}" }})\n')
+open(luaf,'w').write("-- Generated from settings.json by the settings panel. Edit there, not here.\n"+main+mon)
+open(os.path.join(state,"main.lua"),'w').write(main)
+open(os.path.join(state,"monitors.lua.new"),'w').write(mon)
+
 # auto-lock time (screens go off one minute later)
-p=sys.argv[3]; t=open(p).read(); m=int(s["lock_minutes"])
-t=re.sub(r'timeout = \d+(\s+# \d+ min: lock)', lambda x: f'timeout = {m*60}  # {m} min: lock', t)
-t=re.sub(r'timeout = \d+(\s+# \d+ min: screens off)', lambda x: f'timeout = {m*60+60}  # {m+1} min: screens off', t)
-t=re.sub(r'(timeout = \d+)\s+# (\d+ min: lock)', r'\1                                  # \2', t)
-open(p,'w').write(t)
-print(m)
+t=open(idle).read(); m=int(s["lock_minutes"])
+t=re.sub(r'timeout = \d+\s+# \d+ min: lock', f'timeout = {m*60}                                  # {m} min: lock', t)
+t=re.sub(r'timeout = \d+\s+# \d+ min: screens off', f'timeout = {m*60+60}                                  # {m+1} min: screens off', t)
+open(idle,'w').write(t)
+
+# desktop theme (applied below only when it changed)
+th={k:s.get(k,v) for k,v in {"folder_color":"blue","icon_base":"Papirus-Dark","cursor_theme":"capitaine-cursors",
+    "cursor_size":24,"ui_font":"Noto Sans","ui_font_size":10}.items()}
+open(os.path.join(state,"theme.json.new"),'w').write(json.dumps(th,sort_keys=True))
 PY
-# apply live (a full reload makes open panels drop the next click); fall back to reload if eval fails
-code=$(grep -v '^--' "$H/settings.lua" | tr '\n' ' ')
+
+# ---- Hyprland: apply live (a full reload makes open panels drop the next click)
+code=$(tr '\n' ' ' < "$S/main.lua")
 hyprctl eval "$code" 2>/dev/null | grep -qx ok || hyprctl reload >/dev/null
-# night light: apply new temperature if it's on
+if ! cmp -s "$S/monitors.lua.new" "$S/monitors.lua"; then
+  mv "$S/monitors.lua.new" "$S/monitors.lua"
+  [ -s "$S/monitors.lua" ] && hyprctl eval "$(tr '\n' ' ' < "$S/monitors.lua")" >/dev/null
+fi
+
+# ---- night light: apply new temperature if it's on
 if pgrep -x hyprsunset >/dev/null; then pkill -x hyprsunset; t=$(python3 -I -c "import json;print(json.load(open('$H/settings.json')).get('night_temp',4500))"); setsid hyprsunset -t "$t" >/dev/null 2>&1 & fi
-# auto-lock: restart hypridle so a new time applies (only if it's running, i.e. "keep awake" is off)
-if pgrep -x hypridle >/dev/null && ! cmp -s "$H/hypridle.conf" "$H/.hypridle.applied"; then pkill -x hypridle; setsid hypridle >/dev/null 2>&1 & fi
-cp "$H/hypridle.conf" "$H/.hypridle.applied"
+
+# ---- auto-lock: restart hypridle so a new time applies (only if running, i.e. "keep awake" is off)
+if pgrep -x hypridle >/dev/null && ! cmp -s "$H/hypridle.conf" "$S/hypridle.applied"; then pkill -x hypridle; setsid hypridle >/dev/null 2>&1 & fi
+cp "$H/hypridle.conf" "$S/hypridle.applied"
+
+# ---- desktop theme: icons, folder colour, cursor, font
+if ! cmp -s "$S/theme.json.new" "$S/theme.json"; then
+  mv "$S/theme.json.new" "$S/theme.json"
+  eval "$(python3 -I -c "
+import json,shlex; t=json.load(open('$S/theme.json'))
+for k,v in t.items(): print(f'{k}={shlex.quote(str(v))}')")"
+  icons="$icon_base"
+  if [ "$icon_base" = Papirus-Dark ] && [ "$folder_color" != blue ]; then
+    "$HOME/.local/bin/papirus-folders-color.sh" "$folder_color" >/dev/null; icons=Papirus-Tokyo
+  fi
+  for f in "$HOME/.config/gtk-3.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"; do
+    [ -f "$f" ] || continue
+    sed -i "s|^gtk-icon-theme-name=.*|gtk-icon-theme-name=$icons|; s|^gtk-cursor-theme-name=.*|gtk-cursor-theme-name=$cursor_theme|;
+            s|^gtk-cursor-theme-size=.*|gtk-cursor-theme-size=$cursor_size|; s|^gtk-font-name=.*|gtk-font-name=$ui_font, $ui_font_size|" "$f"
+  done
+  gsettings set org.gnome.desktop.interface icon-theme "$icons"
+  gsettings set org.gnome.desktop.interface cursor-theme "$cursor_theme"
+  gsettings set org.gnome.desktop.interface cursor-size "$cursor_size"
+  gsettings set org.gnome.desktop.interface font-name "$ui_font $ui_font_size"
+  kwriteconfig6 --file kdeglobals --group Icons --key Theme "$icons"
+  kwriteconfig6 --file kdeglobals --group General --key font "$ui_font,$ui_font_size,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+  kwriteconfig6 --file kdeglobals --group General --key menuFont "$ui_font,$ui_font_size,-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+  kwriteconfig6 --file kdeglobals --group General --key toolBarFont "$ui_font,$((ui_font_size-1)),-1,5,400,0,0,0,0,0,0,0,0,0,0,1"
+  kwriteconfig6 --file kcminputrc --group Mouse --key cursorTheme "$cursor_theme"
+  kwriteconfig6 --file kcminputrc --group Mouse --key cursorSize "$cursor_size"
+  printf '[Icon Theme]\nInherits=%s\n' "$cursor_theme" > "$HOME/.icons/default/index.theme"
+  hyprctl setcursor "$cursor_theme" "$cursor_size" >/dev/null
+  # keep Hyprland's own cursor env in step for apps started later
+  sed -i "s|hl.env(\"XCURSOR_THEME\", \"[^\"]*\")|hl.env(\"XCURSOR_THEME\", \"$cursor_theme\")|; s|hl.env(\"XCURSOR_SIZE\", \"[^\"]*\")|hl.env(\"XCURSOR_SIZE\", \"$cursor_size\")|; s|hl.env(\"HYPRCURSOR_SIZE\", \"[^\"]*\")|hl.env(\"HYPRCURSOR_SIZE\", \"$cursor_size\")|" "$H/hyprland.lua"
+  # tell running KDE/Qt apps (Dolphin) to pick up the new icons/fonts
+  dbus-send --session --type=signal /KGlobalSettings org.kde.KGlobalSettings.notifyChange int32:4 int32:0 2>/dev/null
+  dbus-send --session --type=signal /KIconLoader org.kde.KIconLoader.iconChanged int32:0 2>/dev/null
+fi
+rm -f "$S/theme.json.new" "$S/monitors.lua.new"

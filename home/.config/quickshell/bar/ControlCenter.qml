@@ -19,6 +19,10 @@ BarPopup {
     PwObjectTracker { objects: [Pipewire.defaultAudioSink, Pipewire.defaultAudioSource].concat(cc.sinks) }
     readonly property var players: Mpris.players.values
     readonly property var player: players.find(p => p.isPlaying) || players.find(p => p.identity === "Spotify") || players[0] || null
+    // album art: keep the last picture while a new track loads (an empty image source crashes Qt 6.12)
+    property string art: ""
+    readonly property string liveArt: cc.player ? (cc.player.trackArtUrl || "") : ""
+    onLiveArtChanged: if (liveArt !== "") art = liveArt
 
     onVisibleChanged: if (visible) SysState.refresh()
     function speed(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + " MB/s" : b >= 1024 ? Math.round(b / 1024) + " KB/s" : b + " B/s" }
@@ -71,7 +75,7 @@ BarPopup {
         width: parent.width; height: 96; radius: 16; color: Theme.card
         border.width: 1; border.color: "#14c0caf5"
         Image {   // album art as a soft backdrop
-            anchors.fill: parent; source: cc.player ? cc.player.trackArtUrl : ""
+            anchors.fill: parent; source: cc.art
             fillMode: Image.PreserveAspectCrop; asynchronous: true; opacity: 0.22
         }
         Rectangle { anchors.fill: parent; gradient: Gradient { orientation: Gradient.Horizontal
@@ -80,8 +84,8 @@ BarPopup {
             anchors.fill: parent; anchors.margins: 12; spacing: 14
             ClippingRectangle {
                 width: 72; height: 72; radius: 12; color: Theme.bgAlt
-                Image { anchors.fill: parent; source: cc.player ? cc.player.trackArtUrl : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true }
-                Label { anchors.centerIn: parent; visible: !cc.player || !cc.player.trackArtUrl; text: "\u{f075a}"; font.pixelSize: 26; color: Theme.muted }
+                Image { anchors.fill: parent; source: cc.art; fillMode: Image.PreserveAspectCrop; asynchronous: true }
+                Label { anchors.centerIn: parent; visible: cc.art === ""; text: "\u{f075a}"; font.pixelSize: 26; color: Theme.muted }
             }
             Column {
                 Layout.fillWidth: true; spacing: 3

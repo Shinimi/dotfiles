@@ -22,5 +22,26 @@
   "repeat_rate": 45,
   "repeat_delay": 400,
   "lock_minutes": 10,
-  "vibrancy": 18
+  "vibrancy": 18,
+  "vibrance": 100,
+  "monitors": {
+    "DP-1": {
+      "mode": "2560x1440@144.00",
+      "cm": "srgb",
+      "bitdepth": 8,
+      "vrr": 0
+    },
+    "DP-2": {
+      "mode": "1920x1080@165.01",
+      "cm": "srgb",
+      "bitdepth": 8,
+      "vrr": 0
+    }
+  },
+  "folder_color": "blue",
+  "icon_base": "Papirus-Dark",
+  "cursor_theme": "capitaine-cursors",
+  "cursor_size": 24,
+  "ui_font": "Noto Sans",
+  "ui_font_size": 10
 }

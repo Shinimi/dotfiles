@@ -6,6 +6,10 @@ import Quickshell.Widgets
 BarPopup {
     id: popup
     property var player
+    // album art: keep the last picture while a new track loads (an empty image source crashes Qt 6.12)
+    property string art: ""
+    readonly property string liveArt: popup.player ? (popup.player.trackArtUrl || "") : ""
+    onLiveArtChanged: if (liveArt !== "") art = liveArt
     contentWidth: 320
     function fmt(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2) }
     Timer { running: popup.visible && popup.player && popup.player.isPlaying; interval: 1000; repeat: true; onTriggered: popup.player.positionChanged() }
@@ -14,8 +18,8 @@ BarPopup {
         width: parent.width; spacing: 14
         ClippingRectangle {
             width: 84; height: 84; radius: 12; color: Theme.card
-            Image { anchors.fill: parent; source: popup.player ? popup.player.trackArtUrl : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true }
-            Label { anchors.centerIn: parent; visible: !popup.player || !popup.player.trackArtUrl; text: ""; font.pixelSize: 28; color: Theme.muted }
+            Image { anchors.fill: parent; source: popup.art; fillMode: Image.PreserveAspectCrop; asynchronous: true }
+            Label { anchors.centerIn: parent; visible: popup.art === ""; text: ""; font.pixelSize: 28; color: Theme.muted }
         }
         Column {
             Layout.fillWidth: true; spacing: 4

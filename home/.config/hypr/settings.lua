@@ -8,6 +8,7 @@ hl.config({
         dim_inactive = false, dim_strength = 0.12,
         blur = { enabled = true, size = 7, passes = 3, vibrancy = 0.18 },
         shadow = { enabled = true },
+        screen_shader = "",
     },
     animations = { enabled = true },
     input = { sensitivity = 0.40, follow_mouse = 1,
@@ -16,3 +17,5 @@ hl.config({
     misc = { focus_on_activate = true },
 })
 hl.animation({ leaf = "borderangle", enabled = true, speed = 60, bezier = "linear", style = "loop" })
+hl.monitor({ output = "DP-1", mode = "2560x1440@144.00", position = "0x0", scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })
+hl.monitor({ output = "DP-2", mode = "1920x1080@165.01", position = "2560x0", scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })

@@ -11,7 +11,7 @@ home_paths=(
   .local/bin/backup-game-saves.sh .local/bin/remember-volume.sh
   .config/systemd/user/audio-fx.service .config/systemd/user/spicetify-refresh.service
   .config/systemd/user/weekly-checkup.service .config/systemd/user/weekly-checkup.timer
-  .local/bin/audio-fx.sh .local/bin/weekly-checkup.sh
+  .local/bin/audio-fx.sh .local/bin/weekly-checkup.sh .local/bin/papirus-folders-color.sh
   .config/spicetify/Themes/TokyoNight .config/vesktop/settings/quickCss.css
   .config/gtk-3.0/settings.ini .config/gtk-3.0/gtk.css .config/gtk-4.0/settings.ini .config/gtk-4.0/gtk.css
   .local/share/color-schemes/TokyoNight.colors .icons/default/index.theme

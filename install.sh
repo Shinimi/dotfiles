@@ -28,7 +28,7 @@ PKGS=(
   # sound
   pipewire wireplumber pavucontrol noise-suppression-for-voice
   # look
-  papirus-icon-theme capitaine-cursors adw-gtk-theme ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji plymouth
+  papirus-icon-theme capitaine-cursors adw-gtk-theme ttf-jetbrains-mono-nerd inter-font noto-fonts noto-fonts-emoji plymouth
   # terminal & gaming
   fish starship fastfetch btop mangohud scx-tools
   # apps

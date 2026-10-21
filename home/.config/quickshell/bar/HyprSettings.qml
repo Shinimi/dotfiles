@@ -13,7 +13,7 @@ Scope {
     property int page: 0
     readonly property string qsDir: Quickshell.env("HOME") + "/.config/quickshell/bar"
     readonly property var pages: [
-        ["\u{f03d8}", "Appearance"], ["\u{f0c8a}", "Glass & blur"], ["\u{f037d}", "Mouse & keyboard"],
+        ["\u{f03d8}", "Appearance"], ["\u{f0e09}", "Theme"], ["\u{f0c8a}", "Glass & blur"], ["\u{f037d}", "Mouse & keyboard"],
         ["\u{f0379}", "Display"], ["\u{f057e}", "Sound"], ["\u{f0425}", "Power & lock"], ["\u{f0493}", "System"]
     ]
     function toggle() { visible = !visible }
@@ -54,6 +54,48 @@ Scope {
             }
         }
     }
+    // ---- Display page: modes, colour, and a 15 s "keep or revert" safety net ----
+    property string selMon: "DP-1"
+    readonly property var selInfo: monitors.find(m => m.name === selMon) || null
+    function liveCfg(m) {
+        if (!m) return {}
+        const modes = (m.availableModes || []).map(x => x.replace("Hz", ""))
+        const same = modes.filter(x => x.split("@")[0] === m.width + "x" + m.height)
+        let best = same[0] || (m.width + "x" + m.height + "@" + m.refreshRate.toFixed(2))
+        for (const x of same) if (Math.abs(parseFloat(x.split("@")[1]) - m.refreshRate) < Math.abs(parseFloat(best.split("@")[1]) - m.refreshRate)) best = x
+        return { mode: best, cm: m.colorManagementPreset || "srgb", bitdepth: (m.currentFormat || "").indexOf("2101010") >= 0 ? 10 : 8, vrr: m.vrr ? 1 : 0 }
+    }
+    readonly property var selCfg: Object.assign({}, liveCfg(selInfo), (Settings.get("monitors") || {})[selMon] || {})
+    readonly property var resolutions: {
+        const out = []
+        for (const x of (selInfo ? selInfo.availableModes : [])) { const r = x.split("@")[0]; if (out.indexOf(r) < 0 && parseInt(r) >= 1280) out.push(r) }
+        out.sort((a, b) => { const pa = a.split("x"), pb = b.split("x"); return pb[0] * pb[1] - pa[0] * pa[1] })
+        return out.slice(0, 6)
+    }
+    function ratesFor(res) {
+        const out = []
+        for (const x of (selInfo ? selInfo.availableModes : [])) {
+            const p = x.replace("Hz", "").split("@")
+            if (p[0] === res && !out.some(o => Math.round(parseFloat(o)) === Math.round(parseFloat(p[1])))) out.push(p[1])
+        }
+        return out.sort((a, b) => parseFloat(b) - parseFloat(a))
+    }
+    property var undoMonitors: null
+    property int countdown: 15
+    function monChange(field, val) {
+        if (undoMonitors === null) {
+            const snap = {}
+            for (const m of monitors) snap[m.name] = Object.assign({}, liveCfg(m), (Settings.get("monitors") || {})[m.name] || {})
+            undoMonitors = snap
+        }
+        Settings.setMon(selMon, field, val, liveCfg(selInfo))
+        countdown = 15; revertTimer.restart(); monsLater.restart()
+    }
+    function keepMonitors() { undoMonitors = null; revertTimer.stop() }
+    function revertMonitors() { if (undoMonitors) Settings.set("monitors", undoMonitors); undoMonitors = null; revertTimer.stop(); monsLater.restart() }
+    Timer { id: revertTimer; interval: 1000; repeat: true; onTriggered: { root.countdown--; if (root.countdown <= 0) root.revertMonitors() } }
+    Timer { id: monsLater; interval: 2500; onTriggered: mons.running = true }
+
     readonly property var sinks: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio && !(n.name || "").startsWith("effect_") && n.name !== "headset_eq")
     readonly property var sources: Pipewire.nodes.values.filter(n => !n.isSink && !n.isStream && n.audio && !(n.name || "").startsWith("effect_") && n.name !== "clean_mic" && (n.name || "").indexOf(".monitor") < 0)
     PwObjectTracker { objects: root.sinks.concat(root.sources) }
@@ -153,8 +195,8 @@ Scope {
                         Label { text: root.pages[root.page][1]; font.pixelSize: 22; font.weight: Font.Bold }
                         Label {
                             color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal
-                            text: ["Colours, borders, gaps and motion", "How see-through windows and panels are",
-                                   "Pointer speed, focus and typing", "Screens and night light",
+                            text: ["Colours, borders, gaps and motion", "Icons, folders, cursor and fonts", "How see-through windows and panels are",
+                                   "Pointer speed, focus and typing", "Resolution, refresh rate and colour",
                                    "Devices, clean mic and headset EQ", "Performance, auto-lock and sleep",
                                    "About this PC and maintenance"][root.page]
                         }
@@ -214,9 +256,82 @@ Scope {
                         }
                     }
 
+                    // ---------- Theme ----------
+                    Column {
+                        visible: root.page === 1; width: parent.width; spacing: 14
+                        SetSection {
+                            width: parent.width; title: "Icons"; icon: "\u{f02e9}"
+                            SetChoice {
+                                label: "Icon style"; current: Settings.get("icon_base")
+                                options: [["Papirus-Dark", "Papirus"], ["breeze-dark", "Breeze"]]
+                                onPicked: v => Settings.set("icon_base", v)
+                            }
+                            Column {
+                                visible: Settings.get("icon_base") === "Papirus-Dark"
+                                width: parent.width; spacing: 8
+                                Label { text: "Folder colour"; color: Theme.fgDim; font.pixelSize: 12 }
+                                Flow {
+                                    width: parent.width; spacing: 8
+                                    Repeater {
+                                        model: ["blue", "indigo", "violet", "magenta", "pink", "cyan", "teal", "green", "nordic", "grey"]
+                                        Rectangle {
+                                            id: fc
+                                            required property string modelData
+                                            readonly property bool cur: Settings.get("folder_color") === modelData
+                                            width: 57; height: 70; radius: 12
+                                            color: cur ? Qt.rgba(0.48, 0.64, 0.97, 0.16) : (fcm.containsMouse ? "#1ec0caf5" : "transparent")
+                                            border.width: cur ? 1 : 0; border.color: Theme.blue
+                                            Image { x: 10; y: 6; width: 36; height: 36; sourceSize.width: 72; source: "file:///usr/share/icons/Papirus/48x48/places/folder-" + fc.modelData + ".svg" }
+                                            Label { anchors.horizontalCenter: parent.horizontalCenter; y: 48; text: fc.modelData; color: fc.cur ? Theme.fg : Theme.muted; font.pixelSize: 10 }
+                                            MouseArea { id: fcm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Settings.set("folder_color", fc.modelData) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Row {
+                            width: parent.width; spacing: 14
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Cursor"; icon: "\u{f01bf}"
+                                SetChoice {
+                                    label: "Style"; current: Settings.get("cursor_theme")
+                                    options: [["capitaine-cursors", "Capitaine dark"], ["capitaine-cursors-light", "Capitaine light"], ["breeze_cursors", "Breeze"]]
+                                    onPicked: v => Settings.set("cursor_theme", v)
+                                }
+                                SetChoice {
+                                    label: "Size"; accent: Theme.cyan; current: Settings.get("cursor_size")
+                                    options: [[24, "Normal"], [32, "Large"], [40, "Huge"]]
+                                    onPicked: v => Settings.set("cursor_size", v)
+                                }
+                            }
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Font"; icon: "\u{f0881}"
+                                Column {
+                                    width: parent.width; spacing: 6
+                                    Label { text: "App font"; color: Theme.fgDim; font.pixelSize: 12 }
+                                    Repeater {
+                                        model: ["Inter", "Noto Sans", "Fira Sans", "Cantarell"]
+                                        Rectangle {
+                                            id: fo
+                                            required property string modelData
+                                            readonly property bool cur: Settings.get("ui_font") === modelData
+                                            width: parent.width; height: 34; radius: 10
+                                            color: cur ? Qt.rgba(0.48, 0.64, 0.97, 0.16) : (fom.containsMouse ? "#1ec0caf5" : "#331a1b26")
+                                            border.width: cur ? 1 : 0; border.color: Theme.blue
+                                            Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: fo.modelData + " — The quick brown fox"; font.family: fo.modelData; font.pixelSize: 13; color: fo.cur ? Theme.fg : Theme.fgDim }
+                                            MouseArea { id: fom; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Settings.set("ui_font", fo.modelData) }
+                                        }
+                                    }
+                                }
+                                SetSlider { label: "Font size"; key: "ui_font_size"; from: 9; to: 13; suffix: " pt" }
+                            }
+                        }
+                        Label { width: parent.width; wrapMode: Text.WordWrap; text: "Icons and fonts update in GTK apps right away; Qt apps like Dolphin pick them up next time they open."; color: Theme.muted; font.pixelSize: 10 }
+                    }
+
                     // ---------- 1 Glass ----------
                     Row {
-                        visible: root.page === 1; width: parent.width; spacing: 14
+                        visible: root.page === 2; width: parent.width; spacing: 14
                         SetSection {
                             width: (parent.width - 14) / 2; title: "Transparency"; icon: "\u{f0c8a}"
                             SetSlider { label: "Focused window"; key: "opacity_active"; from: 50; to: 100; suffix: "%" }
@@ -234,7 +349,7 @@ Scope {
 
                     // ---------- 2 Input ----------
                     Row {
-                        visible: root.page === 2; width: parent.width; spacing: 14
+                        visible: root.page === 3; width: parent.width; spacing: 14
                         SetSection {
                             width: (parent.width - 14) / 2; title: "Mouse"; icon: "\u{f037d}"
                             SetSlider { label: "Mouse speed"; key: "sensitivity"; from: -1; to: 1; step: 0.05; decimals: 2 }
@@ -251,42 +366,109 @@ Scope {
                         }
                     }
 
-                    // ---------- 3 Display ----------
+                    // ---------- Display ----------
                     Column {
-                        visible: root.page === 3; width: parent.width; spacing: 14
-                        Row {
+                        visible: root.page === 4; width: parent.width; spacing: 14
+
+                        Rectangle {   // "keep these settings?" after a screen change
+                            visible: root.undoMonitors !== null
+                            width: parent.width; height: 58; radius: 14
+                            color: Qt.rgba(0.88, 0.69, 0.41, 0.14); border.width: 1; border.color: Theme.yellow
+                            RowLayout {
+                                anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 12; spacing: 10
+                                Label { text: "\u{f0026}"; color: Theme.yellow; font.pixelSize: 18 }
+                                Column {
+                                    Layout.fillWidth: true
+                                    Label { text: "Keep these display settings?"; font.pixelSize: 13 }
+                                    Label { text: "Going back in " + root.countdown + " s if you don't answer"; color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal }
+                                }
+                                SetButton { text: "Revert"; icon: "\u{f0450}"; onClicked: root.revertMonitors() }
+                                SetButton { text: "Keep"; icon: "\u{f012c}"; primary: true; accent: Theme.green; onClicked: root.keepMonitors() }
+                            }
+                        }
+
+                        Row {   // pick a screen
                             width: parent.width; spacing: 14
                             Repeater {
                                 model: root.monitors
                                 Rectangle {
+                                    id: monCard
                                     required property var modelData
-                                    width: (parent.width - 14) / 2; height: 150; radius: 14; color: Theme.card; border.width: 1; border.color: "#14c0caf5"
+                                    readonly property bool sel: root.selMon === modelData.name
+                                    width: (parent.width - 14) / 2; height: 112; radius: 14
+                                    color: sel ? Qt.rgba(0.48, 0.64, 0.97, 0.12) : (mcm.containsMouse ? "#1ec0caf5" : Theme.card)
+                                    border.width: 1; border.color: sel ? Theme.blue : "#14c0caf5"
+                                    Behavior on color { ColorAnimation { duration: 120 } }
+                                    MouseArea { id: mcm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.selMon = monCard.modelData.name }
                                     Rectangle {
-                                        x: 18; anchors.verticalCenter: parent.verticalCenter
-                                        width: modelData.width > 2000 ? 150 : 124; height: width * 9 / 16; radius: 8
-                                        color: Theme.bgAlt; border.width: 2; border.color: modelData.focused ? Theme.blue : Theme.line
-                                        Label { anchors.centerIn: parent; text: modelData.name === "DP-1" ? "Main" : "Side"; color: modelData.focused ? Theme.blue : Theme.muted; font.pixelSize: 12 }
+                                        x: 16; anchors.verticalCenter: parent.verticalCenter
+                                        width: monCard.modelData.width > 2000 ? 120 : 100; height: width * 9 / 16; radius: 7
+                                        color: Theme.bgAlt; border.width: 2; border.color: monCard.sel ? Theme.blue : Theme.line
+                                        Label { anchors.centerIn: parent; text: monCard.modelData.name === "DP-1" ? "Main" : "Side"; color: monCard.sel ? Theme.blue : Theme.muted; font.pixelSize: 11 }
                                     }
                                     Column {
-                                        x: modelData.width > 2000 ? 186 : 160; width: parent.width - x - 14
-                                        anchors.verticalCenter: parent.verticalCenter; spacing: 4
-                                        Label { width: parent.width; elide: Text.ElideRight; text: modelData.model || modelData.name; font.pixelSize: 14; font.weight: Font.Bold }
-                                        Label { text: modelData.width + " × " + modelData.height + " · " + Math.round(modelData.refreshRate) + " Hz"; color: Theme.blue; font.pixelSize: 12 }
-                                        Label { width: parent.width; wrapMode: Text.WordWrap; text: modelData.name + " · VRR " + (modelData.vrr ? "on" : "off") + "\n" + (modelData.name === "DP-1" ? "Workspaces 1–20" : "Discord + Spotify"); color: Theme.muted; font.pixelSize: 11; lineHeight: 1.2 }
+                                        x: monCard.modelData.width > 2000 ? 150 : 130; width: parent.width - x - 12
+                                        anchors.verticalCenter: parent.verticalCenter; spacing: 3
+                                        Label { width: parent.width; elide: Text.ElideRight; text: monCard.modelData.model || monCard.modelData.name; font.pixelSize: 13; font.weight: Font.Bold }
+                                        Label { text: monCard.modelData.width + " × " + monCard.modelData.height + " · " + Math.round(monCard.modelData.refreshRate) + " Hz"; color: Theme.blue; font.pixelSize: 12 }
+                                        Label { text: monCard.modelData.name + " · " + (monCard.modelData.name === "DP-1" ? "workspaces 1–20" : "Discord + Spotify"); color: Theme.muted; font.pixelSize: 10 }
                                     }
                                 }
                             }
                         }
+
                         SetSection {
-                            width: parent.width; title: "Night light"; icon: "\u{f0594}"
-                            SetSwitch { label: "Night light"; desc: "warmer colours, easier on the eyes at night"; on: SysState.night; accent: Theme.yellow; onToggled: SysState.toggleNight() }
-                            SetSlider { label: "Warmth"; key: "night_temp"; from: 2500; to: 6500; step: 100; suffix: " K" }
+                            width: parent.width; title: "Resolution & refresh rate · " + root.selMon; icon: "\u{f0379}"
+                            SetChoice {
+                                label: "Resolution"
+                                current: root.selCfg.mode ? root.selCfg.mode.split("@")[0] : ""
+                                options: root.resolutions.map(r => [r, r.replace("x", " × ")])
+                                onPicked: v => root.monChange("mode", v + "@" + root.ratesFor(v)[0])
+                            }
+                            SetChoice {
+                                label: "Refresh rate"; accent: Theme.cyan
+                                current: root.selCfg.mode ? root.selCfg.mode.split("@")[1] : ""
+                                options: root.ratesFor(root.selCfg.mode ? root.selCfg.mode.split("@")[0] : "").map(r => [r, Math.round(parseFloat(r)) + " Hz"])
+                                onPicked: v => root.monChange("mode", root.selCfg.mode.split("@")[0] + "@" + v)
+                            }
+                        }
+
+                        SetSection {
+                            width: parent.width; title: "Colour · " + root.selMon; icon: "\u{f03d8}"
+                            SetChoice {
+                                label: "Colour mode"; desc: "How colours are mapped to this screen"; accent: Theme.purple
+                                current: root.selCfg.cm || "srgb"
+                                options: [["srgb", "Accurate (sRGB)"], ["wide", "Vivid (wide gamut)"], ["edid", "Monitor's own (EDID)"]]
+                                onPicked: v => root.monChange("cm", v)
+                            }
+                            SetSwitch {
+                                label: "10-bit colour"; desc: "smoother gradients, less banding (if the screen supports it)"; accent: Theme.purple
+                                on: root.selCfg.bitdepth === 10; onToggled: root.monChange("bitdepth", root.selCfg.bitdepth === 10 ? 8 : 10)
+                            }
+                            SetSwitch {
+                                label: "Adaptive sync (VRR)"; desc: "smoother games below max Hz — it made these screens flicker before"; accent: Theme.yellow
+                                on: !!root.selCfg.vrr; onToggled: root.monChange("vrr", root.selCfg.vrr ? 0 : 1)
+                            }
+                        }
+
+                        Row {
+                            width: parent.width; spacing: 14
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Vibrance"; icon: "\u{f0e09}"
+                                SetSlider { label: "Colour vibrance (all screens)"; key: "vibrance"; from: 70; to: 150; step: 5; suffix: "%" }
+                                Label { width: parent.width; wrapMode: Text.WordWrap; text: "100% = untouched. Higher makes colours pop; uses a tiny bit of GPU."; color: Theme.muted; font.pixelSize: 10 }
+                            }
+                            SetSection {
+                                width: (parent.width - 14) / 2; title: "Night light"; icon: "\u{f0594}"
+                                SetSwitch { label: "Night light"; desc: "warmer colours at night"; on: SysState.night; accent: Theme.yellow; onToggled: SysState.toggleNight() }
+                                SetSlider { label: "Warmth"; key: "night_temp"; from: 2500; to: 6500; step: 100; suffix: " K" }
+                            }
                         }
                     }
 
                     // ---------- 4 Sound ----------
                     Column {
-                        visible: root.page === 4; width: parent.width; spacing: 14
+                        visible: root.page === 5; width: parent.width; spacing: 14
                         Row {
                             width: parent.width; spacing: 14
                             SetSection {
@@ -321,7 +503,7 @@ Scope {
 
                     // ---------- 5 Power & lock ----------
                     Column {
-                        visible: root.page === 5; width: parent.width; spacing: 14
+                        visible: root.page === 6; width: parent.width; spacing: 14
                         SetSection {
                             width: parent.width; title: "Power profile"; icon: "\u{f0e7}"
                             SetChoice {
@@ -346,7 +528,7 @@ Scope {
 
                     // ---------- 6 System ----------
                     Column {
-                        visible: root.page === 6; width: parent.width; spacing: 14
+                        visible: root.page === 7; width: parent.width; spacing: 14
                         Rectangle {
                             width: parent.width; height: 120; radius: 16; color: Theme.card; border.width: 1; border.color: "#14c0caf5"
                             Row {
