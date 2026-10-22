@@ -27,3 +27,4 @@
 @define-color popover_fg_color #efeaf8;
 @define-color thumbnail_bg_color #1b1928;
 @define-color shade_color rgba(0,0,0,0.36);
+@import 'colors.css';
