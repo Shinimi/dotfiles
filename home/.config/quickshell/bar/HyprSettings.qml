@@ -458,7 +458,7 @@ Scope {
                                 width: (parent.width - 14) / 2; title: "Cursor"; icon: "\u{f01bf}"
                                 SetChoice {
                                     label: "Style"; current: Settings.get("cursor_theme")
-                                    options: [["capitaine-cursors", "Capitaine dark"], ["capitaine-cursors-light", "Capitaine light"], ["breeze_cursors", "Breeze"]]
+                                    options: [["Kocho-cursors", "Kochō"], ["capitaine-cursors", "Capitaine dark"], ["capitaine-cursors-light", "Capitaine light"], ["breeze_cursors", "Breeze"]]
                                     onPicked: v => Settings.set("cursor_theme", v)
                                 }
                                 SetChoice {
@@ -494,7 +494,7 @@ Scope {
                             width: parent.width; title: "Terminal art (fastfetch)"; icon: "\u{f018d}"
                             SetChoice {
                                 label: "Shown next to your system info"; current: Settings.get("fetch_logo"); onPicked: v => Settings.set("fetch_logo", v)
-                                options: [["butterfly", "Butterfly"], ["portrait", "Shinobu portrait"], ["picture", "My picture"], ["ascii", "Text art"], ["distro", "CachyOS logo"]]
+                                options: [["kamon", "Kochō crest"], ["butterfly", "Butterfly"], ["portrait", "Shinobu portrait"], ["picture", "My picture"], ["ascii", "Text art"], ["distro", "CachyOS logo"]]
                             }
                             Row {
                                 visible: Settings.get("fetch_logo") === "ascii"; spacing: 8

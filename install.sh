@@ -100,6 +100,7 @@ fi
 command -v spicetify >/dev/null && { spicetify config current_theme ShinobuKocho >/dev/null 2>&1; spicetify backup apply -q -n >/dev/null 2>&1 || true; }
 [ "$(basename "${SHELL:-}")" = fish ] || { ask "Make fish your shell?" && chsh -s /usr/bin/fish; }
 [ -f "$HOME/.face.icon" ] && "$HOME/.local/bin/fetch-logo.sh"
+python3 -I "$HOME/.local/bin/kocho-cursor.py" >/dev/null 2>&1 || true
 ok "theme"
 
 printf '\n%sAll done.%s Log out and pick Hyprland on the login screen.\n' "$green" "$off"

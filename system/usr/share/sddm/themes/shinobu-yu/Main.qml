@@ -1,4 +1,4 @@
-// 胡蝶しのぶ login screen for yu's CachyOS (SDDM, Qt 6) – matches the lock screen. Made by Claude.
+// 胡蝶しのぶ login screen (SDDM, Qt 6): moonlit art, drifting butterflies, floating clock. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -97,6 +97,40 @@ Item {
             GradientStop { position: 0.0;  color: "#000d0c13" }
             GradientStop { position: 0.55; color: "#110d0c13" }
             GradientStop { position: 1.0;  color: "#990d0c13" }
+        }
+    }
+
+    // ---------- drifting butterflies ----------
+    Repeater {
+        model: 9
+        Image {
+            id: bf
+            required property int index
+            source: Qt.resolvedUrl("assets/butterfly.svg")
+            readonly property real sc: 0.35 + (index % 4) * 0.18
+            width: 120 * sc; height: 90 * sc; sourceSize.width: width * 2; sourceSize.height: height * 2
+            opacity: 0.0
+            property real baseY: root.height * (0.15 + ((index * 37) % 70) / 100)
+            x: -150; y: baseY
+            transform: Scale { id: flap; origin.x: bf.width / 2; xScale: 1 }
+            SequentialAnimation on opacity { loops: Animation.Infinite
+                PauseAnimation { duration: bf.index * 2100 }
+                NumberAnimation { to: 0.55 + (bf.index % 3) * 0.15; duration: 2500 }
+                PauseAnimation { duration: 17000 }
+                NumberAnimation { to: 0; duration: 2500 }
+            }
+            SequentialAnimation on x { loops: Animation.Infinite
+                PauseAnimation { duration: bf.index * 2100 }
+                NumberAnimation { from: -150; to: root.width + 150; duration: 22000 + (bf.index % 3) * 5000; easing.type: Easing.InOutSine }
+            }
+            SequentialAnimation on baseY { loops: Animation.Infinite
+                NumberAnimation { to: bf.baseY - 70; duration: 3300 + bf.index * 200; easing.type: Easing.InOutSine }
+                NumberAnimation { to: bf.baseY + 40; duration: 3300 + bf.index * 200; easing.type: Easing.InOutSine }
+            }
+            SequentialAnimation { running: true; loops: Animation.Infinite
+                NumberAnimation { target: flap; property: "xScale"; to: 0.35; duration: 260 + bf.index * 20; easing.type: Easing.InOutQuad }
+                NumberAnimation { target: flap; property: "xScale"; to: 1; duration: 260 + bf.index * 20; easing.type: Easing.InOutQuad }
+            }
         }
     }
 
