@@ -46,7 +46,7 @@ PanelWindow {
         Text {   // today's line
             anchors.horizontalCenter: w.pos === "center" ? parent.horizontalCenter : undefined
             topPadding: 2
-            text: "— " + Journey.today()
+            text: Journey.today()
             font.family: Theme.font; font.pixelSize: 14; font.italic: true; font.letterSpacing: 1
             color: Theme.muted; style: Text.Raised; styleColor: "#aa000000"
         }

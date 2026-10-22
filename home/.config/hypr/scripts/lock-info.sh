@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # lock-info.sh greeting|music|line|island – small text snippets for hyprlock. Made by Claude.
 case "$1" in
-  line)   # today's line, the same one the desktop shows (read from Journey.qml)
+  line)   # today's quote, the same one the desktop shows (read from Journey.qml)
     python3 -I - <<'PY'
 import re,datetime,os
 t=open(os.path.expanduser("~/.config/quickshell/bar/Journey.qml")).read()
-lines=re.findall(r'^\s*"([^"]+)",?\s*$', t, re.M)
+q=re.findall(r'\["(.+?)", "(.+?)"\]', t)
 d=datetime.date.today(); n=(d-datetime.date(d.year,1,1)).days+1
-print("— " + lines[n % len(lines)] if lines else "")
+print(f"“{q[n % len(q)][0]}”  — {q[n % len(q)][1].lower()}" if q else "")
 PY
     ;;
   island)   # the pill at the top: time · date

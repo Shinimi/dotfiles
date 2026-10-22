@@ -68,7 +68,7 @@ Scope {
                    color: "#f5f5f5"; font.family: Theme.font; font.pixelSize: 170; font.weight: Font.Thin }
             Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(root.now, "dddd, d MMMM").toLowerCase()
                    color: "#b8b8b8"; font.family: Theme.font; font.pixelSize: 20; font.letterSpacing: 1 }
-            Text { anchors.horizontalCenter: parent.horizontalCenter; text: "— " + Journey.today()
+            Text { anchors.horizontalCenter: parent.horizontalCenter; text: Journey.today()
                    color: "#a0a0a0"; font.family: Theme.font; font.pixelSize: 14; font.italic: true }
         }
 

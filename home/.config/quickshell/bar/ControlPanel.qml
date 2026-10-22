@@ -2,7 +2,6 @@
 //   hero    — big thin clock, date and today's line over your blurred wallpaper (the album art while music plays)
 //   toggles — a row of round switches
 //   mixer   — vertical faders for volume, mic and both screens, like a little mixing desk; output + EQ below
-//   system  — live line graphs for CPU, GPU and RAM
 //   then notifications, shortcuts and the tray. Esc or click outside closes. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
@@ -29,8 +28,6 @@ Scope {
     Timer { id: hideLater; interval: 260; onTriggered: if (!cc.visible) cc.shown = false }
     Connections { target: PopupState; function onCurrentChanged() { if (PopupState.current !== cc) cc.visible = false } }
     IpcHandler { target: "panel"; function toggle(): void { cc.toggle() } }
-    property bool _statsOn: visible
-    on_StatsOnChanged: Stats.watchers = Math.max(0, Stats.watchers + (_statsOn ? 1 : -1))
 
     // ---------- data ----------
     readonly property var sink: Pipewire.defaultAudioSink
@@ -52,16 +49,6 @@ Scope {
     function nice(n) { return (n ? (n.nickname || n.description || n.name || "") : "").replace(/ Analog Stereo| Digital Stereo \(HDMI\)| Stereo/g, "") }
     function go(cmd) { cc.visible = false; Quickshell.execDetached(cmd) }
     function qs(target, fn) { go(["qs", "ipc", "-p", qsDir, "call", target, fn || "toggle"]) }
-
-    // last 40 readings for the graphs (every 2 s while open, every 30 s otherwise — so there's history when you open it)
-    property var hCpu: []; property var hGpu: []; property var hRam: []
-    Connections {
-        target: Stats
-        function onDChanged() {
-            const push = (a, v) => a.concat([v || 0]).slice(-40)
-            cc.hCpu = push(cc.hCpu, Stats.d.cpu); cc.hGpu = push(cc.hGpu, Stats.d.gpu); cc.hRam = push(cc.hRam, Stats.d.ram)
-        }
-    }
     SystemClock { id: clock; precision: SystemClock.Minutes }
 
     // ---------- building blocks ----------
@@ -122,33 +109,6 @@ Scope {
         }
         Text { anchors.horizontalCenter: parent.horizontalCenter; text: fd.name; color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5 }
     }
-    component Graph: Item {   // a live line graph with a soft fill
-        id: gr
-        property string name; property var hist: []; property string value: ""; property string sub: ""
-        Layout.fillWidth: true; Layout.preferredWidth: 1; height: 74
-        Canvas {
-            id: cv
-            anchors.fill: parent
-            property var pts: gr.hist
-            onPtsChanged: requestPaint()
-            onPaint: {
-                const c = getContext("2d"); c.reset()
-                const n = pts.length; if (n < 2) return
-                const step = width / 39, top = 26, h = height - top - 2
-                const peak = Math.min(100, Math.max(25, Math.max.apply(null, pts) * 1.4))   // auto-scale so quiet moments still show
-                const X = i => width - (n - 1 - i) * step, Y = v => top + h * (1 - Math.min(peak, v) / peak)
-                c.beginPath(); c.moveTo(X(0), Y(pts[0])); for (let i = 1; i < n; i++) c.lineTo(X(i), Y(pts[i]))
-                c.strokeStyle = "rgba(255,255,255,0.85)"; c.lineWidth = 1.5; c.stroke()
-                c.lineTo(X(n - 1), top + h); c.lineTo(X(0), top + h); c.closePath()
-                const g = c.createLinearGradient(0, top, 0, top + h); g.addColorStop(0, "rgba(255,255,255,0.16)"); g.addColorStop(1, "rgba(255,255,255,0)")
-                c.fillStyle = g; c.fill()
-            }
-        }
-        Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: "#1fffffff" }
-        Text { text: gr.name; color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 2 }
-        Text { anchors.right: parent.right; text: gr.value; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
-        Text { anchors.right: parent.right; y: 15; text: gr.sub; color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 9 }
-    }
     component IconBtn: Rectangle {
         property string icon; signal hit()
         width: 32; height: 32; radius: 16
@@ -193,7 +153,7 @@ Scope {
                     // ================= hero =================
                     ClippingRectangle {
                         id: hero
-                        width: parent.width; height: cc.player ? 236 : 176; radius: 12; color: "#0b0b0b"
+                        width: parent.width; height: cc.player ? 268 : 210; radius: 12; color: "#0b0b0b"
                         Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                         Image {   // the hero picture (assets/hero.jpg): dark sky on the left for the clock, the peak on the right
                             anchors.fill: parent; asynchronous: true; fillMode: Image.PreserveAspectCrop; sourceSize.width: 1240
@@ -230,7 +190,9 @@ Scope {
                             x: 18; y: 54; spacing: 2
                             Text { text: Qt.formatDateTime(clock.date, Settings.cur("clock_12h") ? "h:mm" : "HH:mm"); color: "#ffffff"; font.family: Theme.font; font.pixelSize: 58; font.weight: Font.Thin }
                             Text { text: Qt.formatDateTime(clock.date, "dddd, d MMMM").toLowerCase(); color: "#d0d0d0"; font.family: Theme.font; font.pixelSize: 12 }
-                            Text { text: "— " + Journey.today(); color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10; font.italic: true; topPadding: 2 }
+                            Text { width: hero.width - 36; wrapMode: Text.WordWrap; maximumLineCount: 2; elide: Text.ElideRight; topPadding: 4
+                                   text: "“" + Journey.quote + "”"; color: "#b8b8b8"; font.family: Theme.font; font.pixelSize: 10; font.italic: true }
+                            Text { text: "— " + Journey.author.toLowerCase(); color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9 }
                         }
                         Item {   // now playing strip, bottom of the hero
                             visible: !!cc.player
@@ -351,13 +313,6 @@ Scope {
                         }
                     }
 
-                    // ================= system =================
-                    RowLayout {
-                        width: parent.width; spacing: 16
-                        Graph { name: "CPU"; hist: cc.hCpu; value: Stats.d.cpu + "%"; sub: Stats.d.cpuTemp + "°" }
-                        Graph { name: "GPU"; hist: cc.hGpu; value: Stats.d.gpu + "%"; sub: Stats.d.gpuTemp + "°  " + Stats.d.gpuPower + "W" }
-                        Graph { name: "RAM"; hist: cc.hRam; value: Stats.d.ram + "%"; sub: Stats.d.ramUsed.toFixed(1) + "G" }
-                    }
 
                     // ================= notifications =================
                     Item {
@@ -379,16 +334,12 @@ Scope {
 
                     // ================= shortcuts + tray =================
                     GridLayout {
-                        width: parent.width; columns: 4; rowSpacing: 6; columnSpacing: 6
+                        width: parent.width; columns: 4; rowSpacing: 6; columnSpacing: 6   // the four you actually use
                         Repeater {
                             model: [["\u{f0100}", "screenshot", () => cc.go(["sh", "-c", "sleep 0.3; ~/.config/hypr/scripts/screenshot.sh region"])],
                                     ["\u{f014c}", "clipboard", () => cc.qs("clipboard")],
                                     ["\u{f02e9}", "wallpaper", () => cc.qs("wallpaper")],
-                                    ["\u{f082e}", "notes", () => cc.qs("notes")],
-                                    ["\u{f0d52}", "colour pick", () => cc.go(["sh", "-c", "sleep 0.3; hyprpicker -a"])],
-                                    ["\u{f0eb5}", "games", () => cc.qs("games")],
-                                    ["\u{f030c}", "shortcuts", () => cc.qs("keys")],
-                                    ["\u{f0349}", "launcher", () => cc.qs("launcher")]]
+                                    ["\u{f082e}", "notes", () => cc.qs("notes")]]
                             Rectangle {
                                 required property var modelData
                                 Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 12

@@ -30,7 +30,7 @@ Singleton {
         ui_font: "Noto Sans", ui_font_size: 10, fetch_logo: "katana", fetch_source: "",
         // bar & notifications
         clock_seconds: false, clock_12h: false, clock_date: true, bar_media: true,
-        notif_timeout: 5, notif_center: false, sounds: true, desktop_clock: true, desktop_clock_pos: "left",
+        notif_timeout: 5, notif_center: false, sounds: false, desktop_clock: true, desktop_clock_pos: "left",
         // power
         lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true,
         // account, wallpaper, apps, time

@@ -1,8 +1,5 @@
 // New tab page: clock, today's line, and the dunes drawn as slowly moving ASCII. Made by Claude.
-const LINES = ["a thousand years is just a long walk", "learn one useless spell today", "slow is still moving",
-  "the flowers bloom where you walked", "remember the small things", "every journey ends somewhere new",
-  "magic is patience, mostly", "the road remembers you", "rest is part of the journey",
-  "keep the people you meet", "one more step, then tea", "the stars were here before the map"];
+const LINES = ["The impediment to action advances action.  — Marcus Aurelius", "Waste no more time arguing what a good man should be. Be one.  — Marcus Aurelius", "You have power over your mind, not outside events.  — Marcus Aurelius", "We suffer more often in imagination than in reality.  — Seneca", "While we wait for life, life passes.  — Seneca", "A journey of a thousand miles begins with a single step.  — Lao Tzu", "Nature does not hurry, yet everything is accomplished.  — Lao Tzu", "It does not matter how slowly you go, as long as you do not stop.  — Confucius", "Do nothing that is of no use.  — Miyamoto Musashi", "Perceive that which cannot be seen with the eye.  — Miyamoto Musashi", "Today is victory over yourself of yesterday.  — Miyamoto Musashi", "Fall seven times, stand up eight.  — Japanese proverb", "Every day is a journey, and the journey itself is home.  — Matsuo Bashō", "No man ever steps in the same river twice.  — Heraclitus", "Well begun is half done.  — Aristotle", "First say to yourself what you would be; then do what you have to do.  — Epictetus", "He who has a why to live can bear almost any how.  — Nietzsche", "The unexamined life is not worth living.  — Socrates"];
 const $ = id => document.getElementById(id);
 function tick() {
   const d = new Date();
@@ -10,7 +7,7 @@ function tick() {
   $("date").textContent = d.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }).toLowerCase();
 }
 tick(); setInterval(tick, 1000);
-{ const d = new Date(), start = new Date(d.getFullYear(), 0, 0); $("line").textContent = "— " + LINES[Math.floor((d - start) / 86400000) % LINES.length]; }
+{ const d = new Date(), start = new Date(d.getFullYear(), 0, 0); $("line").textContent = LINES[Math.floor((d - start) / 86400000) % LINES.length]; }
 // ---- ASCII dunes (same characters and light wave as the desktop) ----
 const CHARS = " .`:-=+*cox%#@", CW = 9, CH = 16;
 const cv = $("ascii"), cx = cv.getContext("2d");

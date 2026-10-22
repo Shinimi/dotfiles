@@ -1,5 +1,5 @@
 // Main-screen workspaces: 1-4 always, plus any higher one that is active or has windows.
-// Active = white pill; a small dot marks workspaces that have windows. Hover one you're not on and a small live
+// Dots: faint = empty, grey = has windows; the one you're on is a white pill with its kanji. Hover one you're not on and a small live
 // preview of its windows drops down (Settings → Extras). Made by Claude.
 import QtQuick
 import Quickshell
@@ -87,26 +87,25 @@ Pill {
             readonly property bool isActive: !!(Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId)
                                              || !!(ws && ws.monitor && ws.monitor.name === "DP-1" && ws.monitor.activeWorkspace === ws)
             readonly property bool hasWindows: !!(ws && ws.toplevels && ws.toplevels.values.length > 0)
-            width: Math.max(30, wsLabel.implicitWidth + 16); height: 24; radius: 2
-            anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-            color: wsMouse.containsMouse ? "#14ffffff" : "transparent"
-            Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            Behavior on color { ColorAnimation { duration: 140 } }
-            Label {
-                id: wsLabel
+            // dots: faint = empty, grey = has windows, a white pill with its kanji = the one you're on
+            width: isActive ? 40 : 18; height: 24
+            color: "transparent"
+            Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+            Rectangle {
+                id: dot
                 anchors.centerIn: parent
-                text: Theme.wsName(wsId); font.pixelSize: Settings.cur("ws_kanji") ? 13 : 11; font.family: Settings.cur("ws_kanji") ? "Noto Sans CJK JP" : Theme.font
-                color: isActive ? "#ffffff" : (hasWindows ? "#a8a8a8" : "#4a4a4a"); font.bold: isActive
-            }
-            Rectangle {   // the one you're on: a short white line under it
-                anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom
-                width: isActive ? 14 : 0; height: 2; color: "#ffffff"
-                Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-            }
-            Rectangle {   // tiny dot: this workspace has windows
-                visible: hasWindows && !isActive && !Settings.cur("ws_kanji")
-                anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 2
-                width: 3; height: 3; radius: 2; color: Theme.fgDim
+                width: isActive ? 34 : (wsMouse.containsMouse ? 10 : 7); height: isActive ? 18 : width; radius: height / 2
+                color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#d0d0d0" : (hasWindows ? "#8a8a8a" : "#3a3a3a")
+                Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                Behavior on color { ColorAnimation { duration: 160 } }
+                Text {
+                    id: wsLabel
+                    anchors.centerIn: parent
+                    opacity: isActive ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 160 } }
+                    text: Theme.wsName(wsId); color: "#0c0c0c"; font.bold: true
+                    font.family: Settings.cur("ws_kanji") ? "Noto Sans CJK JP" : Theme.font; font.pixelSize: Settings.cur("ws_kanji") ? 11 : 10
+                }
             }
             MouseArea {
                 id: wsMouse

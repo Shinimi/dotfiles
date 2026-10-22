@@ -62,7 +62,7 @@ Scope {
                     Item { width: 1; height: 26 }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
-                        text: "— " + Journey.today()
+                        text: Journey.today()
                         font.family: Theme.font; font.pixelSize: 15; font.italic: true; font.letterSpacing: 1; color: "#9a9a9a"
                     }
                 }

@@ -174,10 +174,7 @@ Item {
     }
 
     property date now: new Date()
-    readonly property var lines: ["a thousand years is just a long walk", "learn one useless spell today", "slow is still moving",
-        "the flowers bloom where you walked", "remember the small things", "every journey ends somewhere new",
-        "magic is patience, mostly", "the road remembers you", "rest is part of the journey",
-        "keep the people you meet", "one more step, then tea", "the stars were here before the map"]
+    readonly property var lines: ["“The impediment to action advances action.”  — marcus aurelius", "“Waste no more time arguing what a good man should be. Be one.”  — marcus aurelius", "“You have power over your mind, not outside events.”  — marcus aurelius", "“We suffer more often in imagination than in reality.”  — seneca", "“While we wait for life, life passes.”  — seneca", "“A journey of a thousand miles begins with a single step.”  — lao tzu", "“Nature does not hurry, yet everything is accomplished.”  — lao tzu", "“It does not matter how slowly you go, as long as you do not stop.”  — confucius", "“Do nothing that is of no use.”  — miyamoto musashi", "“Perceive that which cannot be seen with the eye.”  — miyamoto musashi", "“Today is victory over yourself of yesterday.”  — miyamoto musashi", "“Fall seven times, stand up eight.”  — japanese proverb", "“Every day is a journey, and the journey itself is home.”  — matsuo bashō", "“No man ever steps in the same river twice.”  — heraclitus", "“Well begun is half done.”  — aristotle", "“First say to yourself what you would be; then do what you have to do.”  — epictetus", "“He who has a why to live can bear almost any how.”  — nietzsche", "“The unexamined life is not worth living.”  — socrates"]
     readonly property string todayLine: {
         const d = new Date(), start = new Date(d.getFullYear(), 0, 0)
         return lines[Math.floor((d - start) / 86400000) % lines.length]
@@ -229,7 +226,7 @@ Item {
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: "— " + root.todayLine
+            text: root.todayLine
             color: "#b0ffffff"; font.family: root.font; font.pixelSize: 16; font.italic: true
         }
     }
