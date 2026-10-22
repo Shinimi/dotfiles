@@ -1,5 +1,5 @@
 // Control center (SUPER + A, or the sliders icon in the bar): a full-height panel that slides in from the right,
-// in numbered sections — now playing, quick toggles, sound, screens, system, notifications — with shortcuts and
+// in numbered sections — now playing, today, quick toggles, sound, screens, system, notifications — with shortcuts and
 // the tray at the bottom. Esc or click outside closes. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
@@ -135,7 +135,6 @@ Scope {
             Behavior on x { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
             radius: 3; color: Theme.mix(Qt.rgba(0.03, 0.03, 0.03, 0.95), Theme.tint, 0.07 * Theme.tintOn)
             border.width: 1; border.color: "#3dffffff"
-            Brackets {}
             MouseArea { anchors.fill: parent }
             focus: cc.visible
             Keys.onEscapePressed: cc.visible = false
@@ -225,8 +224,73 @@ Scope {
                         }
                     }
 
-                    // ===== 02 quick =====
-                    Head { num: "02"; title: "QUICK"; jp: "操作" }
+                    // ===== 02 today =====
+                    Head { num: "02"; title: "TODAY"; jp: "今日"; note: Weather.ready ? Weather.place.toLowerCase() : "" }
+                    Row {   // this week, today in white
+                        width: parent.width; spacing: 4
+                        Repeater {
+                            model: 7
+                            Rectangle {
+                                required property int index
+                                readonly property date d: { const t = new Date(); const mon = new Date(t); mon.setDate(t.getDate() - (t.getDay() + 6) % 7); const x = new Date(mon); x.setDate(mon.getDate() + index); return x }
+                                readonly property bool today: d.toDateString() === new Date().toDateString()
+                                width: (parent.width - 24) / 7; height: 46; radius: 2
+                                color: today ? Theme.on : "transparent"; border.width: 1; border.color: today ? Theme.on : "#1fffffff"
+                                Column {
+                                    anchors.centerIn: parent; spacing: 2
+                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(parent.parent.d, "ddd").toUpperCase()
+                                           color: parent.parent.today ? "#77000000" : "#6a6a6a"; font.family: Theme.font; font.pixelSize: 8; font.letterSpacing: 1 }
+                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: parent.parent.d.getDate()
+                                           color: parent.parent.today ? Theme.onText : "#d8d8d8"; font.family: Theme.font; font.pixelSize: 14; font.bold: parent.parent.today }
+                                }
+                            }
+                        }
+                    }
+                    RowLayout {   // weather now + next two days
+                        visible: Weather.ready
+                        width: parent.width; spacing: 12
+                        Text { text: Weather.icon; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 26 }
+                        Column {
+                            spacing: 1
+                            Text { text: Weather.temp + "°"; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 22; font.bold: true }
+                            Text { text: Weather.desc.toLowerCase() + "  ·  feels " + Weather.feels + "°"; color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 10 }
+                        }
+                        Item { Layout.fillWidth: true }
+                        Repeater {
+                            model: Weather.days.slice(1, 3)
+                            Column {
+                                required property var modelData
+                                spacing: 2
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(new Date(modelData.date), "ddd").toUpperCase(); color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 8; font.letterSpacing: 1 }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.icon; color: "#d8d8d8"; font.family: Theme.font; font.pixelSize: 15 }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.max + "° " + modelData.min + "°"; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 9 }
+                            }
+                        }
+                    }
+                    RowLayout {   // timer: pick a length, then it counts down here
+                        width: parent.width; spacing: 6
+                        Text {
+                            Layout.fillWidth: true
+                            text: Timers.timerActive ? "\u{f051f}  " + Timers.fmt(Timers.remaining) : "\u{f051f}  TIMER"
+                            color: Timers.timerRunning ? "#ffffff" : "#9a9a9a"; font.family: Theme.font
+                            font.pixelSize: Timers.timerActive ? 16 : 10; font.letterSpacing: Timers.timerActive ? 1 : 2; font.bold: Timers.timerActive
+                        }
+                        Repeater {
+                            model: Timers.timerActive ? [[Timers.timerRunning ? "PAUSE" : "GO", () => Timers.toggleTimer()], ["RESET", () => Timers.resetTimer()]]
+                                                      : [["5M", () => { Timers.setMinutes(5); Timers.toggleTimer() }], ["15M", () => { Timers.setMinutes(15); Timers.toggleTimer() }],
+                                                         ["25M", () => { Timers.setMinutes(25); Timers.toggleTimer() }], ["1H", () => { Timers.setMinutes(60); Timers.toggleTimer() }]]
+                            Rectangle {
+                                required property var modelData
+                                width: Math.max(44, tl2.implicitWidth + 18); height: 26; radius: 2
+                                color: tmm.containsMouse ? Theme.on : "transparent"; border.width: 1; border.color: tmm.containsMouse ? Theme.on : "#33ffffff"
+                                Text { id: tl2; anchors.centerIn: parent; text: modelData[0]; color: tmm.containsMouse ? Theme.onText : "#b0b0b0"; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5 }
+                                MouseArea { id: tmm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData[1]() }
+                            }
+                        }
+                    }
+
+                    // ===== 03 quick =====
+                    Head { num: "03"; title: "QUICK"; jp: "操作" }
                     Grid {
                         width: parent.width; columns: 3; spacing: 6
                         Repeater {
@@ -255,8 +319,8 @@ Scope {
                         }
                     }
 
-                    // ===== 03 sound =====
-                    Head { num: "03"; title: "SOUND"; jp: "音響"; note: SysState.fx.eq ? "eq " + SysState.fx.preset : "" }
+                    // ===== 04 sound =====
+                    Head { num: "04"; title: "SOUND"; jp: "音響"; note: SysState.fx.eq ? "eq " + SysState.fx.preset : "" }
                     CcSlider {
                         icon: "\u{f057e}"; text: cc.nice(cc.sink).slice(0, 22)
                         muted: !!(cc.sink && cc.sink.audio && cc.sink.audio.muted)
@@ -285,8 +349,8 @@ Scope {
                     }
                     AppVolumes { id: apps; visible: apps.apps.length > 0; showTitle: false }
 
-                    // ===== 04 screens =====
-                    Head { num: "04"; title: "SCREENS"; jp: "表示"; note: SysState.night ? "night light on" : "" }
+                    // ===== 05 screens =====
+                    Head { num: "05"; title: "SCREENS"; jp: "表示"; note: SysState.night ? "night light on" : "" }
                     Repeater {
                         model: [["DP-1", "main"], ["DP-2", "side"]]
                         CcSlider {
@@ -297,16 +361,16 @@ Scope {
                         }
                     }
 
-                    // ===== 05 system =====
-                    Head { num: "05"; title: "SYSTEM"; jp: "系統"; note: "↓ " + cc.speed(Stats.d.netRx || 0) + "  ↑ " + cc.speed(Stats.d.netTx || 0) }
+                    // ===== 06 system =====
+                    Head { num: "06"; title: "SYSTEM"; jp: "系統"; note: "↓ " + cc.speed(Stats.d.netRx || 0) + "  ↑ " + cc.speed(Stats.d.netTx || 0) }
                     Bar { label: "CPU"; value: Stats.d.cpu / 100; val: Stats.d.cpu + "%"; extra: Stats.d.cpuTemp + "°  " + Stats.d.cpuFreq + "G" }
                     Bar { label: "GPU"; value: Stats.d.gpu / 100; val: Stats.d.gpu + "%"; extra: Stats.d.gpuTemp + "°  " + Stats.d.gpuPower + "W" }
                     Bar { label: "RAM"; value: Stats.d.ram / 100; val: Stats.d.ram + "%"; extra: Stats.d.ramUsed.toFixed(1) + " / " + Stats.d.ramTotal.toFixed(0) + "G" }
                     Bar { label: "VRAM"; value: Stats.d.vramTotal ? Stats.d.vramUsed / Stats.d.vramTotal : 0
                           val: Math.round(Stats.d.vramTotal ? 100 * Stats.d.vramUsed / Stats.d.vramTotal : 0) + "%"; extra: (Stats.d.vramUsed || 0).toFixed(1) + " / " + (Stats.d.vramTotal || 0).toFixed(0) + "G" }
 
-                    // ===== 06 notifications =====
-                    Head { num: "06"; title: "NOTIFICATIONS"; jp: "通知"; note: Notifs.count > 0 ? String(Notifs.count) : "" }
+                    // ===== 07 notifications =====
+                    Head { num: "07"; title: "NOTIFICATIONS"; jp: "通知"; note: Notifs.count > 0 ? String(Notifs.count) : "" }
                     Text { visible: Notifs.count === 0; width: parent.width; horizontalAlignment: Text.AlignHCenter; topPadding: 6; bottomPadding: 6
                            text: "all caught up"; color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 11 }
                     Column {

@@ -48,7 +48,6 @@ Scope {
             id: box
             anchors.centerIn: parent
             width: Math.min(parent.width - 160, 1700); height: parent.height - 200
-            Brackets { size: 14; out: 10 }
 
             Row {
                 id: head

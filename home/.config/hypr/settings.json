@@ -106,7 +106,13 @@
   "autostart": [],
   "weather_place": "",
   "weather_label": "",
-  "game_profiles": {},
+  "game_profiles": {
+    "1973530": {
+      "fps": 60,
+      "hud": "off",
+      "power": "balanced"
+    }
+  },
   "hot_corner": true,
   "wall_shuffle": 0,
   "pause_on_lock": true,
@@ -115,5 +121,8 @@
   "ws_kanji": true,
   "game_workspace": true,
   "wall_tint": true,
-  "ascii_wall": false
+  "ascii_wall": false,
+  "ws_flash": true,
+  "ws_preview": true,
+  "login_handoff": true
 }

@@ -1,5 +1,5 @@
-// The bar: one long, sharp glass strip across the top. Left: launcher, workspaces and the window you're in;
-// centre: the clock; right: song, status and power. When the song changes or the volume moves, a small card
+// The bar: one long, see-through glass strip across the top. Left: launcher and workspaces;
+// centre: the clock; right: song, volume, control center and power. When the song changes or the volume moves, a small card
 // drops out under the clock for a moment. Made by Claude.
 import QtQuick
 import Quickshell
@@ -104,24 +104,14 @@ PanelWindow {
         width: parent.width - 20
         height: Theme.barHeight
         radius: 2
-        color: Theme.island
-        border.width: 1; border.color: "#26ffffff"
-        Brackets { size: 8; out: 3 }
+        color: Theme.mix(Qt.rgba(0.04, 0.04, 0.04, 0.42), Theme.tint, 0.10 * Theme.tintOn)   // see-through glass
+        border.width: 1; border.color: "#1cffffff"
 
         Row {   // left
             anchors.left: parent.left; anchors.leftMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
             Launcher { anchors.verticalCenter: parent.verticalCenter }
             Sep {}
             Workspaces { anchors.verticalCenter: parent.verticalCenter }
-            Sep { visible: winTitle.text !== "" }
-            Text {
-                id: winTitle
-                anchors.verticalCenter: parent.verticalCenter; leftPadding: 6
-                readonly property var t: ToplevelManager.activeToplevel
-                text: t ? ((t.appId || "").split(".").pop().toUpperCase() + "  ·  " + (t.title || "")) : ""
-                width: Math.min(implicitWidth, island.width / 2 - 360); elide: Text.ElideRight
-                color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 11; font.letterSpacing: 0.5
-            }
         }
         ClockPill { id: clockPill; anchors.centerIn: parent }
         Row {   // right

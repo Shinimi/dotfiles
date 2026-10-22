@@ -1,4 +1,5 @@
-// Control center button: one icon, plus a small dot for notifications/updates. Scroll = volume. Made by Claude.
+// Volume + control center button: speaker and level, then the sliders icon (a dot for unread notifications).
+// Scroll = volume, right-click = mute, click = control center. Made by Claude.
 import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
@@ -8,20 +9,22 @@ Pill {
     padding: 11
     readonly property var sink: Pipewire.defaultAudioSink
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
-    Repeater {   // small icons that only show while something is on
-        model: [[SysState.gameMode, "\u{f0eb5}", Theme.red], [SysState.night, "\u{f0594}", Theme.yellow], [SysState.awake, "\u{f0176}", Theme.cyan],
-                [Notifs.dnd, "\u{f009b}", Theme.purple], [!!SysState.fx.mic, "\u{f036c}", Theme.green]].filter(x => x[0])
-        Label { required property var modelData; text: modelData[1]; color: modelData[2]; font.pixelSize: 13
-                anchors.verticalCenter: parent ? parent.verticalCenter : undefined }
+    Label {
+        anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+        readonly property real v: pill.sink && pill.sink.audio ? pill.sink.audio.volume : 0
+        readonly property bool m: !!(pill.sink && pill.sink.audio && pill.sink.audio.muted)
+        text: (m ? "\u{f075f}" : "\u{f057e}") + "  " + (m ? "muted" : Math.round(v * 100))
+        color: m ? Theme.muted : "#d8d8d8"; font.pixelSize: 11; font.weight: Font.Normal
     }
+    Rectangle { anchors.verticalCenter: parent ? parent.verticalCenter : undefined; width: 1; height: 12; color: "#22ffffff" }
     Item {
         width: 16; height: 16
         anchors.verticalCenter: parent ? parent.verticalCenter : undefined
         Label { anchors.centerIn: parent; text: ""; color: Theme.fg; font.pixelSize: 14 }
         Rectangle {
-            visible: (Notifs.count > 0 && !Notifs.dnd) || Updates.total > 0
-            width: 7; height: 7; radius: 4
-            color: Notifs.count > 0 && !Notifs.dnd ? Theme.red : Theme.blue
+            visible: Notifs.count > 0 && !Notifs.dnd
+            width: 6; height: 6; radius: 3
+            color: "#ffffff"
             x: parent.width - 2; y: -2
         }
     }

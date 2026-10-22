@@ -101,7 +101,6 @@ Scope {
         Rectangle {
             anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.95), Theme.tint, 0.07 * Theme.tintOn)
             border.width: 1; border.color: "#3dffffff"
-            Brackets {}
 
             Row {
                 id: head; x: 20; y: 16; spacing: 12

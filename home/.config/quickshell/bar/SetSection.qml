@@ -19,16 +19,6 @@ Rectangle {
     implicitWidth: 300               // the RowLayout decides the real width
     implicitHeight: col.implicitHeight + 30
     radius: 2; color: Theme.card; border.width: 1; border.color: "#26ffffff"
-    Repeater {
-        model: [[0, 0], [1, 0], [0, 1], [1, 1]]
-        Item {
-            required property var modelData
-            x: modelData[0] ? sec.width - 9 + 3 : -3; y: modelData[1] ? sec.height - 9 + 3 : -3
-            width: 9; height: 9
-            Rectangle { x: modelData[0] ? 8 : 0; width: 1; height: 9; color: "#99ffffff" }
-            Rectangle { y: modelData[1] ? 8 : 0; width: 9; height: 1; color: "#99ffffff" }
-        }
-    }
     Column {
         id: col
         x: 16; y: 14; width: parent.width - 32; spacing: 12

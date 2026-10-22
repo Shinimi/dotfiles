@@ -188,17 +188,6 @@ Scope {
             anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn)
             border.width: 1; border.color: "#3dffffff"
             focus: true
-            Repeater {   // corner brackets
-                model: [[0, 0], [1, 0], [0, 1], [1, 1]]
-                Item {
-                    required property var modelData
-                    z: 10
-                    x: modelData[0] ? frame.width - 12 + 4 : -4; y: modelData[1] ? frame.height - 12 + 4 : -4
-                    width: 12; height: 12
-                    Rectangle { x: modelData[0] ? 11 : 0; width: 1; height: 12; color: "#ffffff" }
-                    Rectangle { y: modelData[1] ? 11 : 0; width: 12; height: 1; color: "#ffffff" }
-                }
-            }
             Keys.onEscapePressed: root.visible = false
             Keys.onPressed: e => { if ((e.modifiers & Qt.ControlModifier) && e.key === Qt.Key_S) { Settings.apply(); e.accepted = true } }
             Keys.onUpPressed: { const i = root.shownPages.findIndex(p => p[0] === root.page); if (i > 0) root.page = root.shownPages[i - 1][0] }
@@ -604,7 +593,6 @@ Scope {
                             SetToggle { label: "ASCII living wallpaper"; desc: "your wallpaper drawn in glowing characters, slowly moving"; key: "ascii_wall" }
                             SetToggle { label: "Wallpaper tint"; desc: "the glass picks up a little of your wallpaper's colour"; key: "wall_tint" }
                             SetToggle { label: "Login hand-off"; desc: "after logging in, the ASCII dunes dissolve into your desktop"; key: "login_handoff" }
-                            SetToggle { label: "Workspace flash"; desc: "the workspace kanji fades through the screen when you switch"; key: "ws_flash" }
                             SetToggle { label: "Workspace previews"; desc: "hover a workspace in the bar to see its windows"; key: "ws_preview" }
                             SetToggle { label: "Kanji workspaces"; desc: "一 二 三 四 instead of 1 2 3 4"; key: "ws_kanji" }
                             SetToggle { label: "Screensaver"; desc: "your wallpaper in glowing characters, halfway to the auto-lock"; key: "screensaver" }

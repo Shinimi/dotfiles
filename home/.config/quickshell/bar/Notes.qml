@@ -52,7 +52,6 @@ Scope {
             Behavior on x { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
             radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.95), Theme.tint, 0.07 * Theme.tintOn)
             border.width: 1; border.color: "#3dffffff"
-            Brackets {}
             MouseArea { anchors.fill: parent }   // clicks inside stay inside
 
             Row {

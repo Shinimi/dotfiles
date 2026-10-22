@@ -44,7 +44,6 @@ Pill {
         Rectangle {
             anchors.fill: parent; anchors.margins: 4; radius: 2
             color: Theme.mix(Qt.rgba(0.03, 0.03, 0.03, 0.95), Theme.tint, 0.07 * Theme.tintOn); border.width: 1; border.color: "#3dffffff"
-            Brackets { size: 9; out: 3 }
             Row {
                 x: 12; y: 9; spacing: 8
                 Text { text: String(wsPill.previewWs).padStart(2, "0"); color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 10 }
@@ -86,16 +85,21 @@ Pill {
             readonly property bool isActive: !!(Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId)
                                              || !!(ws && ws.monitor && ws.monitor.name === "DP-1" && ws.monitor.activeWorkspace === ws)
             readonly property bool hasWindows: !!(ws && ws.toplevels && ws.toplevels.values.length > 0)
-            width: Math.max(isActive ? 38 : 26, wsLabel.implicitWidth + 14); height: 24; radius: 2
+            width: Math.max(30, wsLabel.implicitWidth + 16); height: 24; radius: 2
             anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-            color: isActive ? Theme.on : (wsMouse.containsMouse ? "#17ffffff" : "transparent")
+            color: wsMouse.containsMouse ? "#14ffffff" : "transparent"
             Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
             Behavior on color { ColorAnimation { duration: 140 } }
             Label {
                 id: wsLabel
                 anchors.centerIn: parent
                 text: Theme.wsName(wsId); font.pixelSize: Settings.cur("ws_kanji") ? 13 : 11; font.family: Settings.cur("ws_kanji") ? "Noto Sans CJK JP" : Theme.font
-                color: isActive ? Theme.onText : (hasWindows ? Theme.fg : "#555555")
+                color: isActive ? "#ffffff" : (hasWindows ? "#a8a8a8" : "#4a4a4a"); font.bold: isActive
+            }
+            Rectangle {   // the one you're on: a short white line under it
+                anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom
+                width: isActive ? 14 : 0; height: 2; color: "#ffffff"
+                Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
             }
             Rectangle {   // tiny dot: this workspace has windows
                 visible: hasWindows && !isActive && !Settings.cur("ws_kanji")

@@ -7,7 +7,7 @@ import os, re, shutil, subprocess, time, unicodedata
 ART = os.path.expanduser("~/.config/fastfetch/frieren.txt")
 G = lambda v: f"\033[38;2;{v};{v};{v}m"
 R = "\033[0m"; B = "\033[1m"
-LINE, CORNER, NUM, KEY, VAL, DIM, HEAD, JP = G(70), G(235), G(105), G(120), G(232), G(90), G(255), G(130)
+LINE, CORNER, NUM, KEY, VAL, DIM, HEAD, JP = G(70), G(70), G(105), G(120), G(232), G(90), G(255), G(130)
 
 def sh(cmd):
     try: return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=3).stdout.strip()

@@ -31,16 +31,6 @@ Rectangle {
         NumberAnimation { target: card; property: "opacity"; to: 1; duration: 260 }
     }
     Rectangle { visible: card.popup; width: 2; height: parent.height; color: card.critical ? Theme.red : "#ffffff" }
-    Repeater {
-        model: card.popup ? [[0, 0], [1, 0], [0, 1], [1, 1]] : []
-        Item {
-            required property var modelData
-            x: modelData[0] ? card.width - 10 + 3 : -3; y: modelData[1] ? card.height - 10 + 3 : -3
-            width: 10; height: 10
-            Rectangle { x: modelData[0] ? 9 : 0; width: 1; height: 10; color: "#bbffffff" }
-            Rectangle { y: modelData[1] ? 9 : 0; width: 10; height: 1; color: "#bbffffff" }
-        }
-    }
     Rectangle {   // countdown: shrinks until the pop-up goes away
         id: countdown
         visible: card.popup && !card.critical

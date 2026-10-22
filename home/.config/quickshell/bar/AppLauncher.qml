@@ -177,17 +177,6 @@ Scope {
             anchors.fill: parent; radius: 3
             color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn)
             border.width: 1; border.color: "#3dffffff"
-            // corner brackets
-            Repeater {
-                model: [[0, 0], [1, 0], [0, 1], [1, 1]]
-                Item {
-                    required property var modelData
-                    x: modelData[0] ? frame.width - 12 + 4 : -4; y: modelData[1] ? frame.height - 12 + 4 : -4
-                    width: 12; height: 12
-                    Rectangle { x: modelData[0] ? 11 : 0; width: 1; height: 12; color: "#ffffff" }
-                    Rectangle { y: modelData[1] ? 11 : 0; width: 12; height: 1; color: "#ffffff" }
-                }
-            }
 
             // ---------- header ----------
             Item {

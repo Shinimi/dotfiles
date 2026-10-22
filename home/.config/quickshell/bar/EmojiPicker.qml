@@ -69,7 +69,6 @@ Scope {
 
         Rectangle {
             anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn); border.width: 1; border.color: "#3dffffff"
-            Brackets {}
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 16; spacing: 12
                 TextField {
