@@ -4,7 +4,8 @@ import Quickshell
 import Quickshell.Wayland
 
 PanelWindow {
-    required property var screen
+    required property var modelData
+    screen: modelData
     visible: Settings.cur("hot_corner")
     anchors { top: true; left: true }
     implicitWidth: 3; implicitHeight: 3

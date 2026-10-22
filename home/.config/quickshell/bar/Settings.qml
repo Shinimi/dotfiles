@@ -37,7 +37,7 @@ Singleton {
         user_name: "yu", avatar: "", cc_logo: "avatar", wall_main: "", wall_side: "", default_apps: ({}), autostart: [],
         weather_place: "", weather_label: "", game_profiles: ({}),
         // extras
-        hot_corner: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true
+        hot_corner: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true, screensaver: true, desktop_vinyl: true
     })
     property var v: defaults        // applied
     property var draft: defaults    // being edited

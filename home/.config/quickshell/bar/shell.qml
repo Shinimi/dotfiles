@@ -5,9 +5,18 @@ import Quickshell
 
 ShellRoot {
     WallShuffle {}
+    Screensaver {}
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
-        HotCorner { required property var modelData; screen: modelData }
+        DesktopVinyl {}
+    }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        Ink { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        HotCorner {}
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
@@ -15,7 +24,7 @@ ShellRoot {
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
-        NotifPopups { required property var modelData; screen: modelData }
+        NotifPopups {}
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
@@ -43,7 +52,7 @@ ShellRoot {
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
-        DesktopWidget { required property var modelData; screen: modelData }
+        DesktopWidget {}
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")

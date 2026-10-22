@@ -4,7 +4,8 @@ import Quickshell
 import Quickshell.Wayland
 
 PanelWindow {
-    required property var screen
+    required property var modelData
+    screen: modelData
     visible: Notifs.popups.count > 0
     readonly property bool center: Settings.cur("notif_center")
     anchors { top: true; right: !center }

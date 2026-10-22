@@ -34,6 +34,7 @@
 --    Print                   region screenshot   CTRL + Print       full screen   ALT + Print  window
 --    SUPER + "  (left of 1)  drop-down terminal  SUPER + Z          focus mode (no gaps, bar or pop-ups)
 --    mouse to top-left corner  workspace overview
+--    SUPER + D               draw on the screen  SUPER + ALT + scroll  magnifier (SUPER + ALT + Z resets)
 --    SUPER + SHIFT + R       fix desktop (reload + restart bar/wallpaper/etc. if they died)
 --    SUPER + SHIFT + /  or  SUPER + F1   show this list
 -- ============================================================================
@@ -331,6 +332,10 @@ b("SUPER + SHIFT + Slash",  run(scripts .. "/keybinds.sh"))
 b("SUPER + F1",             run(scripts .. "/keybinds.sh"))
 b("SUPER + code:49",        run(scripts .. "/dropterm.sh"))        -- key left of 1: drop-down terminal
 b("SUPER + Z",              run(scripts .. "/focus-mode.sh"))      -- focus mode: no gaps, bar or pop-ups
+b("SUPER + D",              run("qs ipc -p ~/.config/quickshell/bar call ink toggle"))   -- draw on the screen
+b("SUPER + ALT + mouse_up",   run(scripts .. "/zoom.sh in"))      -- magnifier (scroll up = closer)
+b("SUPER + ALT + mouse_down", run(scripts .. "/zoom.sh out"))
+b("SUPER + ALT + Z",          run(scripts .. "/zoom.sh reset"))
 b("SUPER + SHIFT + R",      run(os.getenv("HOME") .. "/.local/bin/hypr-doctor.sh --fix"))   -- reload + restart anything that died
 
 -- Alt+Tab workspace switcher (hold Alt, tap Tab, release Alt)

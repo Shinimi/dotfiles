@@ -1,14 +1,14 @@
-// Desktop clock on the wallpaper (behind windows): time, date, weather, now playing.
+// Desktop clock on the wallpaper (behind windows): time, date, weather and today's line (the record player is DesktopVinyl).
 // On/off and position in Settings → Bar & notifications. Made by Claude.
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Widgets
 import Quickshell.Services.Mpris
 
 PanelWindow {
     id: w
-    required property var screen
+    required property var modelData
+    screen: modelData
     readonly property string pos: Settings.cur("desktop_clock_pos")
     visible: Settings.cur("desktop_clock")
     exclusionMode: ExclusionMode.Ignore
@@ -22,9 +22,6 @@ PanelWindow {
 
     readonly property var players: Mpris.players.values
     readonly property var player: players.find(p => p.isPlaying) || null
-    property string art: ""
-    readonly property string liveArt: player ? (player.trackArtUrl || "") : ""
-    onLiveArtChanged: if (liveArt !== "") art = liveArt   // never hand Image an empty source (Qt 6.12 crash)
     SystemClock { id: clk; precision: SystemClock.Minutes }
 
     Column {
@@ -54,25 +51,12 @@ PanelWindow {
             font.family: Theme.font; font.pixelSize: 17
             color: Theme.fgDim; style: Text.Raised; styleColor: "#aa000000"
         }
-        Item { width: 1; height: 14 }
-        Rectangle {   // now playing
-            visible: w.player !== null
+        Text {   // today's line
             anchors.horizontalCenter: w.pos === "center" ? parent.horizontalCenter : undefined
-            width: Math.min(560, np.implicitWidth + 24); height: 64; radius: 16
-            color: Qt.rgba(0.04, 0.04, 0.04, 0.55); border.width: 1; border.color: "#22eaeaea"
-            Row {
-                id: np
-                x: 10; anchors.verticalCenter: parent.verticalCenter; spacing: 12
-                ClippingRectangle {
-                    width: 44; height: 44; radius: 10; color: Theme.bgAlt
-                    Image { anchors.fill: parent; source: w.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; visible: w.art !== "" }
-                }
-                Column {
-                    anchors.verticalCenter: parent.verticalCenter
-                    Text { width: Math.min(implicitWidth, 470); elide: Text.ElideRight; text: w.player ? w.player.trackTitle : ""; color: Theme.fg; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
-                    Text { width: Math.min(implicitWidth, 470); elide: Text.ElideRight; text: w.player ? (w.player.trackArtist || w.player.identity) : ""; color: Theme.green; font.family: Theme.font; font.pixelSize: 12 }
-                }
-            }
+            topPadding: 2
+            text: "— " + Journey.today()
+            font.family: Theme.font; font.pixelSize: 14; font.italic: true; font.letterSpacing: 1
+            color: Theme.muted; style: Text.Raised; styleColor: "#aa000000"
         }
     }
 }

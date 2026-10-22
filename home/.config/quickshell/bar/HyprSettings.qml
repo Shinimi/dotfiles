@@ -24,7 +24,7 @@ Scope {
         ["glass", "\u{f0c8a}", "Glass & blur", "Look & feel", "transparency opacity blur"],
         ["wallpaper", "\u{f02e9}", "Wallpaper", "Look & feel", "background picture"],
         ["bar", "\u{f0e9e}", "Bar & notifications", "Desktop", "clock seconds weather popup do not disturb"],
-        ["extras", "\u{f0674}", "Extras", "Desktop", "hot corner focus mode drop-down terminal picture in picture wallpaper shuffle pause music lock"],
+        ["extras", "\u{f0674}", "Extras", "Desktop", "hot corner focus mode drop-down terminal screensaver ink draw magnifier zoom picture in picture wallpaper shuffle pause music lock"],
         ["shortcuts", "\u{f030c}", "Shortcuts", "Desktop", "keybinds keys hotkeys"],
         ["defaults", "\u{f03d6}", "Default apps", "Desktop", "browser file manager open with"],
         ["autostart", "\u{f0412}", "Autostart", "Desktop", "login startup apps"],
@@ -572,6 +572,8 @@ Scope {
                             SetToggle { label: "Hot corner"; desc: "push the mouse into the top-left corner for the overview"; key: "hot_corner" }
                             SetToggle { label: "Pause music when locking"; desc: "Spotify & co. stop when the screen locks"; key: "pause_on_lock" }
                             SetToggle { label: "Song & volume cards"; desc: "a small card drops under the bar when they change"; key: "island_peeks" }
+                            SetToggle { label: "Record player on the desktop"; desc: "your song spins on a vinyl, bottom-right, behind windows"; key: "desktop_vinyl" }
+                            SetToggle { label: "Screensaver"; desc: "drifting mana and a clock, halfway to the auto-lock"; key: "screensaver" }
                             SetChoice {
                                 label: "Wallpaper shuffle"; desc: "a different monochrome wallpaper now and then"
                                 current: Settings.get("wall_shuffle"); onPicked: v => Settings.set("wall_shuffle", v)
@@ -590,8 +592,14 @@ Scope {
                                 on: false; accent: Theme.on
                                 onToggled: { root.visible = false; Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/dropterm.sh"]) }
                             }
+                            SetSwitch {
+                                label: "Ink  ·  Super + D"; desc: "draw on the screen; ctrl+s saves a screenshot with it"
+                                on: false; accent: Theme.on
+                                onToggled: { root.visible = false; Quickshell.execDetached(["qs", "ipc", "-p", root.qsDir, "call", "ink", "toggle"]) }
+                            }
                             Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal
-                                    text: "Picture-in-picture videos from any browser pop into the bottom-right corner, stay on every workspace and never go see-through." }
+                                    text: "Magnifier: hold Super + Alt and scroll (Super + Alt + Z resets). "
+                                        + "Picture-in-picture videos from any browser pop into the bottom-right corner, stay on every workspace and never go see-through." }
                         }
                     }
 
