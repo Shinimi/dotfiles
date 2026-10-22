@@ -101,7 +101,6 @@ command -v spicetify >/dev/null && { spicetify config current_theme Monochrome >
 [ "$(basename "${SHELL:-}")" = zsh ] || { ask "Make zsh your shell?" && chsh -s /usr/bin/zsh; }
 [ -f "$HOME/.face.icon" ] && "$HOME/.local/bin/fetch-logo.sh"
 python3 -I "$HOME/.local/bin/mono-icons.py" >/dev/null 2>&1 || true
-python3 -I "$HOME/.local/bin/kocho-cursor.py" >/dev/null 2>&1 || true
 ok "theme"
 
 printf '\n%sAll done.%s Log out and pick Hyprland on the login screen.\n' "$green" "$off"
