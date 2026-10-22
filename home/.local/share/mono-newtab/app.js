@@ -1,4 +1,4 @@
-// New tab page: clock, today's line, bookmarks, and the dunes drawn as slowly moving ASCII. Made by Claude.
+// New tab page: clock, today's line, and the dunes drawn as slowly moving ASCII. Made by Claude.
 const LINES = ["a thousand years is just a long walk", "learn one useless spell today", "slow is still moving",
   "the flowers bloom where you walked", "remember the small things", "every journey ends somewhere new",
   "magic is patience, mostly", "the road remembers you", "rest is part of the journey",
@@ -11,16 +11,6 @@ function tick() {
 }
 tick(); setInterval(tick, 1000);
 { const d = new Date(), start = new Date(d.getFullYear(), 0, 0); $("line").textContent = "— " + LINES[Math.floor((d - start) / 86400000) % LINES.length]; }
-LINKS.forEach(([name, url], i) => {
-  const a = document.createElement("a"); a.href = url;
-  a.innerHTML = `<span class="n">${String(i + 1).padStart(2, "0")}</span><span class="s">//</span><span class="t">${name.toUpperCase()}</span><span class="u">${url.replace(/^https?:\/\/(www\.)?/, "")}</span>`;
-  $("links").appendChild(a);
-});
-// number keys 1-8 open a bookmark when the search box is empty
-addEventListener("keydown", e => {
-  if ($("q").value === "" && /^[1-9]$/.test(e.key) && LINKS[e.key - 1]) { e.preventDefault(); location.href = LINKS[e.key - 1][1]; }
-});
-
 // ---- ASCII dunes (same characters and light wave as the desktop) ----
 const CHARS = " .`:-=+*cox%#@", CW = 9, CH = 16;
 const cv = $("ascii"), cx = cv.getContext("2d");
