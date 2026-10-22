@@ -44,3 +44,6 @@ html, body, #app-mount, [class*="appMount"], [class*="app_"], [class*="bg_"], [c
   --mention-foreground: var(--tn-purple) !important;
 }
 ::selection { background: rgba(162,138,232, 0.35); }
+
+/* Kochō: same fonts as the desktop. Made by Claude. */
+:root { --font-primary: "Inter", sans-serif; --font-display: "Inter", sans-serif; --font-code: "GeistMono Nerd Font", monospace; }

@@ -65,7 +65,7 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" 
 local terminal    = "kitty"
 local fileManager = "dolphin"
 local browser     = "helium-browser"
-local menu        = "rofi -show drun"
+local menu        = os.getenv("HOME") .. "/.local/bin/launcher.sh drun"
 local scripts     = os.getenv("HOME") .. "/.config/hypr/scripts"
 
 

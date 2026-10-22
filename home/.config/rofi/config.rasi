@@ -9,6 +9,7 @@ configuration {
   hover-select: true;
   me-select-entry: "";
   me-accept-entry: "MousePrimary";
+  click-to-exit: true;
 }
 * {
   bg:    #0d0c13d9;
@@ -21,26 +22,32 @@ configuration {
 }
 window {
   width: 520px;
-  background-color: @bg;
-  border: 1px; border-color: #ffffff12; border-radius: 18px;
-  padding: 22px 18px 16px 18px;
+  background-color: transparent;
+  border: 0;
 }
-mainbox { spacing: 14px; children: [ inputbar, sep, listview ]; }
-inputbar { padding: 4px 8px; spacing: 14px; children: [ textbox-bf, entry ]; }
+mainbox {
+  spacing: 14px;
+  children: [ inputbar, sep, listview ];
+  background-color: #13121ce6;
+  border: 1px; border-color: #ffffff14; border-radius: 18px;
+  padding: 20px 16px 14px 16px;
+}
+inputbar { padding: 6px 8px; spacing: 12px; children: [ textbox-bf, entry ]; }
 textbox-bf {
   expand: false; vertical-align: 0.5;
   text-color: @pink; font: "GeistMono Nerd Font 15";
   content: "󱖉";
 }
 entry {
-  placeholder: "search";
+  placeholder: "Search";
+  cursor: text;
   placeholder-color: @dim;
   vertical-align: 0.5;
   font: "GeistMono Nerd Font 14";
 }
-sep { expand: false; content: ""; font: "GeistMono Nerd Font 1"; border: 0 0 1px 0; border-color: #e39ec033; margin: 0 8px; }
-listview { lines: 8; spacing: 2px; scrollbar: false; fixed-height: true; }
-element { padding: 9px 10px; border-radius: 10px; spacing: 14px; cursor: pointer; }
+sep { expand: false; content: ""; font: "GeistMono Nerd Font 1"; border: 0 0 1px 0; border-color: #e39ec033; margin: 0 6px; }
+listview { lines: 7; spacing: 2px; scrollbar: false; fixed-height: true; }
+element { padding: 8px 10px; border-radius: 10px; spacing: 14px; cursor: pointer; }
 element normal.normal, element alternate.normal, element normal.active, element alternate.active { background-color: transparent; text-color: #cfc8e2; }
 element selected.normal, element selected.active { background-color: #a28ae81f; text-color: @fg; }
 element-icon { size: 22px; vertical-align: 0.5; }

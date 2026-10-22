@@ -44,4 +44,8 @@ ShellRoot {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         DesktopWidget { required property var modelData; screen: modelData }
     }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        LauncherShield { required property var modelData; screen: modelData }
+    }
 }

@@ -1,3 +1,6 @@
 /* Tokyo Night for Spotify (made by Claude). Hyprland adds the glass. */
 .main-nowPlayingBar-container, .Root__now-playing-bar { border-top: 1px solid #2a2640 !important; }
 ::selection { background: rgba(162,138,232,.35); }
+
+/* Kochō: desktop fonts. Made by Claude. */
+body, .main-type-body, .encore-text { font-family: "Inter", sans-serif !important; }

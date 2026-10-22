@@ -52,7 +52,7 @@ BarPopup {
             Layout.fillWidth: true; spacing: 2
             Label { text: cc.greeting; font.pixelSize: 16; font.weight: Font.Bold }
             Label {
-                text: "\u{f0954}  up " + Stats.d.uptime + (Updates.total > 0 ? "   ·   \u{f06b0}  " + Updates.total + " updates" : "   ·   \u{f012c}  up to date")
+                text: "\u{f0954}  up " + Stats.d.uptime + (Updates.total > 0 ? "   ·   \u{f06b0}  " + Updates.total + " updates" : "   ·   up to date")
                 color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal
             }
         }
@@ -297,12 +297,12 @@ BarPopup {
                     width: parent.width; spacing: 8
                     MiniStat { icon: "\u{f0ee0}"; title: "CPU"; usage: Stats.d.cpu; temp: Stats.d.cpuTemp; extra: Stats.d.cpuFreq + " GHz"; accent: Theme.cyan }
                     MiniStat { icon: "\u{f08ae}"; title: "GPU"; usage: Stats.d.gpu; temp: Stats.d.gpuTemp; extra: Stats.d.gpuPower + " W"; accent: Theme.purple }
-                    MiniStat { icon: "\u{f035b}"; title: "RAM"; usage: Stats.d.ram; extra: Stats.d.ramUsed.toFixed(1) + " / " + Stats.d.ramTotal.toFixed(0) + " GB"; accent: Theme.yellow }
+                    MiniStat { icon: "\u{f035b}"; title: "RAM"; usage: Stats.d.ram; extra: Stats.d.ramUsed.toFixed(1) + " / " + Stats.d.ramTotal.toFixed(0) + " GB"; accent: Theme.blue }
                 }
                 RowLayout {
                     width: parent.width
                     Label { text: "\u{f0200}  " + (Stats.d.iface || "network"); color: Theme.muted; font.pixelSize: 10; Layout.fillWidth: true }
-                    Label { text: "\u{f0045} " + cc.speed(Stats.d.netRx || 0); color: Theme.green; font.pixelSize: 10 }
+                    Label { text: "\u{f0045} " + cc.speed(Stats.d.netRx || 0); color: Theme.cyan; font.pixelSize: 10 }
                     Label { text: "   \u{f005d} " + cc.speed(Stats.d.netTx || 0); color: Theme.purple; font.pixelSize: 10 }
                 }
             }
