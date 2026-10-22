@@ -6,10 +6,10 @@ hl.config({
     dwindle = { smart_split = false },
     decoration = {
         rounding = 8,
-        active_opacity = 0.94, inactive_opacity = 0.88,
+        active_opacity = 1.00, inactive_opacity = 0.92,
         dim_inactive = false, dim_strength = 0.12,
-        blur = { enabled = true, size = 8, passes = 3, vibrancy = 0.00,
-                 brightness = 0.85, noise = 0.020, xray = false, popups = true },
+        blur = { enabled = true, size = 10, passes = 4, vibrancy = 0.00,
+                 brightness = 0.70, noise = 0.010, xray = false, popups = true },
         shadow = { enabled = true, range = 12, color = "rgba(000000aa)" },
         glow = { enabled = false, range = 14, color = { colors = { "rgba(eaeaea66)", "rgba(7a7a7a66)" }, angle = 45 } },
         screen_shader = "",

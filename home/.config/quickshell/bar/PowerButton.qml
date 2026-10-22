@@ -8,7 +8,7 @@ Pill {
     id: pill
     padding: 10
     active: panel.visible
-    Label { text: ""; color: Theme.red; font.pixelSize: 14 }
+    Label { text: ""; color: pill.hovered ? Theme.red : Theme.fgDim; font.pixelSize: 14 }
     onClicked: panel.toggle()
 
     BarPopup {

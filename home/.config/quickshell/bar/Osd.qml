@@ -38,9 +38,9 @@ Scope {
                 anchors.centerIn: parent; spacing: 14
                 Label { text: parent.parent.m ? "" : ""; color: parent.parent.m ? Theme.muted : Theme.blue; font.pixelSize: 16; width: 20 }
                 Rectangle {
-                    width: 190; height: 8; radius: 4; color: Theme.bgAlt; anchors.verticalCenter: parent.verticalCenter
+                    width: 190; height: 6; radius: 3; color: "#1fffffff"; anchors.verticalCenter: parent.verticalCenter
                     Rectangle {
-                        width: Math.max(height, parent.width * Math.min(1, parent.parent.parent.v)); height: parent.height; radius: 4
+                        width: Math.max(height, parent.width * Math.min(1, parent.parent.parent.v)); height: parent.height; radius: 3
                         color: parent.parent.parent.m ? Theme.muted : Theme.blue
                         Behavior on width { NumberAnimation { duration: 90 } }
                     }

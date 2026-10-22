@@ -9,6 +9,7 @@ Column {
     id: root
     width: parent ? parent.width : 300
     spacing: 8
+    property bool showTitle: true
     // app playback streams (Quickshell marks them isStream + isSink); mic captures are excluded
     readonly property var streams: Pipewire.nodes.values.filter(n => n.isStream && n.isSink && n.audio && !(n.name || "").startsWith("effect_"))
     PwObjectTracker { objects: root.streams }
@@ -37,7 +38,7 @@ Column {
     }
     function label(name) { return name === "UE4" || name === "UE5" ? "Game" : name }
 
-    Label { visible: root.apps.length > 0; text: "Apps"; color: Theme.muted; font.pixelSize: 11 }
+    Label { visible: root.showTitle && root.apps.length > 0; text: "Apps"; color: Theme.muted; font.pixelSize: 11 }
     Repeater {
         model: root.apps
         RowLayout {
@@ -46,8 +47,8 @@ Column {
             readonly property bool muted: lead && lead.audio ? lead.audio.muted : false
             width: root.width; spacing: 10
             Rectangle {
-                width: 32; height: 32; radius: 9
-                color: muted ? Theme.red : (aMouse.containsMouse ? Theme.bgHover : Theme.bgAlt)
+                width: 32; height: 32; radius: 10
+                color: muted ? "#40cf6b6b" : (aMouse.containsMouse ? Theme.cardHi : Theme.card)
                 IconImage { anchors.centerIn: parent; implicitSize: 20; source: root.iconFor(modelData); opacity: muted ? 0.4 : 1 }
                 MouseArea { id: aMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                     onClicked: { const m = !muted; for (const n of modelData.nodes) if (n.audio) n.audio.muted = m } }
@@ -60,7 +61,7 @@ Column {
                     Label { text: lead && lead.audio ? Math.round(lead.audio.volume * 100) + "%" : ""; color: Theme.muted; font.pixelSize: 10 }
                 }
                 Slider {
-                    accent: Theme.blue
+                    accent: Theme.on
                     value: lead && lead.audio ? Math.min(1, lead.audio.volume) : 0
                     onMoved: v => { for (const n of modelData.nodes) if (n.audio) { n.audio.muted = false; n.audio.volume = v } }
                 }

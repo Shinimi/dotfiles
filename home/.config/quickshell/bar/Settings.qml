@@ -17,8 +17,8 @@ Singleton {
         // motion
         animations: true, anim_speed: "normal", butterflies: true, butterfly_count: 7, ws_anim: "slidefade",
         // glass
-        opacity_active: 90, opacity_inactive: 80, glass: 60, blur: true, blur_size: 7, blur_passes: 3, vibrancy: 18,
-        blur_brightness: 85, blur_noise: 2, blur_xray: false, blur_popups: true,
+        opacity_active: 100, opacity_inactive: 92, glass: 60, blur: true, blur_size: 10, blur_passes: 4, vibrancy: 0,
+        blur_brightness: 70, blur_noise: 1, blur_xray: false, blur_popups: true,
         // input
         sensitivity: 0.4, accel_flat: true, natural_scroll: false, scroll_factor: 1.0, follow_mouse: true,
         middle_scroll: true, scroll_mode: "autoscroll", middle_paste: true, focus_on_activate: true, repeat_rate: 35, repeat_delay: 300,

@@ -13,9 +13,9 @@ Rectangle {
     width: parent ? parent.width : 340
     implicitHeight: col.implicitHeight + 24
     radius: 14
-    color: popup ? Theme.panel : "#66111111"
+    color: popup ? Theme.panel : Theme.card
     border.width: 1
-    border.color: critical ? Theme.red : (popup ? Theme.glassLine : "transparent")
+    border.color: critical ? Theme.red : (popup ? Theme.glassLine : Theme.stroke)
     Rectangle {   // butterfly-pink accent on the left edge
         visible: card.popup
         x: 6; anchors.verticalCenter: parent.verticalCenter

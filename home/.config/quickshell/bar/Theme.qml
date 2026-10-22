@@ -8,10 +8,16 @@ Singleton {
     // translucent surfaces (Hyprland blurs what's behind them); text colors stay solid
     // glass level (0-100) comes from the Hyprland settings panel
     readonly property real glass: Settings.cur("glass") / 100
-    readonly property color barBg:   Qt.rgba(0.07, 0.07, 0.07, 1 - glass * 0.70)
-    readonly property color panel:   Qt.rgba(0.07, 0.07, 0.07, 1 - glass * 0.45)
-    readonly property color card:    Qt.rgba(0.11, 0.11, 0.11, 0.80 - glass * 0.45)
-    readonly property color glassLine: "#40eaeaea" // soft light edge
+    // frosted dark glass: a deep tint the blur shows through, never grey haze
+    readonly property color barBg:   Qt.rgba(0.035, 0.035, 0.035, 0.82 - glass * 0.40)
+    readonly property color panel:   Qt.rgba(0.035, 0.035, 0.035, 0.90 - glass * 0.35)
+    // cards are light veils on the glass (not darker boxes) so layers stay clean
+    readonly property color card:    "#0bffffff"
+    readonly property color cardHi:  "#16ffffff"
+    readonly property color stroke:  "#12ffffff"   // card hairline
+    readonly property color glassLine: "#1fffffff" // panel/bar edge
+    readonly property color on:      "#ededed"     // "on" state fill (monochrome accent)
+    readonly property color onText:  "#0c0c0c"
     readonly property color bgAlt:   "#1c1c1c"
     readonly property color bgHover: "#242424"
     readonly property color border:  "#242424"
@@ -29,7 +35,7 @@ Singleton {
     function fileUrl(p) { return p ? "file://" + p.split("/").map(encodeURIComponent).join("/") : "" }
     readonly property string font:   "GeistMono Nerd Font"
     readonly property int fontSize:  12
-    readonly property int barHeight: 32
+    readonly property int barHeight: 34
     readonly property int pillHeight: 26
     readonly property int radius:    9
 }

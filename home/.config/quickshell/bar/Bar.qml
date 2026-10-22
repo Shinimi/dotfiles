@@ -13,28 +13,33 @@ PanelWindow {
     exclusiveZone: Theme.barHeight + 4
     color: "transparent"
 
-    // one floating translucent bar; Hyprland blurs what's behind it
-    Rectangle {
-        anchors.fill: parent
-        anchors.topMargin: 6; anchors.leftMargin: 10; anchors.rightMargin: 10
-        radius: 14
+    // three floating glass islands (left · centre · right); Hyprland blurs only behind them
+    component Island: Rectangle {
+        default property alias items: islandRow.data
+        anchors.top: parent.top; anchors.topMargin: 6
+        height: Theme.barHeight
+        width: islandRow.implicitWidth + 8
+        radius: height / 2
         color: Theme.barBg
         border.width: 1; border.color: Theme.glassLine
+        Behavior on width { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+        Row { id: islandRow; anchors.centerIn: parent; spacing: 2 }
+    }
 
-        Row {
-            anchors.left: parent.left; anchors.leftMargin: 4; anchors.verticalCenter: parent.verticalCenter
-            spacing: 2
-            Launcher {}
-            Workspaces {}
-        }
-        ClockPill { id: clockPill; anchors.centerIn: parent }
-        Row {
-            anchors.right: parent.right; anchors.rightMargin: 4; anchors.verticalCenter: parent.verticalCenter
-            spacing: 2
-            MediaPill { id: mediaPill }
-            StatusPill { id: statusPill }
-            PowerButton { id: powerPill }
-        }
+    Island {
+        anchors.left: parent.left; anchors.leftMargin: 10
+        Launcher {}
+        Workspaces {}
+    }
+    Island {
+        anchors.horizontalCenter: parent.horizontalCenter
+        ClockPill { id: clockPill }
+    }
+    Island {
+        anchors.right: parent.right; anchors.rightMargin: 10
+        MediaPill { id: mediaPill }
+        StatusPill { id: statusPill }
+        PowerButton { id: powerPill }
     }
 
     // open panels from keybinds / scripts:  qs -p ~/.config/quickshell/bar ipc call bar calendar

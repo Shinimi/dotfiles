@@ -9,10 +9,10 @@ Pill {
     readonly property var player: players.find(p => p.isPlaying) || players.find(p => p.identity === "Spotify") || players[0] || null
     visible: Settings.cur("bar_media") && player !== null && player.trackTitle !== ""
     active: panel.visible
-    Label { text: pill.player && pill.player.isPlaying ? "" : ""; color: Theme.purple }
+    Label { text: pill.player && pill.player.isPlaying ? "\u{f075a}" : "\u{f03e4}"; color: Theme.fg; font.pixelSize: 13 }
     Label {
-        text: pill.player ? (pill.player.trackArtist ? pill.player.trackArtist + " – " : "") + pill.player.trackTitle : ""
-        elide: Text.ElideRight; width: Math.min(implicitWidth, 260); color: Theme.fgDim
+        text: pill.player ? pill.player.trackTitle + (pill.player.trackArtist ? "  ·  " + pill.player.trackArtist : "") : ""
+        elide: Text.ElideRight; width: Math.min(implicitWidth, 240); color: Theme.fgDim; font.weight: Font.Normal
     }
     onClicked: m => { if (m.button === Qt.MiddleButton && player) player.togglePlaying(); else panel.toggle() }
     onScrolled: d => { if (player) (d > 0 ? player.next() : player.previous()) }
