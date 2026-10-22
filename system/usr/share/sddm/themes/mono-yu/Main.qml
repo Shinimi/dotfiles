@@ -1,4 +1,5 @@
 // Monochrome login screen (SDDM, Qt 6), island style to match the lock screen: torii at night, slow zoom,
+// the picture drawn in glowing ASCII characters,
 // drifting dust, a black glass pill at the top, thin clock, today's line, avatar + pill password. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
@@ -85,20 +86,63 @@ Item {
         function onLoginSucceeded() { fadeOut.start() }
     }
 
-    // ---------- background: the art stays sharp; a soft shade on the right for the text ----------
-    Image {
+    // ---------- background: the art redrawn in glowing characters (ASCII), breathing slowly ----------
+    Rectangle { anchors.fill: parent; color: "#000000" }
+    Item {
         id: bgArt
         anchors.fill: parent
-        source: root.isMain ? config.background : (config.background2 || config.background)
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: false
         transformOrigin: Item.Center
         SequentialAnimation on scale { loops: Animation.Infinite
-            NumberAnimation { from: 1.0; to: 1.09; duration: 38000; easing.type: Easing.InOutSine }
-            NumberAnimation { from: 1.09; to: 1.0; duration: 38000; easing.type: Easing.InOutSine } }
-        SequentialAnimation on x { loops: Animation.Infinite
-            NumberAnimation { from: 0; to: -60; duration: 30000; easing.type: Easing.InOutSine }
-            NumberAnimation { from: -60; to: 0; duration: 30000; easing.type: Easing.InOutSine } }
+            NumberAnimation { from: 1.0; to: 1.06; duration: 38000; easing.type: Easing.InOutSine }
+            NumberAnimation { from: 1.06; to: 1.0; duration: 38000; easing.type: Easing.InOutSine } }
+        readonly property size cell: Qt.size(9, 16)
+        Image {   // the picture, one pixel per character cell
+            id: srcImg
+            source: root.isMain ? (config.asciiBackground || config.background) : (config.background2 || config.background)
+            sourceSize.width: Math.ceil(root.width / bgArt.cell.width) * 2
+            sourceSize.height: Math.ceil(root.height / bgArt.cell.height) * 2
+            width: sourceSize.width; height: sourceSize.height
+            fillMode: Image.PreserveAspectCrop; visible: false; smooth: true
+        }
+        MultiEffect {   // lift the night picture so the shore and rocks become characters too
+            id: lifted; source: srcImg; width: srcImg.width; height: srcImg.height; visible: false
+            brightness: 0.0; contrast: 0.1
+        }
+        ShaderEffectSource { id: srcTex; sourceItem: lifted; hideSource: true; live: true; smooth: true }
+        Row {   // character atlas, dim → bright
+            id: atlasRow
+            readonly property string chars: " .`:-=+*cox%#@"
+            visible: false
+            Repeater {
+                model: atlasRow.chars.length
+                Text {
+                    required property int index
+                    width: bgArt.cell.width; height: bgArt.cell.height
+                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    text: atlasRow.chars[index]; color: "#ffffff"
+                    font.family: root.font; font.pixelSize: 13; font.weight: Font.Bold
+                }
+            }
+        }
+        ShaderEffectSource { id: atlasTex; sourceItem: atlasRow; hideSource: true; live: true; smooth: true }
+        MultiEffect {   // soft glow under the characters
+            anchors.fill: parent; source: fx
+            blurEnabled: true; blur: 0.55; blurMax: 32; brightness: 0.05; opacity: 0.85
+        }
+        ShaderEffect {
+            id: fx
+            anchors.fill: parent
+            property real time: 0
+            NumberAnimation on time { from: 0; to: 100000; duration: 100000000; loops: Animation.Infinite }
+            property real glyphs: atlasRow.chars.length
+            property real bright: 0.95
+            property size res: Qt.size(width, height)
+            property size cell: bgArt.cell
+            property color tintc: "#ffffff"
+            property variant src: srcTex
+            property variant atlas: atlasTex
+            fragmentShader: Qt.resolvedUrl("assets/ascii.frag.qsb")
+        }
     }
     // slow drifting dust
     ParticleSystem { id: petals; anchors.fill: parent; running: true }
@@ -121,10 +165,11 @@ Item {
     Wander { system: petals; xVariance: 70; pace: 120; affectedParameter: Wander.Velocity }
     Rectangle {
         anchors.fill: parent
-        gradient: Gradient {
-            orientation: Gradient.Horizontal
-            GradientStop { position: 0.0;  color: "#330b0b0b" }
-            GradientStop { position: 1.0;  color: "#330b0b0b" }
+        gradient: Gradient {   // darker at the top so the clock reads over the bright character sky
+            GradientStop { position: 0.0;  color: "#d0000000" }
+            GradientStop { position: 0.36; color: "#a0000000" }
+            GradientStop { position: 0.55; color: "#18000000" }
+            GradientStop { position: 1.0;  color: "#40000000" }
         }
     }
 
@@ -180,12 +225,12 @@ Item {
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatDate(root.now, "dddd, d MMMM").toLowerCase()
-            color: "#b0b0b0"; font.family: root.font; font.pixelSize: 21
+            color: "#d8d8d8"; font.family: root.font; font.pixelSize: 21
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "— " + root.todayLine
-            color: "#66ffffff"; font.family: root.font; font.pixelSize: 16; font.italic: true
+            color: "#b0ffffff"; font.family: root.font; font.pixelSize: 16; font.italic: true
         }
     }
 
