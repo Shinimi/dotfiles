@@ -1,8 +1,8 @@
 [Sound Theme]
 Name=Mono
-Comment=KDE Ocean sounds (+ freedesktop shutter). Made by Claude.
+Comment=COSMIC sounds: short, soft, modern. Made by Claude.
 Directories=stereo
-Inherits=ocean,freedesktop
+Inherits=COSMIC,freedesktop
 
 [stereo]
 OutputProfile=stereo

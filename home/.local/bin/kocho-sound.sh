@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # kocho-sound.sh <event> – plays your voice clip for the event if you added one
-# (~/.local/share/sounds/kocho-voice/<event>[-N].ogg|mp3|wav|…), otherwise the Kochō koto sound.
+# (~/.local/share/sounds/kocho-voice/<event>[-N].ogg|mp3|wav|…), otherwise the Mono (COSMIC) sound.
 # Quiet during game mode or when Sounds is off in Settings. Made by Claude.
 [ -e "$XDG_RUNTIME_DIR/gamemode.state" ] && exit 0
 grep -q '"sounds": false' "$HOME/.config/hypr/settings.json" 2>/dev/null && exit 0
@@ -11,4 +11,8 @@ if [ ${#clips[@]} -gt 0 ]; then
 else
   f="$HOME/.local/share/sounds/mono/stereo/$1.oga"; [ -f "$f" ] || exit 0
 fi
-pw-play --volume 0.6 "$f" >/dev/null 2>&1 &
+# no pile-ups: a burst of notifications plays one sound, not ten
+stamp="$XDG_RUNTIME_DIR/ui-sound.last"; now=$(date +%s%N)
+[ -f "$stamp" ] && [ $(( (now - $(cat "$stamp")) / 1000000 )) -lt 700 ] && exit 0
+echo "$now" > "$stamp"
+pw-play --volume 0.55 "$f" >/dev/null 2>&1 &

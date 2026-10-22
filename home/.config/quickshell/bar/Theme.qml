@@ -16,6 +16,7 @@ Singleton {
     readonly property color cardHi:  "#16ffffff"
     readonly property color stroke:  "#12ffffff"   // card hairline
     readonly property color glassLine: "#1fffffff" // panel/bar edge
+    readonly property color island:  Qt.rgba(0.02, 0.02, 0.02, 0.90 - glass * 0.25)   // the dynamic island: near-black glass
     readonly property color on:      "#ededed"     // "on" state fill (monochrome accent)
     readonly property color onText:  "#0c0c0c"
     readonly property color bgAlt:   "#1c1c1c"

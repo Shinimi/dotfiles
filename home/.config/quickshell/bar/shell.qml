@@ -1,16 +1,12 @@
 //@ pragma UseQApplication
 //@ pragma IconTheme Tela-mono
-// Yu's bar (Quickshell). Only on the main screen (DP-1). Made by Claude.
+// Yu's shell (Quickshell): dynamic island + panels. Only on the main screen (DP-1). Made by Claude.
 import Quickshell
 
 ShellRoot {
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
-        Bar {}
-    }
-    Variants {
-        model: Quickshell.screens.filter(s => s.name === "DP-1")
-        Osd { required property var modelData; screen: modelData }
+        Island {}
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
@@ -43,10 +39,6 @@ ShellRoot {
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         DesktopWidget { required property var modelData; screen: modelData }
-    }
-    Variants {
-        model: Quickshell.screens.filter(s => s.name === "DP-1")
-        LauncherShield { required property var modelData; screen: modelData }
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")

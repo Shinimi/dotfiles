@@ -238,7 +238,7 @@ BarPopup {
                         Row {
                             anchors.fill: parent; anchors.margins: 3
                             Repeater {
-                                model: [["off", "Off"], ["flat", "Flat"], ["music", "Music"], ["games", "Games"], ["bass", "Bass"]]
+                                model: [["off", "Off"], ["music", "Music"], ["vocal", "Vocal"], ["games", "Games"], ["bass", "Bass"]]
                                 Rectangle {
                                     required property var modelData
                                     readonly property bool cur: modelData[0] === "off" ? !SysState.fx.eq : (!!SysState.fx.eq && SysState.fx.preset === modelData[0])
