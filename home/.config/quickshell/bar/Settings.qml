@@ -17,8 +17,8 @@ Singleton {
         // motion
         animations: true, anim_speed: "normal", butterflies: true, butterfly_count: 7, ws_anim: "slidefade",
         // glass
-        opacity_active: 100, opacity_inactive: 92, glass: 60, blur: true, blur_size: 10, blur_passes: 4, vibrancy: 0,
-        blur_brightness: 70, blur_noise: 1, blur_xray: false, blur_popups: true,
+        opacity_active: 80, opacity_inactive: 72, glass: 60, blur: true, blur_size: 6, blur_passes: 3, vibrancy: 15,
+        blur_brightness: 62, blur_noise: 1, blur_xray: false, blur_popups: true,
         // input
         sensitivity: 0.4, accel_flat: true, natural_scroll: false, scroll_factor: 1.0, follow_mouse: true,
         middle_scroll: true, scroll_mode: "autoscroll", middle_paste: true, focus_on_activate: true, repeat_rate: 35, repeat_delay: 300,
@@ -35,7 +35,9 @@ Singleton {
         lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true,
         // account, wallpaper, apps, time
         user_name: "yu", avatar: "", cc_logo: "avatar", wall_main: "", wall_side: "", default_apps: ({}), autostart: [],
-        weather_place: "", weather_label: "", game_profiles: ({})
+        weather_place: "", weather_label: "", game_profiles: ({}),
+        // extras
+        hot_corner: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true
     })
     property var v: defaults        // applied
     property var draft: defaults    // being edited

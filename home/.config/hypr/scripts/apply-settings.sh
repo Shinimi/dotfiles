@@ -94,6 +94,9 @@ open(os.path.join(state,"monitors.lua.new"),'w').write(mon)
 t=open(idle).read(); m=int(s["lock_minutes"])
 t=re.sub(r'timeout = \d+\s+# \d+ min: lock', f'timeout = {m*60}                                  # {m} min: lock', t)
 t=re.sub(r'timeout = \d+\s+# \d+ min: screens off', f'timeout = {m*60+int(s["screen_off_after"])*60}                                  # {m+int(s["screen_off_after"])} min: screens off', t)
+# pause music when the screen locks
+lk = "pidof hyprlock || { playerctl -a pause; hyprlock; }" if s.get("pause_on_lock", True) else "pidof hyprlock || hyprlock"
+t=re.sub(r'lock_cmd = [^\n]*', lambda _: 'lock_cmd = ' + lk, t)
 open(idle,'w').write(t)
 
 # desktop theme (applied below only when it changed)

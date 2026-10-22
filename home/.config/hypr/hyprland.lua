@@ -32,6 +32,8 @@
 --    SUPER + SHIFT + C       color picker        SUPER + SHIFT + P  screens off / on
 --    CTRL + ALT + Delete / M task manager (btop)
 --    Print                   region screenshot   CTRL + Print       full screen   ALT + Print  window
+--    SUPER + "  (left of 1)  drop-down terminal  SUPER + Z          focus mode (no gaps, bar or pop-ups)
+--    mouse to top-left corner  workspace overview
 --    SUPER + SHIFT + R       fix desktop (reload + restart bar/wallpaper/etc. if they died)
 --    SUPER + SHIFT + /  or  SUPER + F1   show this list
 -- ============================================================================
@@ -267,11 +269,19 @@ for _, cls in ipairs({ "^(pavucontrol|org.pulseaudio.pavucontrol)$", "^(nm-conne
 end
 
 
+-- Drop-down terminal (SUPER + `): lives on its own hidden workspace, slides from the top
+hl.window_rule({ name = "dropterm", match = { class = "^(dropterm)$" }, float = true, workspace = "special:term",
+                 size = "(monitor_w*0.62) (monitor_h*0.48)", move = "(monitor_w*0.19) 52" })
+-- Picture-in-picture videos: small, pinned to every workspace, bottom-right corner, never see-through
+hl.window_rule({ name = "pip", match = { title = "^([Pp]icture[- ][Ii]n[- ][Pp]icture)$" }, float = true, pin = true,
+                 size = "(monitor_w*0.24) (monitor_h*0.24)", move = "(monitor_w*0.76-18) (monitor_h*0.76-18)",
+                 opacity = "1.0 override 1.0 override" })
+
 -- Glass: these stay fully solid (games, video players, fullscreen)
 hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|org.kde.gwenview|com.obsproject.Studio)$" }, opacity = "1.0 override 1.0 override" })
 hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true }, opacity = "1.0 override 1.0 override" })
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
-hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop)$" }, opacity = "1.0 override 1.0 override" })
+hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop|dropterm)$" }, opacity = "1.0 override 1.0 override" })
 -- blur behind the bar, panels and pop-ups
 hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview|launcher))$" }, blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
@@ -319,6 +329,8 @@ b("SUPER + ALT + N",        run(scripts .. "/nightlight.sh"))
 b("SUPER + ALT + I",        run(scripts .. "/idle-inhibit.sh"))
 b("SUPER + SHIFT + Slash",  run(scripts .. "/keybinds.sh"))
 b("SUPER + F1",             run(scripts .. "/keybinds.sh"))
+b("SUPER + code:49",        run(scripts .. "/dropterm.sh"))        -- key left of 1: drop-down terminal
+b("SUPER + Z",              run(scripts .. "/focus-mode.sh"))      -- focus mode: no gaps, bar or pop-ups
 b("SUPER + SHIFT + R",      run(os.getenv("HOME") .. "/.local/bin/hypr-doctor.sh --fix"))   -- reload + restart anything that died
 
 -- Alt+Tab workspace switcher (hold Alt, tap Tab, release Alt)

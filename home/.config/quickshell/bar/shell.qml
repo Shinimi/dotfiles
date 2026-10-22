@@ -4,6 +4,11 @@
 import Quickshell
 
 ShellRoot {
+    WallShuffle {}
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        HotCorner { required property var modelData; screen: modelData }
+    }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         Island {}

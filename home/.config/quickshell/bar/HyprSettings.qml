@@ -13,6 +13,7 @@ Scope {
     property bool visible: false
     property string page: "appearance"
     property string kbMode: "kocho"
+    property bool focusOn: false
     readonly property string qsDir: Quickshell.env("HOME") + "/.config/quickshell/bar"
     // sidebar: [id, icon, title, group, search words]
     readonly property var pages: [
@@ -23,6 +24,7 @@ Scope {
         ["glass", "\u{f0c8a}", "Glass & blur", "Look & feel", "transparency opacity blur"],
         ["wallpaper", "\u{f02e9}", "Wallpaper", "Look & feel", "background picture"],
         ["bar", "\u{f0e9e}", "Bar & notifications", "Desktop", "clock seconds weather popup do not disturb"],
+        ["extras", "\u{f0674}", "Extras", "Desktop", "hot corner focus mode drop-down terminal picture in picture wallpaper shuffle pause music lock"],
         ["shortcuts", "\u{f030c}", "Shortcuts", "Desktop", "keybinds keys hotkeys"],
         ["defaults", "\u{f03d6}", "Default apps", "Desktop", "browser file manager open with"],
         ["autostart", "\u{f0412}", "Autostart", "Desktop", "login startup apps"],
@@ -60,7 +62,9 @@ Scope {
     function toggle() { visible = !visible }
     function open(p) { page = p; visible = true }
     function exec(cmd) { visible = false; Quickshell.execDetached(cmd) }
-    onVisibleChanged: if (visible) { PopupState.current = root; SysState.refresh(); about.running = true; mons.running = true }
+    onVisibleChanged: if (visible) { PopupState.current = root; SysState.refresh(); about.running = true; mons.running = true; focusChk.running = true }
+    Process { id: focusChk; command: ["sh", "-c", "test -e \"$XDG_RUNTIME_DIR/focus-mode\" && echo 1"]
+              stdout: StdioCollector { onStreamFinished: root.focusOn = this.text.trim() === "1" } }
     Connections { target: PopupState; function onCurrentChanged() { if (PopupState.current !== root) root.visible = false } }
     IpcHandler {
         target: "settings"
@@ -557,6 +561,37 @@ Scope {
                             }
                             SetToggle { label: "Sounds"; desc: "soft sounds for notifications, login and screenshots"; key: "sounds" }
                             SetSwitch { label: "Do not disturb"; desc: "hide pop-ups (instant)"; on: Notifs.dnd; accent: Theme.purple; onToggled: Notifs.dnd = !Notifs.dnd }
+                        }
+                    }
+
+                    // ---------- Extras ----------
+                    Row {
+                        visible: root.page === "extras"; width: parent.width; spacing: 14
+                        SetSection {
+                            width: (parent.width - 14) / 2; title: "Little helpers"; icon: "\u{f0674}"
+                            SetToggle { label: "Hot corner"; desc: "push the mouse into the top-left corner for the overview"; key: "hot_corner" }
+                            SetToggle { label: "Pause music when locking"; desc: "Spotify & co. stop when the screen locks"; key: "pause_on_lock" }
+                            SetToggle { label: "Song & volume cards"; desc: "a small card drops under the bar when they change"; key: "island_peeks" }
+                            SetChoice {
+                                label: "Wallpaper shuffle"; desc: "a different monochrome wallpaper now and then"
+                                current: Settings.get("wall_shuffle"); onPicked: v => Settings.set("wall_shuffle", v)
+                                options: [[0, "Off"], [15, "15 min"], [60, "Hourly"], [1440, "Daily"]]
+                            }
+                        }
+                        SetSection {
+                            width: (parent.width - 14) / 2; title: "Modes & tricks"; icon: "\u{f0d4a}"
+                            SetSwitch {
+                                label: "Focus mode  ·  Super + Z"; desc: "no gaps, no bar, no pop-ups, just the window"
+                                on: root.focusOn; accent: Theme.on
+                                onToggled: { Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/focus-mode.sh"]); root.focusOn = !root.focusOn }
+                            }
+                            SetSwitch {
+                                label: "Drop-down terminal  ·  Super + \""; desc: "a terminal slides from the top; same key hides it"
+                                on: false; accent: Theme.on
+                                onToggled: { root.visible = false; Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/dropterm.sh"]) }
+                            }
+                            Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal
+                                    text: "Picture-in-picture videos from any browser pop into the bottom-right corner, stay on every workspace and never go see-through." }
                         }
                     }
 

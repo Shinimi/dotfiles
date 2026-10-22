@@ -292,6 +292,56 @@ BarPopup {
             }
 
             CcCard {
+                title: "Today"; icon: "\u{f0599}"
+                note: Weather.ready ? Weather.place : ""
+                // weather now + next days
+                RowLayout {
+                    visible: Weather.ready
+                    width: parent.width; spacing: 12
+                    Label { text: Weather.icon; font.pixelSize: 30; color: Theme.fg }
+                    Column {
+                        spacing: 0
+                        Label { text: Weather.temp + "°"; font.pixelSize: 22; font.weight: Font.Bold }
+                        Label { text: Weather.desc + " · feels " + Weather.feels + "°"; color: Theme.muted; font.pixelSize: 9; font.weight: Font.Normal }
+                    }
+                    Item { Layout.fillWidth: true }
+                    Repeater {
+                        model: Weather.days.slice(1, 3)
+                        Column {
+                            required property var modelData
+                            spacing: 2
+                            Label { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(new Date(modelData.date), "ddd"); color: Theme.muted; font.pixelSize: 9 }
+                            Label { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.icon; font.pixelSize: 15 }
+                            Label { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.max + "° " + modelData.min + "°"; color: Theme.fgDim; font.pixelSize: 9; font.weight: Font.Normal }
+                        }
+                    }
+                }
+                Rectangle { width: parent.width; height: 1; color: Theme.stroke }
+                // quick timer: pick a length, or watch it count down
+                RowLayout {
+                    width: parent.width; spacing: 6
+                    Label {
+                        text: Timers.timerActive ? "\u{f051f}  " + Timers.fmt(Timers.remaining) : "\u{f051f}  Timer"
+                        color: Timers.timerRunning ? "#ffffff" : Theme.fgDim; font.pixelSize: Timers.timerActive ? 14 : 11
+                        font.weight: Timers.timerActive ? Font.Bold : Font.DemiBold; Layout.fillWidth: true
+                    }
+                    Repeater {
+                        model: Timers.timerActive ? [[Timers.timerRunning ? "\u{f03e4}" : "\u{f040a}", () => Timers.toggleTimer()], ["\u{f0450}", () => Timers.resetTimer()]]
+                                                  : [["5m", () => { Timers.setMinutes(5); Timers.toggleTimer() }], ["15m", () => { Timers.setMinutes(15); Timers.toggleTimer() }],
+                                                     ["25m", () => { Timers.setMinutes(25); Timers.toggleTimer() }], ["1h", () => { Timers.setMinutes(60); Timers.toggleTimer() }]]
+                        Rectangle {
+                            required property var modelData
+                            width: Math.max(36, tl.implicitWidth + 18); height: 26; radius: 13
+                            color: tmm.containsMouse ? Theme.on : "#0affffff"; border.width: 1; border.color: Theme.stroke
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                            Label { id: tl; anchors.centerIn: parent; text: modelData[0]; font.pixelSize: 10; color: tmm.containsMouse ? Theme.onText : Theme.fgDim }
+                            MouseArea { id: tmm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData[1]() }
+                        }
+                    }
+                }
+            }
+
+            CcCard {
                 title: "Notifications"; icon: "\u{f009a}"
                 note: Notifs.count > 0 ? String(Notifs.count) : ""
                 Column {
