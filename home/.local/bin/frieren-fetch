@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-# frieren-fetch – monochrome system fetch: Frieren braille art beside a rounded info box.
-# Art: ~/.config/fastfetch/frieren.txt (any ANSI/braille text works). Made by Claude.
-import os, re, subprocess, shutil, time, unicodedata
+# frieren-fetch – Tsugumori-style system fetch in mono: one sharp frame with corner brackets, Frieren's braille
+# art on the left, numbered sections (01 // SYSTEM …) on the right, usage bars and a journey timeline.
+# Art: ~/.config/fastfetch/frieren.txt. Narrow terminals get the panel without the art. Made by Claude.
+import os, re, shutil, subprocess, time, unicodedata
 
 ART = os.path.expanduser("~/.config/fastfetch/frieren.txt")
 G = lambda v: f"\033[38;2;{v};{v};{v}m"
 R = "\033[0m"; B = "\033[1m"
-EDGE, KEY, VAL, DIM, HEAD = G(85), G(120), G(230), G(110), G(255)
+LINE, CORNER, NUM, KEY, VAL, DIM, HEAD, JP = G(70), G(235), G(105), G(120), G(232), G(90), G(255), G(130)
 
 def sh(cmd):
     try: return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=3).stdout.strip()
@@ -16,9 +17,15 @@ def width(s):
     s = re.sub(r"\033\[[0-9;]*m", "", s)
     return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in s)
 
+def pad(s, w): return s + " " * max(0, w - width(s))
+
 def human(sec):
     d, r = divmod(int(sec), 86400); h, r = divmod(r, 3600); m = r // 60
     return " ".join(x for x in (f"{d}d" if d else "", f"{h}h" if h else "", f"{m}m") if x)
+
+def bar(frac, n=12):
+    f = max(0, min(n, round(frac * n)))
+    return f"{G(225)}{'━' * f}{G(60)}{'━' * (n - f)}{R}"
 
 def info():
     osr = dict(l.split("=", 1) for l in open("/etc/os-release").read().splitlines() if "=" in l)
@@ -33,47 +40,55 @@ def info():
     try: age = f"{(time.time() - time.mktime(time.strptime(born, '%Y-%m-%d'))) // 86400:.0f} days"
     except Exception: age = "?"
     song = sh("playerctl metadata --format '{{title}} · {{artist}}' 2>/dev/null")
-    rows = [
-        ("os",       osr.get("NAME", "Linux").strip('"')),
-        ("kernel",   os.uname().release.split("-")[0]),
-        ("uptime",   human(up)),
-        ("shell",    sh("ps -o comm= -p $(ps -o ppid= -p $PPID)") or "fish"),
-        ("wm",       "hyprland"),
-        ("os age",   age),
-        None,
-        ("cpu",      cpu),
-        ("gpu",      gpu),
-        ("ram",      f"{used:.1f} / {total:.1f} GiB"),
-        ("disk",     f"{st.used / 2**30:.0f} / {st.total / 2**30:.0f} GiB"),
-        ("packages", sh("pacman -Qq | wc -l")),
+    shell = sh("ps -o comm= -p $(ps -o ppid= -p $PPID)") or "zsh"
+    return [
+        ("SYSTEM", "システム", [("os", osr.get("NAME", "Linux").strip('"')), ("kernel", os.uname().release.split("-")[0]),
+                               ("wm", "hyprland"), ("shell", shell), ("uptime", human(up))]),
+        ("HARDWARE", "機体", [("cpu", cpu), ("gpu", gpu),
+                             ("ram", f"{bar(used / total)}  {used:.1f} / {total:.0f} GiB"),
+                             ("disk", f"{bar(st.used / st.total)}  {st.used / 2**30:.0f} / {st.total / 2**30:.0f} GiB")]),
+        ("JOURNEY", "旅路", [("packages", sh("pacman -Qq | wc -l")), ("os age", age)]
+                           + ([("♪", song[:34] + ("…" if len(song) > 34 else ""))] if song else [])),
     ]
-    if song: rows += [None, ("♪", song[:30] + ("…" if len(song) > 30 else ""))]
-    return rows
 
-def box(rows, inner=40):
-    title = f" {B}{HEAD}フリーレン{R} "
-    top = f"{EDGE}╭──{R}{title}{EDGE}" + "─" * (inner - 2 - width(title)) + f"╮{R}"
-    out = [top, f"{EDGE}│{R}" + " " * inner + f"{EDGE}│{R}"]
-    for r in rows:
-        if r is None:
-            out.append(f"{EDGE}│{R}  {G(65)}" + "·" * (inner - 4) + f"{R}  {EDGE}│{R}"); continue
-        k, v = r
-        pad = inner - 4 - width(k) - width(v)
-        out.append(f"{EDGE}│{R}  {KEY}{k}{R}" + " " * max(1, pad) + f"{VAL}{v}{R}  {EDGE}│{R}")
-    foot = f"{DIM}the journey continues  {EDGE}—{R}  {HEAD}旅は続く{R}"
-    fpad = inner - width(foot)
-    out += [f"{EDGE}│{R}" + " " * inner + f"{EDGE}│{R}",
-            f"{EDGE}│{R}" + " " * (fpad // 2) + foot + " " * (fpad - fpad // 2) + f"{EDGE}│{R}",
-            f"{EDGE}╰" + "─" * inner + f"╯{R}"]
-    return out
+def panel(sections, inner):
+    out = []
+    for i, (title, jp, rows) in enumerate(sections, 1):
+        head = f"{NUM}{i:02d}{R} {DIM}//{R} {B}{HEAD}{title}{R}"
+        out.append(pad(head, inner - width(jp)) + f"{JP}{jp}{R}")
+        out.append(f"{LINE}{'─' * inner}{R}")
+        for k, v in rows:
+            out.append(f"  {KEY}{pad(k, 10)}{R}{VAL}{v}{R}")
+        out.append("")
+    return out[:-1]
 
+cols = shutil.get_terminal_size((140, 40)).columns
 art = open(ART, encoding="utf-8").read().rstrip("\n").split("\n") if os.path.exists(ART) else []
-right = box(info())
 aw = max((width(a) for a in art), default=0)
-h = max(len(art), len(right)); top = (h - len(right)) // 2; atop = (h - len(art)) // 2
+INNER = 50                                                   # info column width
+use_art = art and cols >= aw + INNER + 14
+body_r = panel(info(), INNER)
+left = [f"{G(150) if i % 2 else G(175)}{a}{R}" for i, a in enumerate(art)] if use_art else []
+lw = aw if use_art else 0
+gap = 5 if use_art else 0
+W = lw + gap + INNER + 4                                     # inside the frame
+h = max(len(left), len(body_r))
+top_r = (h - len(body_r)) // 2
+
+title = f" {B}{HEAD}FRIEREN{R} {DIM}//{R} {JP}葬送のフリーレン{R} "
+tag = f" {HEAD}◆ 1000 YRS{R} "
 print()
+print(f"  {CORNER}┌─{R}{title}{LINE}" + "─" * (W - 2 - width(title) - width(tag)) + f"{R}{tag}{CORNER}─┐{R}")
+print(f"  {LINE}│{R}" + " " * W + f"{LINE}│{R}")
 for i in range(h):
-    a = art[i - atop] if 0 <= i - atop < len(art) else ""
-    b = right[i - top] if 0 <= i - top < len(right) else ""
-    print("  " + a + " " * (aw - width(a)) + "    " + b)
+    a = left[i] if i < len(left) else ""
+    b = body_r[i - top_r] if 0 <= i - top_r < len(body_r) else ""
+    row = "  " + (pad(a, lw) + " " * gap if use_art else "") + pad(b, INNER) + "  "
+    print(f"  {LINE}│{R}" + pad(row, W) + f"{LINE}│{R}")
+print(f"  {LINE}│{R}" + " " * W + f"{LINE}│{R}")
+steps = f"{DIM}01 ── 02 ── 03 ──{R} {HEAD}04 ◆{R}"
+foot = f"{DIM}the journey continues  —{R}  {JP}旅は続く{R}"
+mid = W - 4 - width(steps) - width(foot)
+print(f"  {LINE}│{R}  " + steps + " " * max(2, mid) + foot + f"  {LINE}│{R}")
+print(f"  {CORNER}└─{R}{LINE}" + "─" * (W - 2) + f"{R}{CORNER}─┘{R}")
 print()

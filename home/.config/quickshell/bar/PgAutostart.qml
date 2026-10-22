@@ -24,7 +24,7 @@ Column {
                 id: ar
                 required property string modelData
                 readonly property var e: pg.entry(modelData)
-                width: parent.width; height: 46; radius: 12; color: "#33111111"
+                width: parent.width; height: 46; radius: 2; color: "#33111111"
                 Row {
                     x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                     IconImage { implicitSize: 26; source: Quickshell.iconPath(ar.e ? ar.e.icon : "application-x-executable", true); anchors.verticalCenter: parent.verticalCenter }
@@ -39,7 +39,7 @@ Column {
             placeholderText: "Add an app – type its name…"; placeholderTextColor: Theme.muted
             onTextEdited: pg.q = text
             color: Theme.fg; font.family: Theme.font; font.pixelSize: 13; leftPadding: 12
-            background: Rectangle { radius: 10; color: Theme.bgAlt; border.width: field.activeFocus ? 2 : 1; border.color: field.activeFocus ? Theme.blue : Theme.line }
+            background: Rectangle { radius: 2; color: Theme.bgAlt; border.width: field.activeFocus ? 2 : 1; border.color: field.activeFocus ? Theme.blue : Theme.line }
             Keys.onReturnPressed: if (pg.found.length) pg.add(pg.found[0])
         }
         Repeater {
@@ -47,7 +47,7 @@ Column {
             Rectangle {
                 id: fr
                 required property var modelData
-                width: parent.width; height: 40; radius: 10; color: fm.containsMouse ? Theme.bgHover : "transparent"
+                width: parent.width; height: 40; radius: 2; color: fm.containsMouse ? Theme.bgHover : "transparent"
                 Row {
                     x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                     IconImage { implicitSize: 22; source: Quickshell.iconPath(fr.modelData.icon, true); anchors.verticalCenter: parent.verticalCenter }

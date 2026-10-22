@@ -10,11 +10,11 @@ Column {
     width: parent ? parent.width : 300; spacing: 6
     RowLayout {
         width: parent.width
-        Label { text: r.label; color: Theme.fgDim; font.pixelSize: 12; Layout.fillWidth: true }
-        Label { text: r.value.toFixed(r.decimals) + r.suffix; color: Theme.blue; font.pixelSize: 12 }
+        Label { text: r.label; color: "#e0e0e0"; font.pixelSize: 12; Layout.fillWidth: true }
+        Label { text: r.value.toFixed(r.decimals) + r.suffix; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 11 }
     }
     Slider {
-        accent: Theme.blue
+        accent: Theme.on
         value: (r.value - r.from) / (r.to - r.from)
         onMoved: v => {
             const raw = r.from + v * (r.to - r.from)

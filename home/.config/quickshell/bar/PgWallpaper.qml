@@ -44,7 +44,7 @@ Column {
                 required property var modelData
                 readonly property bool sel: pg.target === modelData[0]
                 readonly property string img: Settings.get(modelData[0]) || pg.active[modelData[2]] || ""
-                width: (parent.width - 14) / 2; height: 150; radius: 16; clip: true
+                width: (parent.width - 14) / 2; height: 150; radius: 2; clip: true
                 color: Theme.card; border.width: sel ? 2 : 1; border.color: sel ? Theme.blue : "#14eaeaea"
                 Image { anchors.fill: parent; anchors.margins: 2; source: Theme.fileUrl(pg.thumb(sc.img)); fillMode: Image.PreserveAspectCrop; asynchronous: true; opacity: 0.9 }
                 Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 36; color: "#cc0b0b0b"
@@ -62,10 +62,10 @@ Column {
                 id: wt
                 required property string modelData
                 readonly property bool cur: pg.shownFor === modelData
-                width: (parent.width - 30) / 4; height: width * 9 / 16; radius: 12; clip: true; color: Theme.bgAlt
+                width: (parent.width - 30) / 4; height: width * 9 / 16; radius: 2; clip: true; color: Theme.bgAlt
                 border.width: cur ? 3 : 0; border.color: Theme.blue
                 Image { anchors.fill: parent; anchors.margins: wt.cur ? 3 : 0; source: Theme.fileUrl(pg.thumb(wt.modelData)); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 240 }
-                Rectangle { anchors.fill: parent; color: wm.containsMouse ? "#22eaeaea" : "transparent"; radius: 12 }
+                Rectangle { anchors.fill: parent; color: wm.containsMouse ? "#22eaeaea" : "transparent"; radius: 2 }
                 MouseArea { id: wm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Settings.set(pg.target, wt.modelData) }
             }
         }

@@ -184,8 +184,21 @@ Scope {
         implicitWidth: 1080; implicitHeight: 760
 
         Rectangle {
-            anchors.fill: parent; radius: 22; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
+            id: frame
+            anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn)
+            border.width: 1; border.color: "#3dffffff"
             focus: true
+            Repeater {   // corner brackets
+                model: [[0, 0], [1, 0], [0, 1], [1, 1]]
+                Item {
+                    required property var modelData
+                    z: 10
+                    x: modelData[0] ? frame.width - 12 + 4 : -4; y: modelData[1] ? frame.height - 12 + 4 : -4
+                    width: 12; height: 12
+                    Rectangle { x: modelData[0] ? 11 : 0; width: 1; height: 12; color: "#ffffff" }
+                    Rectangle { y: modelData[1] ? 11 : 0; width: 12; height: 1; color: "#ffffff" }
+                }
+            }
             Keys.onEscapePressed: root.visible = false
             Keys.onPressed: e => { if ((e.modifiers & Qt.ControlModifier) && e.key === Qt.Key_S) { Settings.apply(); e.accepted = true } }
             Keys.onUpPressed: { const i = root.shownPages.findIndex(p => p[0] === root.page); if (i > 0) root.page = root.shownPages[i - 1][0] }
@@ -194,17 +207,17 @@ Scope {
             // ================= sidebar =================
             Rectangle {
                 id: side
-                x: 0; y: 0; width: 260; height: parent.height
-                radius: 22; color: "#33000000"
-                Rectangle { anchors.right: parent.right; width: 22; height: parent.height; color: "#33000000" } // square right edge
-                Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: "#14eaeaea" }
+                x: 1; y: 1; width: 260; height: parent.height - 2
+                radius: 0; color: "#26000000"
+                Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: "#1fffffff" }
 
                 Column {
                     id: sideTop
                     x: 16; y: 20; width: parent.width - 32; spacing: 14
                     Rectangle {   // you
-                        width: parent.width; height: 62; radius: 16
-                        color: root.page === "account" ? Qt.rgba(0.88, 0.88, 0.88, 0.18) : (um.containsMouse ? "#1eeaeaea" : "#22000000")
+                        width: parent.width; height: 62; radius: 2
+                        color: root.page === "account" ? "#1fffffff" : (um.containsMouse ? "#12ffffff" : "transparent")
+                        border.width: 1; border.color: root.page === "account" ? "#66ffffff" : "#26ffffff"
                         Row {
                             x: 10; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                             Avatar { size: 42; radius: 21; pick: Settings.get("avatar") }
@@ -223,7 +236,8 @@ Scope {
                         onTextEdited: { root.search = text; if (root.shownPages.length) root.page = root.shownPages[0][0] }
                         Keys.onEscapePressed: { text = ""; root.search = "" }
                         color: Theme.fg; font.family: Theme.font; font.pixelSize: 12; leftPadding: 34
-                        background: Rectangle { radius: 11; color: "#33111111"; border.width: find.activeFocus ? 2 : 1; border.color: find.activeFocus ? Theme.blue : "#1eeaeaea" }
+                        background: Rectangle { radius: 2; color: "#0cffffff"; border.width: 1; border.color: find.activeFocus ? "#99ffffff" : "#26ffffff"
+                                                Rectangle { visible: find.activeFocus; width: 2; height: parent.height; color: "#ffffff" } }
                         Label { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 14 }
                     }
                 }
@@ -237,19 +251,19 @@ Scope {
                     section.delegate: Item {
                         required property string section
                         width: nav.width; height: 30
-                        Label { x: 6; anchors.bottom: parent.bottom; anchors.bottomMargin: 6; text: parent.section.toUpperCase(); color: Theme.muted; font.pixelSize: 9; font.letterSpacing: 1.2 }
+                        Label { x: 6; anchors.bottom: parent.bottom; anchors.bottomMargin: 6; text: "// " + parent.section.toUpperCase(); color: "#5a5a5a"; font.pixelSize: 9; font.letterSpacing: 1.8 }
                     }
                     delegate: Rectangle {
                         required property var modelData
                         readonly property bool cur: root.page === modelData[0]
-                        width: nav.width; height: 36; radius: 11
-                        color: cur ? Qt.rgba(0.88, 0.88, 0.88, 0.18) : (nm.containsMouse ? "#1eeaeaea" : "transparent")
+                        width: nav.width; height: 34; radius: 2
+                        color: cur ? Theme.on : (nm.containsMouse ? "#12ffffff" : "transparent")
                         Behavior on color { ColorAnimation { duration: 120 } }
-                        Rectangle { visible: cur; x: 0; anchors.verticalCenter: parent.verticalCenter; width: 3; height: 16; radius: 2; color: Theme.blue }
                         Row {
-                            x: 14; anchors.verticalCenter: parent.verticalCenter; spacing: 12
-                            Label { width: 18; text: modelData[1]; color: cur ? Theme.blue : Theme.muted; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
-                            Label { text: modelData[2]; color: cur ? Theme.fg : Theme.fgDim; font.pixelSize: 12; anchors.verticalCenter: parent.verticalCenter }
+                            x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
+                            Label { width: 18; text: modelData[1]; color: cur ? Theme.onText : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
+                            Label { text: modelData[2].toUpperCase(); color: cur ? Theme.onText : "#b8b8b8"; font.pixelSize: 10; font.letterSpacing: 1.5
+                                    font.bold: cur; anchors.verticalCenter: parent.verticalCenter }
                         }
                         Rectangle { visible: root.pageDirty(modelData[0]); anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
                                     width: 7; height: 7; radius: 4; color: Theme.yellow }
@@ -268,9 +282,9 @@ Scope {
             Rectangle {
                 id: applyBar
                 anchors { left: side.right; right: parent.right; bottom: parent.bottom; margins: 14 }
-                height: 58; radius: 15
-                color: Settings.dirty ? Qt.rgba(0.88, 0.88, 0.88, 0.12) : "#22000000"
-                border.width: 1; border.color: Settings.dirty ? Qt.rgba(0.88, 0.88, 0.88, 0.5) : "#14eaeaea"
+                height: 56; radius: 2
+                color: Settings.dirty ? "#14ffffff" : "transparent"
+                border.width: 1; border.color: Settings.dirty ? "#99ffffff" : "#26ffffff"
                 Behavior on color { ColorAnimation { duration: 160 } }
                 RowLayout {
                     anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 10; spacing: 10
@@ -299,11 +313,23 @@ Scope {
 
                 Column {
                     id: pageCol
+                    readonly property bool isPage: true
                     width: flick.width; spacing: 14
 
                     Column {
-                        spacing: 2; bottomPadding: 4
-                        Label { text: root.pageInfo[2]; font.pixelSize: 22; font.weight: Font.Bold }
+                        spacing: 4; bottomPadding: 6
+                        Row {
+                            spacing: 12
+                            Text { anchors.baseline: ttl.baseline; text: String(root.pages.findIndex(p => p[0] === root.page) + 1).padStart(2, "0")
+                                   color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 13 }
+                            Text { anchors.baseline: ttl.baseline; text: "//"; color: "#454545"; font.family: Theme.font; font.pixelSize: 13 }
+                            Text { id: ttl; text: root.pageInfo[2].toUpperCase(); color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 20; font.letterSpacing: 3; font.bold: true }
+                            Text { anchors.baseline: ttl.baseline; text: ({ account: "利用者", appearance: "外観", effects: "効果", theme: "主題", glass: "硝子", wallpaper: "壁紙",
+                                     bar: "通知", extras: "追加", shortcuts: "近道", defaults: "既定", autostart: "起動", games: "遊戯", display: "表示", sound: "音響",
+                                     input: "入力", network: "通信", bluetooth: "無線", storage: "記憶", power: "電力", datetime: "日時", about: "情報" })[root.page] || ""
+                                   color: "#7a7a7a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 14 }
+                        }
+                        Rectangle { width: pageCol.width; height: 1; color: "#1affffff" }
                         Label {
                             color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal
                             text: ({ account: "Your picture and name", appearance: "Colours, borders, gaps and window layout",
@@ -346,7 +372,7 @@ Scope {
                                         readonly property bool cur: Settings.get("accent") === modelData[0]
                                         spacing: 6
                                         Rectangle {
-                                            width: 76; height: 50; radius: 13
+                                            width: 76; height: 50; radius: 2
                                             border.width: sw.cur ? 2 : 0; border.color: Theme.fg
                                             gradient: Gradient { orientation: Gradient.Horizontal
                                                 GradientStop { position: 0; color: sw.modelData[2][0] }
@@ -450,7 +476,7 @@ Scope {
                                             id: fc
                                             required property string modelData
                                             readonly property bool cur: Settings.get("folder_color") === modelData
-                                            width: 57; height: 70; radius: 12
+                                            width: 57; height: 70; radius: 2
                                             color: cur ? Qt.rgba(0.88, 0.88, 0.88, 0.16) : (fcm.containsMouse ? "#1eeaeaea" : "transparent")
                                             border.width: cur ? 1 : 0; border.color: Theme.blue
                                             Image { x: 10; y: 6; width: 36; height: 36; sourceSize.width: 72; source: "file:///usr/share/icons/Papirus/48x48/places/folder-" + fc.modelData + ".svg" }
@@ -487,7 +513,7 @@ Scope {
                                             id: fo
                                             required property string modelData
                                             readonly property bool cur: Settings.get("ui_font") === modelData
-                                            width: parent.width; height: 34; radius: 10
+                                            width: parent.width; height: 34; radius: 2
                                             color: cur ? Qt.rgba(0.88, 0.88, 0.88, 0.16) : (fom.containsMouse ? "#1eeaeaea" : "#33111111")
                                             border.width: cur ? 1 : 0; border.color: Theme.blue
                                             Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: fo.modelData + " — The quick brown fox"; font.family: fo.modelData; font.pixelSize: 13; color: fo.cur ? Theme.fg : Theme.fgDim }
@@ -578,7 +604,7 @@ Scope {
                             SetToggle { label: "ASCII living wallpaper"; desc: "your wallpaper drawn in glowing characters, slowly moving"; key: "ascii_wall" }
                             SetToggle { label: "Wallpaper tint"; desc: "the glass picks up a little of your wallpaper's colour"; key: "wall_tint" }
                             SetToggle { label: "Kanji workspaces"; desc: "一 二 三 四 instead of 1 2 3 4"; key: "ws_kanji" }
-                            SetToggle { label: "Screensaver"; desc: "drifting mana and a clock, halfway to the auto-lock"; key: "screensaver" }
+                            SetToggle { label: "Screensaver"; desc: "your wallpaper in glowing characters, halfway to the auto-lock"; key: "screensaver" }
                             SetChoice {
                                 label: "Wallpaper shuffle"; desc: "a different monochrome wallpaper now and then"
                                 current: Settings.get("wall_shuffle"); onPicked: v => Settings.set("wall_shuffle", v)
@@ -662,7 +688,7 @@ Scope {
 
                         Rectangle {   // "keep these settings?" after a screen change
                             visible: root.undoMonitors !== null
-                            width: parent.width; height: 58; radius: 14
+                            width: parent.width; height: 58; radius: 2
                             color: Qt.rgba(0.84, 0.84, 0.84, 0.14); border.width: 1; border.color: Theme.yellow
                             RowLayout {
                                 anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 12; spacing: 10
@@ -685,7 +711,7 @@ Scope {
                                     id: monCard
                                     required property var modelData
                                     readonly property bool sel: root.selMon === modelData.name
-                                    width: (parent.width - 14) / 2; height: 112; radius: 14
+                                    width: (parent.width - 14) / 2; height: 112; radius: 2
                                     color: sel ? Qt.rgba(0.88, 0.88, 0.88, 0.12) : (mcm.containsMouse ? "#1eeaeaea" : Theme.card)
                                     border.width: 1; border.color: sel ? Theme.blue : "#14eaeaea"
                                     Behavior on color { ColorAnimation { duration: 120 } }
@@ -826,7 +852,7 @@ Scope {
                     Column {
                         visible: root.page === "about"; width: parent.width; spacing: 14
                         Rectangle {
-                            width: parent.width; height: 120; radius: 16; color: Theme.card; border.width: 1; border.color: "#14eaeaea"
+                            width: parent.width; height: 120; radius: 2; color: Theme.card; border.width: 1; border.color: "#14eaeaea"
                             Row {
                                 x: 22; anchors.verticalCenter: parent.verticalCenter; spacing: 20
                                 Label { text: "\u{f08c7}"; font.pixelSize: 64; color: Theme.blue; anchors.verticalCenter: parent.verticalCenter }
@@ -846,7 +872,7 @@ Scope {
                                         ["\u{f03d6}", "Packages", root.info.pkgs, Theme.blue], ["\u{f0aaa}", "Updates", Updates.total > 0 ? Updates.total + " waiting" : "up to date", Updates.total > 0 ? Theme.yellow : Theme.green]]
                                 Rectangle {
                                     required property var modelData
-                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 12; color: Theme.card
+                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 2; color: Theme.card
                                     Row {
                                         x: 14; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                                         Label { text: modelData[0]; color: modelData[3]; font.pixelSize: 18; anchors.verticalCenter: parent.verticalCenter }
