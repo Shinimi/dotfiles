@@ -1,7 +1,7 @@
-// The bar, on every screen: one see-through glass strip with rounded corners.
-//   left:   launcher · now playing
-//   middle: workspaces split around the clock  (一 二 │ 21:17 │ 三 四) — the side screen shows just the clock
-//   right:  volume / control center · power
+// The bar (main screen): one see-through glass strip with rounded corners.
+//   left:   launcher · workspaces
+//   middle: time · date · weather
+//   right:  control center · power
 // When the song changes, a small card drops out under the main screen's bar for a moment. Volume changes show
 // nothing on purpose. Made by Claude.
 import QtQuick
@@ -29,7 +29,7 @@ PanelWindow {
     property string peek: ""                 // "" or "media"
     Timer { id: peekTimer; interval: 2600; onTriggered: win.peek = "" }
     function showPeek(kind) { if (!armed || !isMain || popupOpen || !Settings.cur("island_peeks")) return; peek = kind; peekTimer.restart() }
-    readonly property bool popupOpen: clockPill.popup.visible || powerPill.popup.visible || (mediaPill.popup && mediaPill.popup.visible)
+    readonly property bool popupOpen: clockPill.popup.visible || powerPill.popup.visible
     property bool armed: false               // no cards while everything starts up
     Timer { running: true; interval: 3000; onTriggered: win.armed = true }
     Connections { target: win.player; function onTrackTitleChanged() { if (win.player && win.player.trackTitle) win.showPeek("media") } }
@@ -46,27 +46,19 @@ PanelWindow {
         color: Theme.mix(Qt.rgba(0.04, 0.04, 0.04, 0.45), Theme.tint, 0.10 * Theme.tintOn)   // see-through glass
         border.width: 1; border.color: "#1cffffff"
 
-        Row {   // left
+        Row {   // left: launcher + workspaces
             anchors.left: parent.left; anchors.leftMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
             Launcher { anchors.verticalCenter: parent.verticalCenter }
-            Sep { visible: mediaPill.visible }
-            MediaPill { id: mediaPill; visible: win.isMain && Settings.cur("bar_media") && player !== null && player.trackTitle !== ""; anchors.verticalCenter: parent.verticalCenter }
+            Sep {}
+            Workspaces { anchors.verticalCenter: parent.verticalCenter }
         }
 
-        Row {   // middle: workspaces around the clock
-            anchors.centerIn: parent; spacing: 6
-            Workspaces { visible: win.isMain; part: 1; anchors.verticalCenter: parent.verticalCenter }
-            Sep { visible: win.isMain }
-            ClockPill { id: clockPill; calendar: win.isMain; anchors.verticalCenter: parent.verticalCenter }
-            Sep { visible: win.isMain }
-            Workspaces { visible: win.isMain; part: 2; anchors.verticalCenter: parent.verticalCenter }
-        }
+        ClockPill { id: clockPill; anchors.centerIn: parent }   // middle: time · date · weather
 
-        Row {   // right
+        Row {   // right: control center + power, nothing else
             anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
             StatusPill { anchors.verticalCenter: parent.verticalCenter }
-            Sep {}
-            PowerButton { id: powerPill; menu: win.isMain; anchors.verticalCenter: parent.verticalCenter }
+            PowerButton { id: powerPill; anchors.verticalCenter: parent.verticalCenter }
         }
     }
     component Sep: Rectangle { anchors.verticalCenter: parent ? parent.verticalCenter : undefined; width: 1; height: 14; color: "#1fffffff" }
@@ -109,7 +101,6 @@ PanelWindow {
             target: "bar"
             function calendar(): void { clockPill.popup.toggle() }
             function power(): void { powerPill.popup.toggle() }
-            function media(): void { if (mediaPill.popup) mediaPill.popup.toggle() }
             function control(): void { win.panel() }
             function notifications(): void { win.panel() }
             function stats(): void { win.panel() }

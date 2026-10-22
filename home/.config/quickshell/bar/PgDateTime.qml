@@ -1,4 +1,4 @@
-// Settings → Date & time: clock, time zone and sync. Made by Claude.
+// Settings → Date & time: clock, time zone, sync, weather location. Made by Claude.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -31,6 +31,11 @@ Column {
             SetToggle { label: "Show seconds in the bar"; key: "clock_seconds" }
             SetSwitch { label: "Set time automatically"; desc: "sync with internet time servers (instant)"; on: pg.td.NTP === "yes"
                 onToggled: { Quickshell.execDetached(["timedatectl", "set-ntp", pg.td.NTP === "yes" ? "false" : "true"]); again.restart() } }
+        }
+        SetSection {
+            width: (parent.width - 14) / 2; title: "Weather"; icon: "\u{f0599}"
+            SetField { label: "Location"; key: "weather_place"; placeholder: "Batman (default)"; desc: "A city name (\"Istanbul\"), or coordinates like 37.88,41.13" }
+            SetField { label: "Name to show"; key: "weather_label"; placeholder: "Batman Merkez" }
         }
     }
 }

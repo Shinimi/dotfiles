@@ -1,5 +1,5 @@
-// Volume + control center button: speaker and level, then the sliders icon (a dot for unread notifications).
-// Scroll = volume, right-click = mute, click = control center. Made by Claude.
+// Control center button: the sliders icon (a small dot for unread notifications).
+// Click = control center, scroll = volume, right-click = mute. Made by Claude.
 import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
@@ -9,14 +9,6 @@ Pill {
     padding: 11
     readonly property var sink: Pipewire.defaultAudioSink
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
-    Label {
-        anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-        readonly property real v: pill.sink && pill.sink.audio ? pill.sink.audio.volume : 0
-        readonly property bool m: !!(pill.sink && pill.sink.audio && pill.sink.audio.muted)
-        text: (m ? "\u{f075f}" : "\u{f057e}") + "  " + (m ? "muted" : Math.round(v * 100))
-        color: m ? Theme.muted : "#d8d8d8"; font.pixelSize: 11; font.weight: Font.Normal
-    }
-    Rectangle { anchors.verticalCenter: parent ? parent.verticalCenter : undefined; width: 1; height: 12; color: "#22ffffff" }
     Item {
         width: 16; height: 16
         anchors.verticalCenter: parent ? parent.verticalCenter : undefined
