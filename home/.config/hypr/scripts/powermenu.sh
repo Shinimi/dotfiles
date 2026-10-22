@@ -14,7 +14,7 @@ choice=$(printf '%s\n%s\n%s\n%s\n%s\n' "$lock" "$logout" "$sleep" "$reboot" "$of
   element selected.normal { background-color: #cf6b6b; text-color: #111111; }' \
   -mesg "Lock · Logout · Suspend · Reboot · Shutdown")
 case "$choice" in
-  "$lock")   loginctl lock-session ;;
+  "$lock")   qs ipc -p ~/.config/quickshell/bar call curtain lock ;;
   "$logout") hyprctl dispatch 'hl.dsp.exit()' ;;
   "$sleep")  systemctl suspend ;;
   "$reboot") systemctl reboot ;;

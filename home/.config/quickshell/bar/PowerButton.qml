@@ -28,7 +28,7 @@ Pill {
 
         Repeater {
             model: [
-                { key: "lock",     icon: "", text: "Lock",      color: Theme.blue,   confirm: false, cmd: ["loginctl", "lock-session"] },
+                { key: "lock",     icon: "", text: "Lock",      color: Theme.blue,   confirm: false, cmd: ["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "curtain", "lock"] },
                 { key: "suspend",  icon: "", text: "Suspend",   color: Theme.purple, confirm: false, cmd: ["systemctl", "suspend"] },
                 { key: "logout",   icon: "", text: "Log out",   color: Theme.yellow, confirm: true,  cmd: ["hyprctl", "dispatch", "hl.dsp.exit()"] },
                 { key: "reboot",   icon: "", text: "Reboot",    color: Theme.cyan,   confirm: true,  cmd: ["systemctl", "reboot"] },

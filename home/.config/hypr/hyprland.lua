@@ -10,7 +10,7 @@
 --  KEYBINDS — DankMaterialShell layout  (SUPER = Windows key)
 --    SUPER + T / Return      terminal (kitty)
 --    SUPER + Space           app launcher        ALT + Space        app launcher
---    SUPER + V               clipboard history   SUPER + A          control center
+--    SUPER + V               clipboard history   SUPER + A          control hub  (+ SHIFT: full control center)
 --    SUPER + CTRL + N        notification center SUPER + comma      settings
 --    SUPER + Tab             workspace overview  SUPER + O          find a window (search)     SUPER + X          power menu
 --    SUPER + Q               close window
@@ -34,7 +34,7 @@
 --    Print                   region screenshot   CTRL + Print       full screen   ALT + Print  window
 --    SUPER + "  (left of 1)  drop-down terminal  SUPER + Z          focus mode (no gaps, bar or pop-ups)
 --    mouse to top-left corner  workspace overview
---    SUPER + D               draw on the screen  SUPER + ALT + scroll  magnifier (SUPER + ALT + Z resets)
+--    SUPER + Esc             home screen         SUPER + D          draw on the screen  SUPER + ALT + scroll  magnifier (SUPER + ALT + Z resets)
 --    SUPER + SHIFT + R       fix desktop (reload + restart bar/wallpaper/etc. if they died)
 --    SUPER + SHIFT + /  or  SUPER + F1   show this list
 -- ============================================================================
@@ -318,7 +318,8 @@ b("SUPER + space",          run(menu))
 b("ALT + space",            run(menu))
 b("SUPER + V",              run("qs ipc -p " .. os.getenv("HOME") .. "/.config/quickshell/bar call clipboard toggle"))
 b("SUPER + comma",          run("qs ipc -p ~/.config/quickshell/bar call settings toggle"))
-b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call bar control"))
+b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call hub toggle"))       -- control hub (MENU → full control center)
+b("SUPER + SHIFT + A",      run("qs ipc -p ~/.config/quickshell/bar call bar control"))      -- full control center directly
 b("SUPER + CTRL + N",       run("qs ipc -p ~/.config/quickshell/bar call bar notifications"))
 b("SUPER + TAB",            run("qs ipc -p ~/.config/quickshell/bar call overview toggle"))   -- workspace overview (drag windows between)
 b("SUPER + O",              run("qs ipc -p ~/.config/quickshell/bar call alttab overview"))
@@ -336,6 +337,7 @@ b("SUPER + F1",             run(scripts .. "/keybinds.sh"))
 b("SUPER + code:49",        run(scripts .. "/dropterm.sh"))        -- key left of 1: drop-down terminal
 b("SUPER + Z",              run(scripts .. "/focus-mode.sh"))      -- focus mode: no gaps, bar or pop-ups
 b("SUPER + D",              run("qs ipc -p ~/.config/quickshell/bar call ink toggle"))   -- draw on the screen
+b("SUPER + Escape",         run("qs ipc -p ~/.config/quickshell/bar call home toggle"))  -- home screen
 b("SUPER + ALT + mouse_up",   run(scripts .. "/zoom.sh in"))      -- magnifier (scroll up = closer)
 b("SUPER + ALT + mouse_down", run(scripts .. "/zoom.sh out"))
 b("SUPER + ALT + Z",          run(scripts .. "/zoom.sh reset"))
@@ -349,7 +351,7 @@ b("ALT + Escape",           run(qsAlt .. "cancel"))
 b("ALT + ALT_L",            run(qsAlt .. "confirm"), { release = true, non_consuming = true })
 
 -- Session
-b("SUPER + ALT + L",        run("loginctl lock-session"))
+b("SUPER + ALT + L",        run("qs ipc -p ~/.config/quickshell/bar call curtain lock"))   -- curtains close, then lock
 b("SUPER + SHIFT + E",      hl.dsp.exit())
 b("CTRL + ALT + Delete",    run(terminal .. " --class btop -e btop"))
 b("CTRL + ALT + M",         run(terminal .. " --class btop -e btop"))

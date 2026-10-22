@@ -53,7 +53,7 @@ PanelWindow {
         opacity: win.peek !== "" ? 1 : 0
         scale: win.peek !== "" ? 1 : 0.85
         visible: opacity > 0.01
-        color: Theme.island; border.width: 1; border.color: "#16ffffff"
+        color: Theme.island; border.width: 1; border.color: Theme.glassLine
         Behavior on y { NumberAnimation { duration: 380; easing.type: Easing.OutBack; easing.overshoot: 1.1 } }
         Behavior on opacity { NumberAnimation { duration: 200 } }
         Behavior on scale { NumberAnimation { duration: 320; easing.type: Easing.OutBack } }
@@ -105,7 +105,7 @@ PanelWindow {
         height: Theme.barHeight
         radius: height / 2
         color: Theme.island
-        border.width: 1; border.color: "#16ffffff"
+        border.width: 1; border.color: Theme.glassLine
         Behavior on width { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
 
         // full: everything

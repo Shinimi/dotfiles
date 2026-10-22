@@ -575,6 +575,8 @@ Scope {
                             SetToggle { label: "Pause music when locking"; desc: "Spotify & co. stop when the screen locks"; key: "pause_on_lock" }
                             SetToggle { label: "Song & volume cards"; desc: "a small card drops under the bar when they change"; key: "island_peeks" }
                             SetToggle { label: "Games get their own workspace"; desc: "a game opens on 五 (5); when it closes you're back where you were"; key: "game_workspace" }
+                            SetToggle { label: "ASCII living wallpaper"; desc: "your wallpaper drawn in glowing characters, slowly moving"; key: "ascii_wall" }
+                            SetToggle { label: "Wallpaper tint"; desc: "the glass picks up a little of your wallpaper's colour"; key: "wall_tint" }
                             SetToggle { label: "Kanji workspaces"; desc: "一 二 三 四 instead of 1 2 3 4"; key: "ws_kanji" }
                             SetToggle { label: "Screensaver"; desc: "drifting mana and a clock, halfway to the auto-lock"; key: "screensaver" }
                             SetChoice {

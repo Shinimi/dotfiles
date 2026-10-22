@@ -1,8 +1,7 @@
-// App launcher (SUPER + Space) – monochrome, replaces rofi.
-// Type to search apps and quick actions (fix audio, lock, focus mode, ink…).
-//   ? query  → search the web      : name → emoji (Enter copies)      / name → files in your home
-//   = 12*7   → calculator (copies)  > cmd  → run a command
-// ↑↓ / Tab to move · Enter or click to open · Esc or click outside to close. Made by Claude.
+// Launcher (SUPER + Space), Tsugumori-style: categories on the left, numbered results on the right,
+// session buttons along the bottom. Type to search apps and quick actions (fix audio, lock, focus mode…).
+//   ? query → web     : name → emoji (Enter copies)     / name → files     = 12*7 → math     > cmd → run
+// ↑↓ move · Tab / Shift+Tab category · Enter open · Esc or click outside closes. Made by Claude.
 import QtQuick
 import QtQuick.Controls.Basic
 import QtQuick.Effects
@@ -17,6 +16,7 @@ Scope {
     property bool visible: false
     property string query: ""
     property int sel: 0
+    property string cat: "all"
     property var usage: ({})                    // item key -> launch count (most used first)
     readonly property string usageFile: Quickshell.env("HOME") + "/.local/state/launcher-usage.json"
     readonly property string scripts: Quickshell.env("HOME") + "/.config/hypr/scripts"
@@ -26,22 +26,38 @@ Scope {
                                   : q.startsWith(":") ? "emoji" : q.startsWith("/") ? "files" : "apps"
     readonly property string arg: mode === "apps" ? q : q.slice(1).trim()
 
+    // ---------- categories ----------
+    readonly property var cats: [["all", "all", "全"], ["actions", "actions", "操作"], ["develop", "develop", "開発"], ["internet", "internet", "通信"],
+                                 ["media", "media", "再生"], ["games", "games", "遊戯"], ["graphics", "graphics", "画像"], ["office", "office", "事務"],
+                                 ["system", "system", "系統"], ["other", "other", "他"]]
+    function catOf(e) {
+        const c = (e.categories || []).join(";")
+        if (/Game/.test(c)) return "games"
+        if (/Development|IDE|TextEditor/.test(c)) return "develop"
+        if (/AudioVideo|Audio|Video|Player|Music|TV/.test(c)) return "media"
+        if (/Network|WebBrowser|Chat|Email|InstantMessaging|FileTransfer/.test(c)) return "internet"
+        if (/Graphics|Photography/.test(c)) return "graphics"
+        if (/Office/.test(c)) return "office"
+        if (/System|Settings|Utility|Monitor|TerminalEmulator|FileManager|Accessories/.test(c)) return "system"
+        return "other"
+    }
+
     // ---------- sources ----------
     readonly property var apps: DesktopEntries.applications.values.filter(a => !a.noDisplay && a.name)
     function ipc(target, fn) { return ["qs", "ipc", "-p", qsDir, "call", target, fn || "toggle"] }
-    // quick actions: [name, keywords, glyph, command]
-    readonly property var actions: [
+    readonly property var actions: [   // [name, keywords, glyph, command]
         ["Fix audio", "sound broken restart pipewire spotify discord no sound", "\u{f057e}", [scripts + "/fix-audio.sh"]],
-        ["Lock screen", "lock away", "\u{f033e}", ["loginctl", "lock-session"]],
+        ["Lock screen", "lock away", "\u{f033e}", ["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "curtain", "lock"]],
         ["Focus mode", "zen no gaps distraction", "\u{f0d4a}", [scripts + "/focus-mode.sh"]],
         ["Drop-down terminal", "terminal kitty console", "\u{f018d}", [scripts + "/dropterm.sh"]],
         ["Draw on screen", "ink annotate pen marker", "\u{f03eb}", ipc("ink")],
+        ["Home screen", "dashboard clock calendar", "\u{f02dc}", ipc("home")],
+        ["Control hub", "control center quick settings", "\u{f0493}", ipc("hub")],
         ["Screenshot region", "snip capture print", "\u{f0100}", ["sh", "-c", "sleep 0.3; " + scripts + "/screenshot.sh region"]],
         ["Color picker", "colour pick hex eyedropper", "\u{f0d52}", ["sh", "-c", "sleep 0.3; hyprpicker -a"]],
         ["Clipboard history", "paste copy", "\u{f014c}", ipc("clipboard")],
-        ["Wallpaper", "background picture", "\u{f02e9}", ipc("wallpaper")],
+        ["Wallpaper", "background picture carousel", "\u{f02e9}", ipc("wallpaper")],
         ["Workspace overview", "windows expose", "\u{f0d61}", ipc("overview")],
-        ["Control center", "quick settings volume", "\u{f0493}", ["qs", "ipc", "-p", qsDir, "call", "bar", "control"]],
         ["Settings", "preferences config", "\u{f0493}", ipc("settings")],
         ["Night light", "blue light warm", "\u{f0594}", [scripts + "/nightlight.sh"]],
         ["Fix desktop", "reload restart bar broken", "\u{f0450}", [Quickshell.env("HOME") + "/.local/bin/hypr-doctor.sh", "--fix"]],
@@ -54,7 +70,7 @@ Scope {
     property var files: []
     Process {
         id: findFiles
-        command: ["fd", "-i", "-H", "--max-results", "8", "--max-depth", "7",
+        command: ["fd", "-i", "-H", "--max-results", "30", "--max-depth", "7",
                   "-E", ".cache", "-E", ".local/share/Steam", "-E", "Games", "-E", ".var", "-E", ".wine", "-E", "node_modules",
                   "-E", ".git", "-E", ".mozilla", "-E", ".config/*/Cache*", "--", root.arg, Quickshell.env("HOME")]
         stdout: StdioCollector { onStreamFinished: root.files = this.text.split("\n").filter(x => x) }
@@ -79,35 +95,39 @@ Scope {
         try { const v = Function('"use strict";return (' + e + ')')(); return isFinite(v) ? String(Math.round(v * 1e10) / 1e10) : null } catch (x) { return null }
     }
 
-    // ---------- one list for everything: {kind, key, name, sub, icon, glyph, emoji, run} ----------
+    // every app / action with its category, built once per app list change
+    readonly property var items: apps.map(x => ({ kind: "app", key: x.id, name: x.name, sub: x.genericName || "", icon: x.icon, cat: catOf(x),
+                                                  extra: (x.genericName || "") + " " + (x.keywords || []).join(" "), entry: x }))
+        .concat(actions.map(x => ({ kind: "glyph", key: "action:" + x[0], name: x[0], sub: "action", glyph: x[2], cat: "actions", extra: x[1], cmd: x[3] })))
+    function countIn(c) { return c === "all" ? items.length : items.filter(x => x.cat === c).length }
+
+    // ---------- one list for everything: {kind, key, name, sub, cat, icon, glyph, emoji, run} ----------
     readonly property var shown: {
         const a = arg.toLowerCase()
-        if (mode === "calc") return calc === null ? [] : [{ kind: "glyph", glyph: "\u{f00ec}", name: "= " + calc, sub: "Enter copies the result",
+        if (mode === "calc") return calc === null ? [] : [{ kind: "glyph", glyph: "\u{f00ec}", name: "= " + calc, sub: "Enter copies the result", cat: "math",
                                                              run: () => Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy", "sh", calc]) }]
-        if (mode === "cmd") return arg ? [{ kind: "glyph", glyph: "\u{f018d}", name: arg, sub: "run command", run: () => Quickshell.execDetached(["sh", "-c", arg]) }] : []
-        if (mode === "web") return arg ? [{ kind: "glyph", glyph: "\u{f059f}", name: arg, sub: "search the web",
+        if (mode === "cmd") return arg ? [{ kind: "glyph", glyph: "\u{f018d}", name: arg, sub: "run command", cat: "shell", run: () => Quickshell.execDetached(["sh", "-c", arg]) }] : []
+        if (mode === "web") return arg ? [{ kind: "glyph", glyph: "\u{f059f}", name: arg, sub: "search the web", cat: "web",
                                             run: () => Quickshell.execDetached(["xdg-open", "https://duckduckgo.com/?q=" + encodeURIComponent(arg)]) }] : []
         if (mode === "emoji") {
             if (!a) return []
-            return emojis.filter(e => e.n.indexOf(a) >= 0).slice(0, 8).map(e => ({ kind: "emoji", emoji: e.e, name: e.n, sub: "Enter copies",
+            return emojis.filter(e => e.n.indexOf(a) >= 0).slice(0, 40).map(e => ({ kind: "emoji", emoji: e.e, name: e.n, sub: "Enter copies", cat: "emoji",
                 run: () => Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy", "sh", e.e]) }))
         }
-        if (mode === "files") return files.map(f => ({ kind: "file", name: f.replace(/\/$/, "").split("/").pop(),
+        if (mode === "files") return files.map(f => ({ kind: "file", name: f.replace(/\/$/, "").split("/").pop(), cat: f.endsWith("/") ? "folder" : "file",
             sub: f.replace(Quickshell.env("HOME"), "~").replace(/\/[^/]*\/?$/, ""), icon: f.endsWith("/") ? "folder" : "text-x-generic",
             run: () => Quickshell.execDetached(["xdg-open", f]) }))
-        const items = apps.map(x => ({ kind: "app", key: x.id, name: x.name, sub: x.genericName || "", icon: x.icon, extra: (x.genericName || "") + " " + (x.keywords || []).join(" "), entry: x }))
-            .concat(actions.map(x => ({ kind: "glyph", key: "action:" + x[0], name: x[0], sub: "action", glyph: x[2], extra: x[1], cmd: x[3] })))
-        const list = a ? items.map(x => ({ x: x, s: score(x.name, x.extra, a) })).filter(o => o.s >= 0)
-                       : items.filter(x => x.kind === "app").map(x => ({ x: x, s: 0 }))
+        const pool = cat === "all" ? (a ? items : items.filter(x => x.kind === "app")) : items.filter(x => x.cat === cat)
+        const list = a ? pool.map(x => ({ x: x, s: score(x.name, x.extra, a) })).filter(o => o.s >= 0) : pool.map(x => ({ x: x, s: 0 }))
         list.sort((m, n) => (n.s + (usage[n.x.key] || 0) * 3) - (m.s + (usage[m.x.key] || 0) * 3) || m.x.name.localeCompare(n.x.name))
-        return list.slice(0, 8).map(o => o.x)
+        return list.slice(0, 80).map(o => o.x)
     }
     onShownChanged: sel = 0
     onArgChanged: if (mode === "files") { files = []; fileDelay.restart() }
     onModeChanged: if (mode === "emoji" && emojis.length === 0) loadEmoji.running = true
 
     function toggle() { visible = !visible }
-    onVisibleChanged: if (visible) { query = ""; sel = 0; PopupState.current = root; loadUsage.running = true }
+    onVisibleChanged: if (visible) { query = ""; sel = 0; cat = "all"; PopupState.current = root; loadUsage.running = true }
     Connections { target: PopupState; function onCurrentChanged() { if (PopupState.current !== root) root.visible = false } }
     IpcHandler { target: "launcher"; function toggle(): void { root.toggle() } }
 
@@ -130,6 +150,7 @@ Scope {
         else if (it.run) it.run()
     }
     function accept() { launch(shown[sel]) }
+    function stepCat(d) { const i = cats.findIndex(c => c[0] === cat); cat = cats[(i + d + cats.length) % cats.length][0] }
 
     PanelWindow {   // dim + click anywhere outside closes
         visible: root.visible; screen: root.screen
@@ -137,7 +158,7 @@ Scope {
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qsbar-dismiss"
-        color: "#66000000"
+        color: "#80000000"
         MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons; onClicked: root.visible = false }
     }
 
@@ -148,95 +169,180 @@ Scope {
         WlrLayershell.namespace: "qsbar-launcher"
         WlrLayershell.keyboardFocus: root.visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
         color: "transparent"
-        implicitWidth: 580
-        implicitHeight: 84 + Math.max(1, root.shown.length) * 52 + (root.mode === "apps" && !root.q ? 30 : 0) + 18
+        implicitWidth: 900; implicitHeight: 600
 
         Rectangle {
             id: frame
-            anchors.fill: parent; radius: 22
-            color: "#f20c0c0c"; border.width: 1; border.color: "#24ffffff"
-
-            TextField {
-                id: search
-                x: 18; y: 16; width: parent.width - 36; height: 48
-                focus: root.visible
-                Connections { target: root; function onVisibleChanged() { if (root.visible) { search.text = ""; search.forceActiveFocus() } } }
-                onTextChanged: root.query = text
-                placeholderText: "Search apps & actions"; placeholderTextColor: "#5a5a5a"
-                color: "#f0f0f0"; selectionColor: "#ffffff33"; selectedTextColor: "#ffffff"
-                font.family: Theme.font; font.pixelSize: 16; leftPadding: 40; rightPadding: 90; verticalAlignment: TextInput.AlignVCenter
-                background: Rectangle { radius: 24; color: "#161616"; border.width: 1; border.color: search.activeFocus ? "#4dffffff" : "#1fffffff" }
-                Text { x: 14; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 17 }
-                Rectangle {   // which mode you're in
-                    visible: root.mode !== "apps"
-                    anchors.right: parent.right; anchors.rightMargin: 8; anchors.verticalCenter: parent.verticalCenter
-                    width: modeLbl.implicitWidth + 20; height: 28; radius: 14; color: Theme.on
-                    Text { id: modeLbl; anchors.centerIn: parent; color: Theme.onText; font.family: Theme.font; font.pixelSize: 10; font.bold: true
-                           text: ({ calc: "math", cmd: "command", web: "web", emoji: "emoji", files: "files", apps: "" })[root.mode] }
+            anchors.fill: parent; radius: 3
+            color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn)
+            border.width: 1; border.color: "#3dffffff"
+            // corner brackets
+            Repeater {
+                model: [[0, 0], [1, 0], [0, 1], [1, 1]]
+                Item {
+                    required property var modelData
+                    x: modelData[0] ? frame.width - 12 + 4 : -4; y: modelData[1] ? frame.height - 12 + 4 : -4
+                    width: 12; height: 12
+                    Rectangle { x: modelData[0] ? 11 : 0; width: 1; height: 12; color: "#ffffff" }
+                    Rectangle { y: modelData[1] ? 11 : 0; width: 12; height: 1; color: "#ffffff" }
                 }
-                Keys.onEscapePressed: root.visible = false
-                Keys.onReturnPressed: root.accept()
-                Keys.onEnterPressed: root.accept()
-                Keys.onDownPressed: root.sel = Math.min(root.sel + 1, root.shown.length - 1)
-                Keys.onUpPressed: root.sel = Math.max(root.sel - 1, 0)
-                Keys.onTabPressed: root.sel = (root.sel + 1) % Math.max(1, root.shown.length)
-                Keys.onBacktabPressed: root.sel = (root.sel - 1 + root.shown.length) % Math.max(1, root.shown.length)
             }
 
-            Column {
-                x: 12; y: 76; width: parent.width - 24; spacing: 4
+            // ---------- header ----------
+            Item {
+                id: head
+                x: 0; y: 0; width: parent.width; height: 44
+                Row {
+                    x: 20; anchors.verticalCenter: parent.verticalCenter; spacing: 12
+                    Text { text: "LAUNCH"; color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 12; font.letterSpacing: 4; font.bold: true }
+                    Text { text: "//"; color: "#555555"; font.family: Theme.font; font.pixelSize: 12 }
+                    Text { text: "起動"; color: "#8a8a8a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 12 }
+                }
+                Row {
+                    anchors.right: parent.right; anchors.rightMargin: 20; anchors.verticalCenter: parent.verticalCenter; spacing: 22
+                    Text { text: root.items.filter(x => x.kind === "app").length + " APPS"; color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10; font.letterSpacing: 2 }
+                    Text { id: clk; text: Qt.formatTime(new Date(), "HH:mm:ss"); color: "#e8e8e8"; font.family: Theme.font; font.pixelSize: 11; font.letterSpacing: 1
+                           Timer { interval: 1000; running: root.visible; repeat: true; triggeredOnStart: true; onTriggered: clk.text = Qt.formatTime(new Date(), "HH:mm:ss") } }
+                }
+                Rectangle { anchors.bottom: parent.bottom; x: 1; width: parent.width - 2; height: 1; color: "#26ffffff" }
+            }
 
+            // ---------- categories ----------
+            Column {
+                id: side
+                x: 12; y: head.height + 12; width: 168; spacing: 2
                 Repeater {
-                    model: root.shown
+                    model: root.cats
                     Rectangle {
+                        required property var modelData
+                        readonly property bool on: root.cat === modelData[0] && root.mode === "apps"
+                        width: side.width; height: 32; radius: 2
+                        color: on ? Theme.on : (catMouse.containsMouse ? "#12ffffff" : "transparent")
+                        Behavior on color { ColorAnimation { duration: 110 } }
+                        Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: (on ? "▸ " : "· ") + modelData[1].toUpperCase()
+                               color: on ? Theme.onText : "#a0a0a0"; font.family: Theme.font; font.pixelSize: 11; font.letterSpacing: 1.5; font.bold: on }
+                        Text { anchors.right: parent.right; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter
+                               text: modelData[2]; color: on ? "#66000000" : "#4a4a4a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 10 }
+                        MouseArea { id: catMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                    onClicked: { root.cat = modelData[0]; search.forceActiveFocus() } }
+                    }
+                }
+                Item { width: 1; height: 14 }
+                Text { x: 12; text: root.shown.length + " / " + root.countIn(root.cat) + " NODES"; color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5 }
+            }
+            Rectangle { x: side.x + side.width + 12; y: head.height; width: 1; height: parent.height - head.height - foot.height; color: "#1fffffff" }
+
+            // ---------- search + results ----------
+            Item {
+                id: main
+                x: side.x + side.width + 25; y: head.height + 12
+                width: parent.width - x - 14; height: parent.height - y - foot.height - 10
+
+                TextField {
+                    id: search
+                    width: parent.width; height: 40
+                    focus: root.visible
+                    Connections { target: root; function onVisibleChanged() { if (root.visible) { search.text = ""; search.forceActiveFocus() } } }
+                    onTextChanged: root.query = text
+                    placeholderText: "Search application…"; placeholderTextColor: "#555555"
+                    color: "#f0f0f0"; selectionColor: "#ffffff33"; selectedTextColor: "#ffffff"
+                    font.family: Theme.font; font.pixelSize: 14; leftPadding: 30; rightPadding: 90; verticalAlignment: TextInput.AlignVCenter
+                    background: Rectangle { radius: 2; color: "#0cffffff"; border.width: 1; border.color: search.activeFocus ? "#55ffffff" : "#1fffffff"
+                                            Rectangle { width: 2; height: parent.height; color: "#ffffff" } }
+                    Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 16 }
+                    Rectangle {   // which mode you're in
+                        visible: root.mode !== "apps"
+                        anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter
+                        width: modeLbl.implicitWidth + 18; height: 26; radius: 2; color: Theme.on
+                        Text { id: modeLbl; anchors.centerIn: parent; color: Theme.onText; font.family: Theme.font; font.pixelSize: 10; font.bold: true; font.letterSpacing: 1.5
+                               text: ({ calc: "MATH", cmd: "COMMAND", web: "WEB", emoji: "EMOJI", files: "FILES", apps: "" })[root.mode] }
+                    }
+                    Keys.onEscapePressed: root.visible = false
+                    Keys.onReturnPressed: root.accept()
+                    Keys.onEnterPressed: root.accept()
+                    Keys.onDownPressed: root.sel = Math.min(root.sel + 1, root.shown.length - 1)
+                    Keys.onUpPressed: root.sel = Math.max(root.sel - 1, 0)
+                    Keys.onTabPressed: root.stepCat(1)
+                    Keys.onBacktabPressed: root.stepCat(-1)
+                }
+
+                ListView {
+                    id: lv
+                    y: search.height + 10; width: parent.width; height: parent.height - y
+                    clip: true; spacing: 2
+                    model: root.shown
+                    currentIndex: root.sel
+                    highlightMoveDuration: 90
+                    boundsBehavior: Flickable.StopAtBounds
+                    delegate: Rectangle {
                         id: row
                         required property var modelData
                         required property int index
                         readonly property bool cur: index === root.sel
-                        width: parent.width; height: 48; radius: 14
-                        color: cur ? "#1fffffff" : (rm.containsMouse ? "#0fffffff" : "transparent")
-                        Behavior on color { ColorAnimation { duration: 90 } }
-                        Rectangle { visible: row.cur; x: 0; anchors.verticalCenter: parent.verticalCenter; width: 3; height: 20; radius: 2; color: "#f0f0f0" }
+                        width: lv.width; height: 40; radius: 2
+                        color: cur ? "#1cffffff" : (rm.containsMouse ? "#0affffff" : "transparent")
+                        Rectangle { visible: row.cur; width: 2; height: parent.height; color: "#ffffff" }
+                        Text { id: num; x: 14; anchors.verticalCenter: parent.verticalCenter; width: 22
+                               text: String(row.index + 1).padStart(2, "0"); color: row.cur ? "#ffffff" : "#555555"; font.family: Theme.font; font.pixelSize: 11 }
                         Item {
-                            id: ic; x: 14; anchors.verticalCenter: parent.verticalCenter; width: 30; height: 30
+                            id: ic; anchors.left: num.right; anchors.leftMargin: 10; anchors.verticalCenter: parent.verticalCenter; width: 24; height: 24
                             IconImage {
                                 id: img; anchors.fill: parent; visible: false
                                 source: row.modelData.kind === "app" || row.modelData.kind === "file"
                                         ? (Quickshell.iconPath(row.modelData.icon, true) || Quickshell.iconPath("application-x-executable")) : ""
                             }
-                            MultiEffect { anchors.fill: img; source: img; saturation: -1.0; brightness: row.cur ? 0.08 : -0.05
+                            MultiEffect { anchors.fill: img; source: img; saturation: -1.0; brightness: row.cur ? 0.08 : -0.08
                                           visible: row.modelData.kind === "app" || row.modelData.kind === "file" }
-                            Rectangle {
-                                visible: row.modelData.kind === "glyph"
-                                anchors.fill: parent; radius: 15; color: row.cur ? Theme.on : "#1affffff"
-                                Text { anchors.centerIn: parent; text: row.modelData.glyph || ""; font.family: Theme.font; font.pixelSize: 15
-                                       color: row.cur ? Theme.onText : "#e0e0e0" }
-                            }
-                            Text { visible: row.modelData.kind === "emoji"; anchors.centerIn: parent; text: row.modelData.emoji || ""; font.pixelSize: 24 }
+                            Text { visible: row.modelData.kind === "glyph"; anchors.centerIn: parent; text: row.modelData.glyph || ""
+                                   font.family: Theme.font; font.pixelSize: 15; color: row.cur ? "#ffffff" : "#b0b0b0" }
+                            Text { visible: row.modelData.kind === "emoji"; anchors.centerIn: parent; text: row.modelData.emoji || ""; font.pixelSize: 19 }
                         }
                         Column {
-                            anchors.left: ic.right; anchors.leftMargin: 14; anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 70
-                            Text { width: parent.width; elide: Text.ElideRight; text: row.modelData.name; color: row.cur ? "#ffffff" : "#d0d0d0"; font.family: Theme.font; font.pixelSize: 14 }
-                            Text { visible: !!row.modelData.sub; width: parent.width; elide: Text.ElideMiddle; text: row.modelData.sub || ""; color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 11 }
+                            anchors.left: ic.right; anchors.leftMargin: 14; anchors.right: catLbl.left; anchors.rightMargin: 12
+                            anchors.verticalCenter: parent.verticalCenter
+                            Text { width: parent.width; elide: Text.ElideRight; text: row.modelData.name; color: row.cur ? "#ffffff" : "#d4d4d4"; font.family: Theme.font; font.pixelSize: 13 }
+                            Text { visible: !!row.modelData.sub && row.cur; width: parent.width; elide: Text.ElideMiddle; text: row.modelData.sub || ""
+                                   color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 10 }
                         }
+                        Text { id: catLbl; anchors.right: parent.right; anchors.rightMargin: 14; anchors.verticalCenter: parent.verticalCenter
+                               text: (row.modelData.cat || "").toUpperCase(); color: row.cur ? "#9a9a9a" : "#454545"
+                               font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5 }
                         MouseArea { id: rm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                             onEntered: root.sel = row.index; onClicked: root.launch(row.modelData) }
                     }
                 }
                 Text {
                     visible: root.shown.length === 0
-                    width: parent.width; height: 48; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
+                    anchors.centerIn: lv
                     text: root.mode === "files" ? (root.arg.length < 2 ? "type a file name" : (findFiles.running || fileDelay.running ? "searching…" : "no files found"))
                         : root.mode === "emoji" ? "type an emoji name"
                         : root.mode === "web" ? "type what to search" : root.mode === "cmd" ? "type a command" : "nothing found"
-                    color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 13
+                    color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 12
                 }
-                Text {   // tips, only on the empty start screen
-                    visible: root.mode === "apps" && !root.q
-                    width: parent.width; height: 26; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                    text: "?  web    :  emoji    /  files    =  math    >  command"
-                    color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 11
+            }
+
+            // ---------- session strip ----------
+            Item {
+                id: foot
+                anchors.bottom: parent.bottom; width: parent.width; height: 44
+                Rectangle { x: 1; width: parent.width - 2; height: 1; color: "#26ffffff" }
+                Text { x: 20; anchors.verticalCenter: parent.verticalCenter; text: "?  web   :  emoji   /  files   =  math   >  command   ·   tab  category"
+                       color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 10 }
+                Row {
+                    anchors.right: parent.right; anchors.rightMargin: 14; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+                    Repeater {
+                        model: [["TERMINAL", ["kitty"]], ["FILES", ["dolphin"]], ["LOCK", ["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "curtain", "lock"]],
+                                ["POWER", ["qs", "ipc", "-p", root.qsDir, "call", "bar", "power"]]]
+                        Rectangle {
+                            required property var modelData
+                            width: fl.implicitWidth + 22; height: 26; radius: 2
+                            color: fm.containsMouse ? Theme.on : "transparent"; border.width: 1; border.color: fm.containsMouse ? Theme.on : "#26ffffff"
+                            Text { id: fl; anchors.centerIn: parent; text: modelData[0]; color: fm.containsMouse ? Theme.onText : "#a0a0a0"
+                                   font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5 }
+                            MouseArea { id: fm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                        onClicked: { root.visible = false; Quickshell.execDetached(modelData[1]) } }
+                        }
+                    }
                 }
             }
         }

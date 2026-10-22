@@ -4,7 +4,17 @@
 import Quickshell
 
 ShellRoot {
+    Curtain {}
+    AsciiWall {}
     WallShuffle {}
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        NierHub { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        HomeScreen { required property var modelData; screen: modelData }
+    }
     Screensaver {}
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")

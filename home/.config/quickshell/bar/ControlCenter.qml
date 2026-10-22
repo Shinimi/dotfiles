@@ -62,7 +62,7 @@ BarPopup {
         }
         Repeater {
             model: [["\u{f0493}", () => cc.qs("settings")],
-                    ["\u{f033e}", () => cc.go(["loginctl", "lock-session"])],
+                    ["\u{f033e}", () => cc.go(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "curtain", "lock"])],
                     ["\u{f0425}", () => cc.go([Quickshell.env("HOME") + "/.config/hypr/scripts/powermenu.sh"])]]
             Rectangle {
                 required property var modelData

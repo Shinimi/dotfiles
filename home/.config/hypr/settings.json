@@ -106,5 +106,13 @@
   "autostart": [],
   "weather_place": "",
   "weather_label": "",
-  "game_profiles": {}
+  "game_profiles": {},
+  "hot_corner": true,
+  "wall_shuffle": 0,
+  "pause_on_lock": true,
+  "island_peeks": true,
+  "screensaver": true,
+  "ws_kanji": true,
+  "game_workspace": true,
+  "wall_tint": true
 }
