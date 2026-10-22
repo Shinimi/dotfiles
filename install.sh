@@ -30,7 +30,7 @@ PKGS=(
   # look
   papirus-icon-theme capitaine-cursors adw-gtk-theme ttf-jetbrains-mono-nerd inter-font noto-fonts noto-fonts-emoji plymouth
   # terminal & gaming
-  otf-geist-mono-nerd ttf-victor-mono-nerd noto-fonts-cjk openrgb
+  tela-circle-icon-theme-black vimix-cursors otf-geist-mono-nerd ttf-victor-mono-nerd noto-fonts-cjk openrgb
   zsh zsh-theme-powerlevel10k cachyos-zsh-config fastfetch chafa btop mangohud scx-tools ddcutil
   # apps
   vesktop-bin git github-cli
@@ -100,6 +100,7 @@ fi
 command -v spicetify >/dev/null && { spicetify config current_theme Monochrome >/dev/null 2>&1; spicetify backup apply -q -n >/dev/null 2>&1 || true; }
 [ "$(basename "${SHELL:-}")" = zsh ] || { ask "Make zsh your shell?" && chsh -s /usr/bin/zsh; }
 [ -f "$HOME/.face.icon" ] && "$HOME/.local/bin/fetch-logo.sh"
+python3 -I "$HOME/.local/bin/mono-icons.py" >/dev/null 2>&1 || true
 python3 -I "$HOME/.local/bin/kocho-cursor.py" >/dev/null 2>&1 || true
 ok "theme"
 

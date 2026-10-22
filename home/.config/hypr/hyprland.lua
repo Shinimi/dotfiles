@@ -65,7 +65,7 @@ hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" 
 local terminal    = "kitty"
 local fileManager = "dolphin"
 local browser     = "helium-browser"
-local menu        = os.getenv("HOME") .. "/.local/bin/launcher.sh drun"
+local menu        = "qs ipc -p " .. os.getenv("HOME") .. "/.config/quickshell/bar call launcher toggle"
 local scripts     = os.getenv("HOME") .. "/.config/hypr/scripts"
 
 
@@ -85,7 +85,7 @@ end)
 
 
 ---------------------------------------------------------------- ENVIRONMENT
-hl.env("XCURSOR_THEME", "capitaine-cursors-light")
+hl.env("XCURSOR_THEME", "Vimix-white-cursors")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("QT_QPA_PLATFORMTHEME", "kde")          -- KDE apps keep your Breeze Dark look
@@ -273,7 +273,7 @@ hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true },
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop)$" }, opacity = "1.0 override 1.0 override" })
 -- blur behind the bar, panels and pop-ups
-hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview))$" }, blur = true, ignore_alpha = 0.2 })
+hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview|launcher))$" }, blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
 
 -- Games open on workspace 5; Steam popups float; Discord + Spotify live on the side screen

@@ -1,5 +1,5 @@
 //@ pragma UseQApplication
-//@ pragma IconTheme Papirus-Dark
+//@ pragma IconTheme Tela-mono
 // Yu's bar (Quickshell). Only on the main screen (DP-1). Made by Claude.
 import Quickshell
 
@@ -51,5 +51,9 @@ ShellRoot {
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         Overview { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        AppLauncher { required property var modelData; screen: modelData }
     }
 }

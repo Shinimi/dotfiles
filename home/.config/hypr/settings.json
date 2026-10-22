@@ -71,8 +71,8 @@
     }
   },
   "folder_color": "grey",
-  "icon_base": "Papirus-Dark",
-  "cursor_theme": "capitaine-cursors-light",
+  "icon_base": "Tela-mono",
+  "cursor_theme": "Vimix-white-cursors",
   "cursor_size": 24,
   "ui_font": "Inter",
   "ui_font_size": 10,

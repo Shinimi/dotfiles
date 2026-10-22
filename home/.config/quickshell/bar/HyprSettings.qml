@@ -429,7 +429,7 @@ Scope {
                             width: parent.width; title: "Icons"; icon: "\u{f02e9}"
                             SetChoice {
                                 label: "Icon style"; current: Settings.get("icon_base")
-                                options: [["Papirus-Dark", "Papirus"], ["breeze-dark", "Breeze"]]
+                                options: [["Tela-mono", "Tela mono"], ["Papirus-Dark", "Papirus"], ["breeze-dark", "Breeze"]]
                                 onPicked: v => Settings.set("icon_base", v)
                             }
                             Column {
@@ -461,7 +461,7 @@ Scope {
                                 width: (parent.width - 14) / 2; title: "Cursor"; icon: "\u{f01bf}"
                                 SetChoice {
                                     label: "Style"; current: Settings.get("cursor_theme")
-                                    options: [["Kocho-cursors", "Kochō"], ["capitaine-cursors", "Capitaine dark"], ["capitaine-cursors-light", "Capitaine light"], ["breeze_cursors", "Breeze"]]
+                                    options: [["Vimix-white-cursors", "Vimix white"], ["Vimix-cursors", "Vimix dark"], ["capitaine-cursors", "Capitaine dark"], ["capitaine-cursors-light", "Capitaine light"], ["breeze_cursors", "Breeze"]]
                                     onPicked: v => Settings.set("cursor_theme", v)
                                 }
                                 SetChoice {
