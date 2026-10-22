@@ -2,8 +2,8 @@
 # safe-update.sh – system update with a safety net. Made by Claude.
 #  · snap-pac already snapshots the system before/after (shown in the boot menu → Snapshots)
 #  · afterwards it checks Hyprland's config and the top bar still load, and tells you if a reboot is needed
-pink=$'\e[38;2;227;158;192m'; vio=$'\e[38;2;162;138;232m'; ok=$'\e[38;2;143;214;184m'; bad=$'\e[38;2;236;111;143m'; dim=$'\e[38;2;128;122;156m'; off=$'\e[0m'
-printf '\n%s󱖉  Kochō update%s\n%s   A snapshot is taken automatically before anything changes.%s\n\n' "$pink" "$off" "$dim" "$off"
+pink=$'\e[38;2;230;230;230m'; vio=$'\e[38;2;200;200;200m'; ok=$'\e[38;2;210;210;210m'; bad=$'\e[38;2;207;107;107m'; dim=$'\e[38;2;110;110;110m'; off=$'\e[0m'
+printf '\n%s●  update%s\n%s   A snapshot is taken automatically before anything changes.%s\n\n' "$pink" "$off" "$dim" "$off"
 kernel_before=$(uname -r)
 yay -Syu || { printf '\n%s✗ Update stopped – nothing else was changed.%s\n' "$bad" "$off"; read -n1 -rsp "press any key to close"; exit 1; }
 printf '\n%s── checking your desktop ──%s\n' "$vio" "$off"
@@ -14,8 +14,8 @@ if qs log -p "$HOME/.config/quickshell/bar" 2>/dev/null | head -20 | grep -q "Co
 [ -d "/usr/lib/modules/$kernel_before" ] || { printf '%s!%s new kernel installed – reboot when convenient\n' "$pink" "$off"; }
 if [ $fail = 1 ]; then
   printf '\n%sSomething broke.%s Reboot, choose %sSnapshots%s in the boot menu and pick the one from before this update.\n' "$bad" "$off" "$pink" "$off"
-  notify-send -u critical -a "Kochō update" "Update finished with problems" "Reboot and pick the pre-update snapshot in the boot menu."
+  notify-send -u critical -a "Update" "Update finished with problems" "Reboot and pick the pre-update snapshot in the boot menu."
 else
-  printf '\n%sAll good.%s\n' "$ok" "$off"; notify-send -a "Kochō update" "Update finished" "Everything checks out."
+  printf '\n%sAll good.%s\n' "$ok" "$off"; notify-send -a "Update" "Update finished" "Everything checks out."
 fi
 read -n1 -rsp "press any key to close"

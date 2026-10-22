@@ -16,7 +16,7 @@ ok()   { printf '%s✓%s %s\n' "$green" "$off" "$1"; }
 [ "$EUID" -eq 0 ] && { echo "Run this as your normal user, not root."; exit 1; }
 command -v pacman >/dev/null || { echo "This needs an Arch-based system (CachyOS)."; exit 1; }
 
-printf '%s\n  Shinobu Kochō · Hyprland · CachyOS\n%s  restoring from %s\n' "$blue" "$dim" "$R$off"
+printf '%s\n  Monochrome · Hyprland · CachyOS\n%s  restoring from %s\n' "$blue" "$dim" "$R$off"
 
 # ---------------------------------------------------------------- packages
 PKGS=(
@@ -72,8 +72,8 @@ if ask "Install system files (needs sudo)?"; then
     sudo systemctl enable --now amdgpu-power-cap.service cpu-boost-cap.service
   fi
   sudo systemctl enable sddm.service 2>/dev/null || true
-  if [ -d /usr/share/plymouth/themes/shinobu ] && ask "  Use the Shinobu boot splash? (rebuilds the boot image)"; then
-    sudo plymouth-set-default-theme -R shinobu
+  if [ -d /usr/share/plymouth/themes/mono ] && ask "  Use the monochrome boot splash? (rebuilds the boot image)"; then
+    sudo plymouth-set-default-theme -R mono
   fi
   ok "system files"
 fi
@@ -91,13 +91,13 @@ gsettings set org.gnome.desktop.interface color-scheme prefer-dark 2>/dev/null |
 gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark 2>/dev/null || true
 gsettings set org.gnome.desktop.interface cursor-theme capitaine-cursors 2>/dev/null || true
 gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null || true
-command -v plasma-apply-colorscheme >/dev/null && plasma-apply-colorscheme ShinobuKocho >/dev/null 2>&1 || true
+command -v plasma-apply-colorscheme >/dev/null && plasma-apply-colorscheme Monochrome >/dev/null 2>&1 || true
 if command -v kwriteconfig6 >/dev/null; then
   kwriteconfig6 --file kdeglobals --group Icons --key Theme Papirus-Dark
-  kwriteconfig6 --file kdeglobals --group General --key ColorScheme ShinobuKocho
+  kwriteconfig6 --file kdeglobals --group General --key ColorScheme Monochrome
   kwriteconfig6 --file kdeglobals --group General --key TerminalApplication kitty
 fi
-command -v spicetify >/dev/null && { spicetify config current_theme ShinobuKocho >/dev/null 2>&1; spicetify backup apply -q -n >/dev/null 2>&1 || true; }
+command -v spicetify >/dev/null && { spicetify config current_theme Monochrome >/dev/null 2>&1; spicetify backup apply -q -n >/dev/null 2>&1 || true; }
 [ "$(basename "${SHELL:-}")" = fish ] || { ask "Make fish your shell?" && chsh -s /usr/bin/fish; }
 [ -f "$HOME/.face.icon" ] && "$HOME/.local/bin/fetch-logo.sh"
 python3 -I "$HOME/.local/bin/kocho-cursor.py" >/dev/null 2>&1 || true

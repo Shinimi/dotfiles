@@ -1,32 +1,32 @@
-# starship · Shinobu Kochō — a butterfly, the folder, git. Made by Claude.
+# starship · monochrome — a dot, the folder, git. Made by Claude.
 add_newline = true
-format = """[󱖉](bold #e39ec0) $directory$git_branch$git_status$cmd_duration
+format = """[●](bold #b0b0b0) $directory$git_branch$git_status$cmd_duration
 $character"""
 
 [directory]
-style = "bold #a28ae8"
+style = "bold #e0e0e0"
 format = "[$path]($style)[$read_only]($read_only_style) "
 truncation_length = 3
 truncation_symbol = "…/"
 read_only = " 󰌾"
-read_only_style = "#ec6f8f"
+read_only_style = "#cf6b6b"
 home_symbol = "~"
 
 [git_branch]
 symbol = " "
-style = "#7fc4e3"
+style = "#c4c4c4"
 format = "[$symbol$branch]($style) "
 
 [git_status]
-style = "#eec48e"
+style = "#d6d6d6"
 format = "[($all_status$ahead_behind )]($style)"
 
 [cmd_duration]
 min_time = 2000
-style = "italic #807a9c"
+style = "italic #7a7a7a"
 format = "[ $duration]($style)"
 
 [character]
-success_symbol = "[❯](#e39ec0)"
-error_symbol = "[❯](#ec6f8f)"
-vimcmd_symbol = "[❮](#8fd6b8)"
+success_symbol = "[❯](#b0b0b0)"
+error_symbol = "[❯](#cf6b6b)"
+vimcmd_symbol = "[❮](#c8c8c8)"

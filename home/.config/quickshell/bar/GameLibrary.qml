@@ -90,7 +90,7 @@ Scope {
                                     height: 64
                                     opacity: card.hot ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 140 } }
-                                    gradient: Gradient { GradientStop { position: 0; color: "#0013121c" } GradientStop { position: 1; color: "#f013121c" } }
+                                    gradient: Gradient { GradientStop { position: 0; color: "#00111111" } GradientStop { position: 1; color: "#f0111111" } }
                                     Label {
                                         anchors.left: parent.left; anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: 10
                                         text: card.modelData.name; wrapMode: Text.Wrap; maximumLineCount: 2; elide: Text.ElideRight; font.pixelSize: 12

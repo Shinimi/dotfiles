@@ -1,8 +1,8 @@
 # yu's CachyOS dotfiles
 
-Hyprland (Lua config) + custom Quickshell bar, themed after **Shinobu Kochō** (lilac, orchid pink, butterfly teal on deep plum). Made with Claude.
+Hyprland (Lua config) + custom Quickshell bar, in **monochrome** (greys, white accents, black-and-white wallpapers).
 
-**Branches:** `main` = Shinobu Kochō theme · `tokyo-night` = the earlier Tokyo Night version (`git checkout tokyo-night`).
+**Branches:** `main` = monochrome · `shinobu` = Shinobu Kochō theme · `tokyo-night` = Tokyo Night.
 
 | Folder | What |
 |---|---|

@@ -40,15 +40,15 @@
 ---------------------------------------------------------------- COLORS
 -- Tokyo Night palette
 local c = {
-    bg      = "13121c",
-    bg_dark = "0d0c13",
-    bg_hl   = "2a2640",
-    fg      = "efeaf8",
-    comment = "807a9c",
-    blue    = "a28ae8",
-    purple  = "e39ec0",
-    cyan    = "7fc4e3",
-    border  = "403a5c",
+    bg      = "111111",
+    bg_dark = "0b0b0b",
+    bg_hl   = "242424",
+    fg      = "eaeaea",
+    comment = "7a7a7a",
+    blue    = "e0e0e0",
+    purple  = "b0b0b0",
+    cyan    = "c4c4c4",
+    border  = "3a3a3a",
 }
 local function rgba(hex, a) return "rgba(" .. hex .. (a or "ff") .. ")" end
 
@@ -85,7 +85,7 @@ end)
 
 
 ---------------------------------------------------------------- ENVIRONMENT
-hl.env("XCURSOR_THEME", "Kocho-cursors")
+hl.env("XCURSOR_THEME", "capitaine-cursors-light")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("QT_QPA_PLATFORMTHEME", "kde")          -- KDE apps keep your Breeze Dark look
@@ -176,13 +176,13 @@ hl.config({
     render = { new_render_scheduling = true },
     -- window tabs (SUPER + W groups): Tokyo Night pills
     group = {
-        col = { border_active = { colors = { "rgba(e39ec0ff)", "rgba(a28ae8ff)" }, angle = 45 }, border_inactive = "rgba(403a5caa)" },
+        col = { border_active = { colors = { "rgba(b0b0b0ff)", "rgba(e0e0e0ff)" }, angle = 45 }, border_inactive = "rgba(3a3a3aaa)" },
         groupbar = {
             enabled = true, height = 24, font_family = "GeistMono Nerd Font", font_size = 11,
             gradients = true, rounding = 8, gradient_rounding = 8, round_only_edges = false,
             indicator_height = 0, gaps_in = 4, gaps_out = 6, keep_upper_gap = true, text_padding = 10,
-            text_color = "rgba(0d0c13ff)", text_color_inactive = "rgba(cfc8e2ff)",
-            col = { active = "rgba(a28ae8ee)", inactive = "rgba(221f33dd)", locked_active = "rgba(e39ec0ee)", locked_inactive = "rgba(221f33dd)" },
+            text_color = "rgba(0b0b0bff)", text_color_inactive = "rgba(c8c8c8ff)",
+            col = { active = "rgba(e0e0e0ee)", inactive = "rgba(1c1c1cdd)", locked_active = "rgba(b0b0b0ee)", locked_inactive = "rgba(1c1c1cdd)" },
             blur = true, disable_when_only = false,
         },
     },  -- smoother frame pacing when the GPU is busy
@@ -222,7 +222,7 @@ end
 hl.workspace_rule({ workspace = "name:side", monitor = "DP-2", default = true, persistent = true,
                     layout = "master", layout_opts = { orientation = "left" } })
 -- Side screen layout: Discord big on the left (66%), Spotify / others in a slim column on the right
-hl.config({ master = { mfact = 0.66, new_status = "slave", orientation = "left" } })
+hl.config({ master = { mfact = 0.5, new_status = "slave", orientation = "left" } })
 -- Game mode: Do not disturb + Performance while a game is open (toggle in Settings → Power & lock)
 local function is_game(w) return w and w.class and (w.class:match("^steam_app_%d+$") or w.class == "cs2" or w.class == "gamescope") end
 local gamemode = os.getenv("HOME") .. "/.local/bin/gamemode.sh"
@@ -242,7 +242,7 @@ hl.on("window.open", function(w)
     local prev = hl.get_active_window()
     hl.dispatch(hl.dsp.focus({ window = "address:" .. w.address }))
     if w.class == "vesktop" then hl.dispatch(hl.dsp.layout("swapwithmaster master")) end
-    hl.dispatch(hl.dsp.layout("mfact exact 0.66"))          -- keep the 2/3 : 1/3 split
+    hl.dispatch(hl.dsp.layout("mfact exact 0.5"))          -- keep the 50 : 50 split
     if prev and prev.address ~= w.address then hl.dispatch(hl.dsp.focus({ window = "address:" .. prev.address })) end
 end)
 

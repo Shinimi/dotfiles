@@ -11,7 +11,7 @@ Rectangle {
         return n.replace(/ Analog Stereo| Digital Stereo \(HDMI\)| Mono| Stereo/g, "").slice(0, 34)
     }
     width: parent ? parent.width : 300; height: current ? 72 : 44; radius: 12
-    color: current ? Qt.rgba(accent.r, accent.g, accent.b, 0.14) : (m.containsMouse ? Theme.bgHover : "#3313121c")
+    color: current ? Qt.rgba(accent.r, accent.g, accent.b, 0.14) : (m.containsMouse ? Theme.bgHover : "#33111111")
     border.width: current ? 1 : 0; border.color: accent
     Behavior on height { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
     MouseArea { id: m; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: if (!r.current) r.picked() }

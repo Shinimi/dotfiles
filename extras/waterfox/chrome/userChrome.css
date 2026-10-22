@@ -1,7 +1,7 @@
 /* Tokyo Night for Waterfox. Made by Claude. */
 :root {
-  --tn-bg: #13121c; --tn-bg-dark: #0d0c13; --tn-bg-hl: #2a2640; --tn-fg: #efeaf8;
-  --tn-muted: #807a9c; --tn-blue: #a28ae8; --tn-purple: #e39ec0; --tn-sel: #2f2950;
+  --tn-bg: #111111; --tn-bg-dark: #0b0b0b; --tn-bg-hl: #242424; --tn-fg: #eaeaea;
+  --tn-muted: #7a7a7a; --tn-blue: #e0e0e0; --tn-purple: #b0b0b0; --tn-sel: #2a2a2a;
 
   --lwt-accent-color: var(--tn-bg-dark) !important;
   --lwt-text-color: var(--tn-fg) !important;
@@ -26,15 +26,15 @@
   --sidebar-background-color: var(--tn-bg-dark) !important;
   --sidebar-text-color: var(--tn-fg) !important;
   --chrome-content-separator-color: transparent !important;
-  --button-hover-bgcolor: rgba(239,234,248, 0.10) !important;
-  --button-active-bgcolor: rgba(239,234,248, 0.18) !important;
+  --button-hover-bgcolor: rgba(234,234,234, 0.10) !important;
+  --button-active-bgcolor: rgba(234,234,234, 0.18) !important;
   --identity-icon-color: var(--tn-blue) !important;
   --toolbarbutton-icon-fill-attention: var(--tn-blue) !important;
 }
 #navigator-toolbox { background: var(--tn-bg-dark) !important; border-bottom: none !important; }
 #TabsToolbar, #titlebar { background: var(--tn-bg-dark) !important; }
 .tab-background[selected] { background: var(--tn-bg-hl) !important; box-shadow: inset 0 -2px 0 var(--tn-blue) !important; }
-.tabbrowser-tab:not([selected]):hover .tab-background { background: rgba(239,234,248, 0.06) !important; }
+.tabbrowser-tab:not([selected]):hover .tab-background { background: rgba(234,234,234, 0.06) !important; }
 .tab-label[selected] { color: var(--tn-fg) !important; }
 .tab-label:not([selected]) { color: var(--tn-muted) !important; }
 #urlbar-background { border-radius: 10px !important; }

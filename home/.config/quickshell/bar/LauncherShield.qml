@@ -13,7 +13,7 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Top
     WlrLayershell.namespace: "qsbar-dismiss"
-    color: "#330d0c13"
+    color: "#330b0b0b"
     MouseArea { anchors.fill: parent; acceptedButtons: Qt.AllButtons; onClicked: { w.on = false; Quickshell.execDetached(["pkill", "-x", "rofi"]) } }
     IpcHandler { target: "shield"; function enable(): void { w.on = true } function disable(): void { w.on = false } }
 }

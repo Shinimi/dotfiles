@@ -64,15 +64,15 @@
     },
     "Color": {
       "description": "Choose source color.\nFor [b]Matugen[/b] option check [b]\"matugentemplate.css\"[/b].\nFor [b]Custom/Dynamic[/b] option use [b]\"Custom Accent Color\"[/b].",
-      "default": "Kochō",
+      "default": "Mono",
       "tab": "Style",
       "values": {
-        "Kochō": {
+        "Mono": {
           "TargetCss": {
             "affects": [
               ".*"
             ],
-            "src": "css/main/colors/kocho.css"
+            "src": "css/main/colors/mono.css"
           }
         },
         "Red": {

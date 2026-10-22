@@ -1,0 +1,8 @@
+[Sound Theme]
+Name=Mono
+Comment=Clean glass taps. Made by Claude.
+Directories=stereo
+Inherits=freedesktop
+
+[stereo]
+OutputProfile=stereo

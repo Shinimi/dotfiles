@@ -38,7 +38,7 @@ PanelWindow {
             text: Qt.formatDateTime(clk.date, Settings.cur("clock_12h") ? "h:mm" : "HH:mm")
             font.family: Theme.font; font.pixelSize: 132; font.weight: Font.Black
             color: Theme.fg
-            style: Text.Raised; styleColor: Qt.rgba(0.64, 0.54, 0.91, 0.35)
+            style: Text.Raised; styleColor: Qt.rgba(0.88, 0.88, 0.88, 0.35)
         }
         Text {
             anchors.horizontalCenter: w.pos === "center" ? parent.horizontalCenter : undefined
@@ -59,7 +59,7 @@ PanelWindow {
             visible: w.player !== null
             anchors.horizontalCenter: w.pos === "center" ? parent.horizontalCenter : undefined
             width: Math.min(560, np.implicitWidth + 24); height: 64; radius: 16
-            color: Qt.rgba(0.05, 0.05, 0.07, 0.55); border.width: 1; border.color: "#22efeaf8"
+            color: Qt.rgba(0.04, 0.04, 0.04, 0.55); border.width: 1; border.color: "#22eaeaea"
             Row {
                 id: np
                 x: 10; anchors.verticalCenter: parent.verticalCenter; spacing: 12

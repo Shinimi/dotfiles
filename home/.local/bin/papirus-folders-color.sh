@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# papirus-folders-color.sh <color> – builds ~/.local/share/icons/Papirus-Shinobu: Papirus-Dark with
+# papirus-folders-color.sh <color> – builds ~/.local/share/icons/Papirus-Mono: Papirus-Dark with
 # folders in another colour (blue, indigo, violet, cyan, teal, pink, magenta, green, grey, nordic). Made by Claude.
-c="${1:-blue}"; base=/usr/share/icons/Papirus-Dark; out="$HOME/.local/share/icons/Papirus-Shinobu"
+c="${1:-blue}"; base=/usr/share/icons/Papirus-Dark; out="$HOME/.local/share/icons/Papirus-Mono"
 rm -rf "$out"; mkdir -p "$out"; dirs=()
 for sd in "$base"/*/; do
   size=$(basename "$sd"); src="$(readlink -f "$sd")/places"; [ -d "$src" ] || continue
@@ -12,7 +12,7 @@ for sd in "$base"/*/; do
   done < <(find "$src" -maxdepth 1 -type l)
 done
 {
-  echo "[Icon Theme]"; echo "Name=Papirus-Shinobu"; echo "Comment=Papirus-Dark with $c folders (made by Claude)"
+  echo "[Icon Theme]"; echo "Name=Papirus-Mono"; echo "Comment=Papirus-Dark with $c folders (made by Claude)"
   echo "Inherits=Papirus-Dark,breeze-dark,hicolor"
   printf 'Directories=%s\n' "$(IFS=,; echo "${dirs[*]}")"
   for d in "${dirs[@]}"; do

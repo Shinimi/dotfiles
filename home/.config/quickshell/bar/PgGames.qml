@@ -28,7 +28,7 @@ Column {
             id: row
             required property var modelData
             readonly property var p: pg.prof(modelData.id)
-            width: pg.width; height: 118; radius: 16; color: Theme.card; border.width: 1; border.color: "#14efeaf8"
+            width: pg.width; height: 118; radius: 16; color: Theme.card; border.width: 1; border.color: "#14eaeaea"
             ClippingRectangle {
                 x: 12; y: 12; width: 64; height: 94; radius: 10; color: Theme.bgAlt
                 Image { anchors.fill: parent; source: Theme.fileUrl(row.modelData.cover); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 128 }

@@ -39,10 +39,10 @@ Column {
             model: pg.shown
             Rectangle {
                 required property var modelData
-                width: (pg.width - 10) / 2; height: 38; radius: 10; color: "#3313121c"
+                width: (pg.width - 10) / 2; height: 38; radius: 10; color: "#33111111"
                 Rectangle {
                     x: 8; anchors.verticalCenter: parent.verticalCenter; height: 26; radius: 7; width: Math.min(kl.implicitWidth + 16, parent.width * 0.55)
-                    color: Qt.rgba(0.64, 0.54, 0.91, 0.16); clip: true
+                    color: Qt.rgba(0.88, 0.88, 0.88, 0.16); clip: true
                     Label { id: kl; x: 8; anchors.verticalCenter: parent.verticalCenter; text: modelData.k.replace(/SUPER/g, "\u{f17a} "); color: Theme.blue; font.pixelSize: 10 }
                 }
                 Label { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; width: parent.width * 0.4; horizontalAlignment: Text.AlignRight

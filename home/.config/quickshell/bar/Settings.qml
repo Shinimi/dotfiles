@@ -11,7 +11,7 @@ Singleton {
     readonly property string file: Quickshell.env("HOME") + "/.config/hypr/settings.json"
     readonly property var defaults: ({
         // windows & look
-        gaps_in: 4, gaps_out: 8, border_size: 2, rounding: 10, accent: "tokyo", border_spin: true, border_angle: 45,
+        gaps_in: 4, gaps_out: 8, border_size: 2, rounding: 10, accent: "mono", border_spin: true, border_angle: 45,
         glow: false, glow_range: 14, glow_strength: 40, shadows: true, shadow_range: 6, shadow_tint: false,
         dim_inactive: false, dim_strength: 12, layout: "dwindle", smart_split: false, snap: true, resize_on_border: true,
         // motion
@@ -26,8 +26,8 @@ Singleton {
         // display
         night_temp: 4500, night_auto: false, night_from: 21, night_to: 7, vibrance: 100, monitors: ({}),
         // theme
-        folder_color: "blue", icon_base: "Papirus-Dark", cursor_theme: "Kocho-cursors", cursor_size: 24,
-        ui_font: "Noto Sans", ui_font_size: 10, fetch_logo: "crest", fetch_source: "",
+        folder_color: "grey", icon_base: "Papirus-Dark", cursor_theme: "capitaine-cursors-light", cursor_size: 24,
+        ui_font: "Noto Sans", ui_font_size: 10, fetch_logo: "mono", fetch_source: "",
         // bar & notifications
         clock_seconds: false, clock_12h: false, clock_date: true, bar_weather: true, bar_media: true,
         notif_timeout: 5, notif_center: false, sounds: true, desktop_clock: true, desktop_clock_pos: "left",

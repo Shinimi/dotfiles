@@ -17,8 +17,8 @@ d={"gaps_in":4,"gaps_out":8,"border_size":2,"rounding":10,"accent":"tokyo","bord
    "hide_cursor_typing":False,"cursor_hide_after":0,"ws_back_forth":False,"swallow":False,
    "night_temp":4500,"vibrance":100,"monitors":{},"lock_minutes":10,"screen_off_after":1,"mouse_wakes":False}
 s=dict(d); s.update(json.load(open(jf))); b=lambda v: "true" if v else "false"
-pal={"tokyo":["a28ae8","e39ec0","7fc4e3","a28ae8"],"storm":["a28ae8","7fc4e3"],"sakura":["ec6f8f","e39ec0"],
-     "matcha":["8fd6b8","6fb8d6"],"sunset":["f2ad94","eec48e","ec6f8f"],"mono":["efeaf8","807a9c"]}
+pal={"tokyo":["e0e0e0","b0b0b0","c4c4c4","e0e0e0"],"storm":["e0e0e0","c4c4c4"],"sakura":["cf6b6b","b0b0b0"],
+     "matcha":["c8c8c8","bdbdbd"],"sunset":["c0c0c0","d6d6d6","cf6b6b"],"mono":["eaeaea","7a7a7a"]}
 cols=", ".join(f'"rgba({c}ff)"' for c in pal.get(s["accent"],pal["tokyo"]))
 
 # colour vibrance: a tiny screen shader, only used when not 100%
@@ -125,7 +125,7 @@ import json,shlex; t=json.load(open('$S/theme.json'))
 for k,v in t.items(): print(f'{k}={shlex.quote(str(v))}')")"
   icons="$icon_base"
   if [ "$icon_base" = Papirus-Dark ] && [ "$folder_color" != blue ]; then
-    "$HOME/.local/bin/papirus-folders-color.sh" "$folder_color" >/dev/null; icons=Papirus-Shinobu
+    "$HOME/.local/bin/papirus-folders-color.sh" "$folder_color" >/dev/null; icons=Papirus-Mono
   fi
   for f in "$HOME/.config/gtk-3.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"; do
     [ -f "$f" ] || continue
@@ -195,13 +195,14 @@ if mode=="ascii": subprocess.run([os.path.expanduser("~/.local/bin/fetch-ascii.s
 if mode in ("portrait","picture"):
     pic=os.path.expanduser("~/.config/fastfetch/shinobu-portrait.png") if mode=="portrait" else os.path.expanduser("~/.face.icon")
     subprocess.run([os.path.expanduser("~/.local/bin/fetch-logo.sh"),pic],capture_output=True)
-logo={"crest":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/crest.png", "width": 26, "height": 11, "padding": { "top": 1, "left": 2, "right": 4 } }',
+logo={"mono":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/mono.png", "width": 26, "height": 11, "padding": { "top": 1, "left": 2, "right": 4 } }',
+      "crest":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/crest.png", "width": 26, "height": 11, "padding": { "top": 1, "left": 2, "right": 4 } }',
       "kamon":'{ "type": "file-raw", "source": "~/.config/fastfetch/kamon.txt", "padding": { "top": 1, "left": 3, "right": 6 } }',
       "butterfly":'{ "type": "file-raw", "source": "~/.config/fastfetch/butterfly.txt", "padding": { "top": 2, "left": 3, "right": 5 } }',
       "portrait":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 30, "height": 14, "padding": { "top": 1, "left": 3, "right": 4 } }',
       "ascii":'{ "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }',
       "picture":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 34, "height": 15, "padding": { "top": 1, "left": 3, "right": 5 } }',
-      "distro":'{ "type": "builtin", "color": { "1": "#a28ae8", "2": "#e39ec0" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
+      "distro":'{ "type": "builtin", "color": { "1": "#e0e0e0", "2": "#b0b0b0" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
 p=os.path.expanduser("~/.config/fastfetch/config.jsonc"); c=open(p).read()
 c=re.sub(r'  "logo": .*// LOGO \(Settings → Theme\)', lambda m: f'  "logo": {logo}, // LOGO (Settings → Theme)', c)
 open(p,'w').write(c); open(f,'w').write(key)

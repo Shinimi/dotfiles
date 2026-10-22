@@ -1,4 +1,4 @@
-/* rofi · Kochō minimal launcher. Made by Claude. */
+/* rofi · monochrome minimal launcher. Made by Claude. */
 @theme "/dev/null"
 configuration {
   modi: "drun,run,window";
@@ -12,11 +12,11 @@ configuration {
   click-to-exit: true;
 }
 * {
-  bg:    #0d0c13d9;
-  fg:    #efeaf8;
-  dim:   #5f5878;
-  pink:  #e39ec0;
-  violet:#a28ae8;
+  bg:    #0b0b0bd9;
+  fg:    #eaeaea;
+  dim:   #555555;
+  pink:  #b0b0b0;
+  violet:#e0e0e0;
   background-color: transparent;
   text-color: @fg;
 }
@@ -45,11 +45,11 @@ entry {
   vertical-align: 0.5;
   font: "GeistMono Nerd Font 14";
 }
-sep { expand: false; content: ""; font: "GeistMono Nerd Font 1"; border: 0 0 1px 0; border-color: #e39ec033; margin: 0 6px; }
+sep { expand: false; content: ""; font: "GeistMono Nerd Font 1"; border: 0 0 1px 0; border-color: #b0b0b033; margin: 0 6px; }
 listview { lines: 7; spacing: 2px; scrollbar: false; fixed-height: true; }
 element { padding: 8px 10px; border-radius: 10px; spacing: 14px; cursor: pointer; }
 element normal.normal, element alternate.normal, element normal.active, element alternate.active { background-color: transparent; text-color: #cfc8e2; }
-element selected.normal, element selected.active { background-color: #a28ae81f; text-color: @fg; }
+element selected.normal, element selected.active { background-color: #e0e0e01f; text-color: @fg; }
 element-icon { size: 22px; vertical-align: 0.5; }
 element-text { text-color: inherit; vertical-align: 0.5; }
 message { padding: 8px; }

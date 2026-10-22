@@ -56,7 +56,7 @@ Scope {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "qsbar-overview"
         WlrLayershell.keyboardFocus: root.visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-        color: "#e60d0c13"
+        color: "#e60b0b0b"
 
         MouseArea { anchors.fill: parent; onClicked: root.visible = false }
         Item {
@@ -67,7 +67,7 @@ Scope {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter; y: 70
-            text: "胡蝶しのぶ  ·  workspaces"; color: Theme.purple; font.family: Theme.font; font.pixelSize: 15
+            text: "w o r k s p a c e s"; color: Theme.purple; font.family: Theme.font; font.pixelSize: 15
         }
 
         Flow {
@@ -87,7 +87,7 @@ Scope {
                         width: parent.width; height: root.mh * root.k; radius: 14; clip: true
                         color: Theme.bgAlt
                         border.width: drop.containsDrag ? 3 : (tile.cur ? 2 : 1)
-                        border.color: drop.containsDrag ? Theme.purple : (tile.cur ? Theme.blue : "#22efeaf8")
+                        border.color: drop.containsDrag ? Theme.purple : (tile.cur ? Theme.blue : "#22eaeaea")
                         Behavior on border.color { ColorAnimation { duration: 120 } }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.go(tile.modelData) }
                         DropArea { id: drop; anchors.fill: parent; onDropped: d => root.moveTo(d.source.addr, tile.modelData) }
@@ -101,7 +101,7 @@ Scope {
                                 x: modelData.at[0] * root.k; y: (modelData.at[1]) * root.k
                                 width: Math.max(24, modelData.size[0] * root.k); height: Math.max(18, modelData.size[1] * root.k)
                                 radius: 6; color: Theme.bg; clip: true
-                                border.width: 1; border.color: dm.containsMouse ? Theme.purple : "#33efeaf8"
+                                border.width: 1; border.color: dm.containsMouse ? Theme.purple : "#33eaeaea"
                                 Drag.active: dm.drag.active; Drag.source: win; Drag.hotSpot.x: width / 2; Drag.hotSpot.y: height / 2
                                 ScreencopyView {
                                     anchors.fill: parent

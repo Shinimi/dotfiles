@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Monochrome
+Description=Monochrome boot splash. Made by Claude.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/mono
+ScriptFile=/usr/share/plymouth/themes/mono/mono.script

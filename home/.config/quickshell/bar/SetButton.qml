@@ -7,7 +7,7 @@ Rectangle {
     signal clicked()
     implicitWidth: row.implicitWidth + 28; implicitHeight: 34; radius: 11
     color: primary ? (m.containsMouse ? Qt.lighter(accent, 1.12) : accent) : (m.containsMouse ? Theme.bgHover : Theme.bgAlt)
-    border.width: primary ? 0 : 1; border.color: "#1eefeaf8"
+    border.width: primary ? 0 : 1; border.color: "#1eeaeaea"
     Behavior on color { ColorAnimation { duration: 120 } }
     Row {
         id: row; anchors.centerIn: parent; spacing: 8

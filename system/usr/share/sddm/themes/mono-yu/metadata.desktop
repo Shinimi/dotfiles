@@ -1,0 +1,11 @@
+[SddmGreeterTheme]
+Name=Monochrome (yu)
+Description=Custom Shinobu Kocho login for yu's CachyOS. Made by Claude.
+Author=Claude
+Type=sddm-theme
+Version=1.0
+Website=
+Screenshot=
+MainScript=Main.qml
+ConfigFile=theme.conf
+QtVersion=6

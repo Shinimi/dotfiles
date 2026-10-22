@@ -1,33 +1,33 @@
 /* Tokyo Night glass for Discord (Vesktop) under Hyprland blur. Made by Claude. Delete this to go back to default. */
 html, body, #app-mount, [class*="appMount"], [class*="app_"], [class*="bg_"], [class*="layers_"], [class*="layer_"] { background: transparent !important; }
 :root, .theme-dark, .theme-darker, .theme-midnight, .visual-refresh {
-  --tn-base: rgba(19,18,28, 0.62);
-  --tn-dark: rgba(13,12,19, 0.70);
-  --tn-raise: rgba(34,31,51, 0.72);
-  --tn-hover: rgba(162,138,232, 0.14);
-  --tn-blue: #a28ae8; --tn-purple: #e39ec0; --tn-cyan: #7fc4e3; --tn-fg: #efeaf8; --tn-dim: #cfc8e2; --tn-muted: #807a9c;
+  --tn-base: rgba(17,17,17, 0.62);
+  --tn-dark: rgba(11,11,11, 0.70);
+  --tn-raise: rgba(28,28,28, 0.72);
+  --tn-hover: rgba(224,224,224, 0.14);
+  --tn-blue: #e0e0e0; --tn-purple: #b0b0b0; --tn-cyan: #c4c4c4; --tn-fg: #eaeaea; --tn-dim: #c8c8c8; --tn-muted: #7a7a7a;
 
   --background-primary: var(--tn-base) !important;
   --background-secondary: var(--tn-dark) !important;
   --background-secondary-alt: var(--tn-dark) !important;
   --background-tertiary: var(--tn-dark) !important;
-  --background-floating: rgba(19,18,28, 0.94) !important;
+  --background-floating: rgba(17,17,17, 0.94) !important;
   --background-base-lowest: var(--tn-dark) !important;
   --background-base-lower: var(--tn-dark) !important;
   --background-base-low: var(--tn-base) !important;
   --background-surface-high: var(--tn-raise) !important;
-  --background-surface-higher: rgba(42,38,64, 0.82) !important;
-  --background-surface-highest: rgba(42,38,64, 0.9) !important;
+  --background-surface-higher: rgba(36,36,36, 0.82) !important;
+  --background-surface-highest: rgba(36,36,36, 0.9) !important;
   --chat-background-default: var(--tn-raise) !important;
   --channeltextarea-background: var(--tn-raise) !important;
-  --modal-background: rgba(19,18,28, 0.95) !important;
+  --modal-background: rgba(17,17,17, 0.95) !important;
   --bg-overlay-chat: var(--tn-base) !important;
   --bg-overlay-app-frame: var(--tn-dark) !important;
   --bg-base-primary: var(--tn-base) !important;
   --bg-base-secondary: var(--tn-dark) !important;
   --bg-base-tertiary: var(--tn-dark) !important;
   --background-modifier-hover: var(--tn-hover) !important;
-  --background-modifier-selected: rgba(162,138,232, 0.22) !important;
+  --background-modifier-selected: rgba(224,224,224, 0.22) !important;
 
   --text-normal: var(--tn-fg) !important;
   --text-default: var(--tn-fg) !important;
@@ -40,10 +40,10 @@ html, body, #app-mount, [class*="appMount"], [class*="app_"], [class*="bg_"], [c
   --brand-560: #6a8fe0 !important;
   --button-filled-brand-background: var(--tn-blue) !important;
   --control-brand-foreground: var(--tn-blue) !important;
-  --mention-background: rgba(227,158,192, 0.14) !important;
+  --mention-background: rgba(176,176,176, 0.14) !important;
   --mention-foreground: var(--tn-purple) !important;
 }
-::selection { background: rgba(162,138,232, 0.35); }
+::selection { background: rgba(224,224,224, 0.35); }
 
 /* Kochō: same fonts as the desktop. Made by Claude. */
 :root { --font-primary: "Inter", sans-serif; --font-display: "Inter", sans-serif; --font-code: "GeistMono Nerd Font", monospace; }

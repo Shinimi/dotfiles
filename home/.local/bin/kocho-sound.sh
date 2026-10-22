@@ -9,6 +9,6 @@ mapfile -t clips < <(find "$V" -maxdepth 1 -type f \( -name "$1.*" -o -name "$1-
 if [ ${#clips[@]} -gt 0 ]; then
   f="${clips[RANDOM % ${#clips[@]}]}"
 else
-  f="$HOME/.local/share/sounds/kocho/stereo/$1.oga"; [ -f "$f" ] || exit 0
+  f="$HOME/.local/share/sounds/mono/stereo/$1.oga"; [ -f "$f" ] || exit 0
 fi
 pw-play --volume 0.75 "$f" >/dev/null 2>&1 &

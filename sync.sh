@@ -12,15 +12,15 @@ home_paths=(
   .config/systemd/user/audio-fx.service .config/systemd/user/spicetify-refresh.service
   .config/systemd/user/weekly-checkup.service .config/systemd/user/weekly-checkup.timer
   .local/bin/audio-fx.sh .local/bin/weekly-checkup.sh .local/bin/papirus-folders-color.sh .local/bin/hypr-doctor.sh .local/bin/gamemode.sh .local/bin/fetch-logo.sh .local/bin/fetch-ascii.sh .local/bin/recolor-theme.py .local/bin/retheme.py .local/bin/kocho-cursor.py .local/bin/kb-colors.sh .local/bin/safe-update.sh .local/bin/kocho-sound.sh .local/bin/launcher.sh
-  .local/share/sounds/kocho .local/share/sounds/kocho-voice/README.txt .local/share/Steam/millennium/themes/Material-Theme .config/millennium/config.json .local/share/applications/steam.desktop .config/MangoHud .config/millennium/quick.css .config/spotify-launcher.conf
+  .local/share/sounds/mono .local/share/sounds/kocho-voice/README.txt .local/share/Steam/millennium/themes/Material-Theme .config/millennium/config.json .local/share/applications/steam.desktop .config/MangoHud .config/millennium/quick.css .config/spotify-launcher.conf
   .local/share/icons/Kocho-cursors
   .config/vesktop-flags.conf .config/spotify-launcher.conf
   .config/systemd/user/hypr-doctor.service .config/systemd/user/hypr-doctor.timer
-  .config/spicetify/Themes/ShinobuKocho .config/vesktop/settings/quickCss.css
+  .config/spicetify/Themes/Monochrome .config/vesktop/settings/quickCss.css
   .config/gtk-3.0/settings.ini .config/gtk-3.0/gtk.css .config/gtk-4.0/settings.ini .config/gtk-4.0/gtk.css
-  .local/share/color-schemes/ShinobuKocho.colors .icons/default/index.theme
+  .local/share/color-schemes/Monochrome.colors .icons/default/index.theme
   .config/starship.toml .config/fastfetch .config/btop .config/fish/config.fish
-  .local/share/shinobu-chrome .config/helium-browser-flags.conf
+  .local/share/mono-chrome .config/helium-browser-flags.conf
   .config/systemd/user/fixfuxi-volume.service .config/systemd/user/fixfuxi-volume.timer fixfuxi
   .local/share/sddm-themes/tokyo-night-yu
   Downloads/Optiv10/OptiScaler.ini Downloads/Optiv10/README-Optiv10.txt Downloads/Optiv10/install-optiv10.sh
@@ -29,7 +29,7 @@ system_paths=(
   /etc/sddm.conf.d/10-tokyo-night-yu.conf /etc/scx_loader.toml
   /etc/systemd/system/amdgpu-power-cap.service /etc/systemd/system/cpu-boost-cap.service
   /etc/systemd/system/paccache.service.d/keep2.conf
-  /usr/share/plymouth/themes/shinobu /usr/share/sddm/themes/shinobu-yu
+  /usr/share/plymouth/themes/mono /usr/share/sddm/themes/mono-yu
 )
 for p in "${home_paths[@]}"; do
   [ -e "$H/$p" ] || continue
