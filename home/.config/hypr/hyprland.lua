@@ -10,7 +10,7 @@
 --  KEYBINDS — DankMaterialShell layout  (SUPER = Windows key)
 --    SUPER + T / Return      terminal (kitty)
 --    SUPER + Space           app launcher        ALT + Space        app launcher
---    SUPER + V               clipboard history   SUPER + A          control hub  (+ SHIFT: full control center)
+--    SUPER + V               clipboard history   SUPER + A          control center
 --    SUPER + CTRL + N        notification center SUPER + comma      settings
 --    SUPER + Tab             workspace overview  SUPER + O          find a window (search)     SUPER + X          power menu
 --    SUPER + Q               close window
@@ -319,8 +319,7 @@ b("SUPER + space",          run(menu))
 b("ALT + space",            run(menu))
 b("SUPER + V",              run("qs ipc -p " .. os.getenv("HOME") .. "/.config/quickshell/bar call clipboard toggle"))
 b("SUPER + comma",          run("qs ipc -p ~/.config/quickshell/bar call settings toggle"))
-b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call hub toggle"))       -- control hub (MENU → full control center)
-b("SUPER + SHIFT + A",      run("qs ipc -p ~/.config/quickshell/bar call bar control"))      -- full control center directly
+b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call panel toggle"))     -- control center (slides in from the right)
 b("SUPER + CTRL + N",       run("qs ipc -p ~/.config/quickshell/bar call bar notifications"))
 b("SUPER + TAB",            run("qs ipc -p ~/.config/quickshell/bar call overview toggle"))   -- workspace overview (drag windows between)
 b("SUPER + O",              run("qs ipc -p ~/.config/quickshell/bar call alttab overview"))

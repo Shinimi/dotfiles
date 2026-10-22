@@ -86,7 +86,7 @@ Pill {
             readonly property bool isActive: !!(Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId)
                                              || !!(ws && ws.monitor && ws.monitor.name === "DP-1" && ws.monitor.activeWorkspace === ws)
             readonly property bool hasWindows: !!(ws && ws.toplevels && ws.toplevels.values.length > 0)
-            width: Math.max(isActive ? 38 : 26, wsLabel.implicitWidth + 14); height: 24; radius: 12
+            width: Math.max(isActive ? 38 : 26, wsLabel.implicitWidth + 14); height: 24; radius: 2
             anchors.verticalCenter: parent ? parent.verticalCenter : undefined
             color: isActive ? Theme.on : (wsMouse.containsMouse ? "#17ffffff" : "transparent")
             Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }

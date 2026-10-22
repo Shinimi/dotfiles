@@ -5,9 +5,7 @@ import Quickshell.Services.Pipewire
 
 Pill {
     id: pill
-    property alias popup: cc
     padding: 11
-    active: cc.visible
     readonly property var sink: Pipewire.defaultAudioSink
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
     Repeater {   // small icons that only show while something is on
@@ -28,8 +26,6 @@ Pill {
         }
     }
     onClicked: m => { if (m.button === Qt.RightButton && sink) sink.audio.muted = !sink.audio.muted
-                     else if (m.button === Qt.MiddleButton) cc.toggle()
-                     else Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "hub", "toggle"]) }
+                     else Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "panel", "toggle"]) }
     onScrolled: d => { if (sink) sink.audio.volume = Math.max(0, Math.min(1, sink.audio.volume + (d > 0 ? 0.03 : -0.03))) }
-    ControlCenter { id: cc; anchorItem: pill }
 }

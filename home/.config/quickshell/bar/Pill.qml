@@ -13,7 +13,7 @@ Rectangle {
 
     implicitHeight: Theme.pillHeight
     implicitWidth: row.implicitWidth + padding * 2
-    radius: height / 2
+    radius: 2
     // pills sit on the translucent bar: no box of their own, only a soft highlight
     color: active ? "#2effffff" : (hovered ? "#17ffffff" : "transparent")
     border.width: 0

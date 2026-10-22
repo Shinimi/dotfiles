@@ -1,11 +1,12 @@
-// Island bar: one black glass pill at the top centre with everything (launcher, workspaces,
-// clock, media, status, power). When the song changes or the volume moves, a small card drops
-// out under it for a moment. Made by Claude.
+// The bar: one long, sharp glass strip across the top. Left: launcher, workspaces and the window you're in;
+// centre: the clock; right: song, status and power. When the song changes or the volume moves, a small card
+// drops out under the clock for a moment. Made by Claude.
 import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Widgets
+import Quickshell.Wayland
 import Quickshell.Services.Mpris
 import Quickshell.Services.Pipewire
 
@@ -32,7 +33,7 @@ PanelWindow {
     property string peek: ""                 // "", "media", "volume"
     Timer { id: peekTimer; interval: 2600; onTriggered: win.peek = "" }
     function showPeek(kind) { if (!armed || popupOpen || !Settings.cur("island_peeks")) return; peek = kind; peekTimer.restart() }
-    readonly property bool popupOpen: clockPill.popup.visible || statusPill.popup.visible || mediaPill.popup.visible || powerPill.popup.visible
+    readonly property bool popupOpen: clockPill.popup.visible || mediaPill.popup.visible || powerPill.popup.visible
     property bool armed: false               // no peeks while everything starts up
     Timer { running: true; interval: 3000; onTriggered: win.armed = true }
 
@@ -48,7 +49,7 @@ PanelWindow {
         id: drop
         anchors.horizontalCenter: parent.horizontalCenter
         readonly property Item cur: win.peek === "volume" ? volPeek : mediaPeek
-        width: cur.implicitWidth + 28; height: win.peek === "media" ? 50 : 36; radius: 18
+        width: cur.implicitWidth + 28; height: win.peek === "media" ? 50 : 36; radius: 2
         y: win.peek !== "" ? island.y + island.height + 6 : island.y + 4
         opacity: win.peek !== "" ? 1 : 0
         scale: win.peek !== "" ? 1 : 0.85
@@ -96,50 +97,59 @@ PanelWindow {
 
     }
 
-    // ---------- the pill ----------
+    // ---------- the bar ----------
     Rectangle {
         id: island
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: 6
-        width: full.implicitWidth + 8
+        x: 10; y: 6
+        width: parent.width - 20
         height: Theme.barHeight
-        radius: height / 2
+        radius: 2
         color: Theme.island
-        border.width: 1; border.color: Theme.glassLine
-        Behavior on width { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
+        border.width: 1; border.color: "#26ffffff"
+        Brackets { size: 8; out: 3 }
 
-        // full: everything
-        Row {
-            id: full
-            anchors.centerIn: parent; spacing: 4
+        Row {   // left
+            anchors.left: parent.left; anchors.leftMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
             Launcher { anchors.verticalCenter: parent.verticalCenter }
+            Sep {}
             Workspaces { anchors.verticalCenter: parent.verticalCenter }
-            Sep {}
-            ClockPill { id: clockPill; anchors.verticalCenter: parent.verticalCenter }
-            Sep { visible: mediaPill.visible }
+            Sep { visible: winTitle.text !== "" }
+            Text {
+                id: winTitle
+                anchors.verticalCenter: parent.verticalCenter; leftPadding: 6
+                readonly property var t: ToplevelManager.activeToplevel
+                text: t ? ((t.appId || "").split(".").pop().toUpperCase() + "  ·  " + (t.title || "")) : ""
+                width: Math.min(implicitWidth, island.width / 2 - 360); elide: Text.ElideRight
+                color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 11; font.letterSpacing: 0.5
+            }
+        }
+        ClockPill { id: clockPill; anchors.centerIn: parent }
+        Row {   // right
+            anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
             MediaPill { id: mediaPill; anchors.verticalCenter: parent.verticalCenter }
-            Sep {}
+            Sep { visible: mediaPill.visible }
             StatusPill { id: statusPill; anchors.verticalCenter: parent.verticalCenter }
             PowerButton { id: powerPill; anchors.verticalCenter: parent.verticalCenter }
         }
     }
+    function panel() { Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "panel", "toggle"]) }
     component Sep: Rectangle { anchors.verticalCenter: parent ? parent.verticalCenter : undefined; width: 1; height: 14; color: "#1fffffff" }
 
     // open panels from keybinds / scripts:  qs -p ~/.config/quickshell/bar ipc call bar calendar
     IpcHandler {
         target: "bar"
         function calendar(): void { clockPill.popup.toggle() }
-        function stats(): void { statusPill.popup.toggle() }
-        function volume(): void { statusPill.popup.toggle() }
+        function stats(): void { win.panel() }
+        function volume(): void { win.panel() }
         function power(): void { powerPill.popup.toggle() }
         function media(): void { mediaPill.popup.toggle() }
-        function notifications(): void { statusPill.popup.toggle() }
-        function control(): void { statusPill.popup.toggle() }
+        function notifications(): void { win.panel() }
+        function control(): void { win.panel() }
         function focus(on: bool): void { win.focusMode = on }
         function dnd(on: bool): void { Notifs.dnd = on }
         function timer(minutes: int): void { Timers.resetTimer(); Timers.setMinutes(minutes); Timers.toggleTimer() }
         function timerReset(): void { Timers.resetTimer() }
         function clearNotifications(): void { Notifs.clearAll() }
-        function status(): string { return "cal=" + clockPill.popup.visible + " cc=" + statusPill.popup.visible + " pow=" + powerPill.popup.visible + " peek=" + win.peek }
+        function status(): string { return "cal=" + clockPill.popup.visible + " pow=" + powerPill.popup.visible + " peek=" + win.peek }
     }
 }

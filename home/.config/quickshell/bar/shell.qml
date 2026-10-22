@@ -22,7 +22,7 @@ ShellRoot {
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
-        NierHub { required property var modelData; screen: modelData }
+        ControlPanel { required property var modelData; screen: modelData }
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
