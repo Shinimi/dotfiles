@@ -14,6 +14,8 @@ BarPopup {
     id: cc
     contentWidth: 700
     padding: 18
+    property bool _statsOn: visible
+    on_StatsOnChanged: Stats.watchers = Math.max(0, Stats.watchers + (_statsOn ? 1 : -1))
     readonly property string qsDir: Quickshell.env("HOME") + "/.config/quickshell/bar"
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource

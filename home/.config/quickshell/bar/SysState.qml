@@ -27,7 +27,7 @@ Singleton {
 
     Process {
         id: st
-        command: ["sh", "-c", "pgrep -x hyprsunset >/dev/null && echo n1 || echo n0; pgrep -x hypridle >/dev/null && echo a0 || echo a1; [ -e \"$XDG_RUNTIME_DIR/gamemode.state\" ] && echo g1; echo p=$(powerprofilesctl get)"]
+        command: ["sh", "-c", "pgrep -x hyprsunset >/dev/null && echo n1 || echo n0; pgrep -x hypridle >/dev/null && echo a0 || echo a1; [ -e \"$XDG_RUNTIME_DIR/gamemode.state\" ] && echo g1; echo p=$(busctl get-property net.hadess.PowerProfiles /net/hadess/PowerProfiles net.hadess.PowerProfiles ActiveProfile | cut -d\\\" -f2)"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const t = this.text
@@ -43,6 +43,6 @@ Singleton {
     }
     Timer { id: later; interval: 500; onTriggered: st.running = true }
     Timer { id: fxLater; interval: 400; onTriggered: fxState.running = true }
-    Timer { interval: 8000; running: true; repeat: true; onTriggered: st.running = true }   // keep bar icons in step with keybinds
+    Timer { interval: 15000; running: true; repeat: true; onTriggered: st.running = true }   // keep bar icons in step with keybinds
     Component.onCompleted: refresh()
 }

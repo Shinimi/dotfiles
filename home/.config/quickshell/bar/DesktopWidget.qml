@@ -1,4 +1,4 @@
-// Desktop clock on the wallpaper (behind windows): time, date, weather and today's line (the record player is DesktopVinyl).
+// Desktop clock on the wallpaper (behind windows): time, date, weather and today's line.
 // On/off and position in Settings → Bar & notifications. Made by Claude.
 import QtQuick
 import Quickshell

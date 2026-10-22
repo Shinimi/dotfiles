@@ -90,6 +90,7 @@ end)
 ---------------------------------------------------------------- ENVIRONMENT
 hl.env("XCURSOR_THEME", "Vimix-white-cursors")
 hl.env("XCURSOR_SIZE", "24")
+hl.env("MESA_SHADER_CACHE_MAX_SIZE", "12G")      -- keep compiled game shaders (no re-compile stutter)
 hl.env("HYPRCURSOR_SIZE", "24")
 hl.env("QT_QPA_PLATFORMTHEME", "kde")          -- KDE apps keep your Breeze Dark look
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
@@ -110,7 +111,7 @@ hl.config({
             inactive_border = rgba(c.border, "aa"),
         },
         resize_on_border = true,
-        allow_tearing    = false,
+        allow_tearing    = true,     -- only games marked "immediate" below may tear (lowest input lag)
         layout           = "dwindle",
     },
 
@@ -169,14 +170,14 @@ hl.config({
         force_default_wallpaper = 0,
         disable_hyprland_logo   = true,
         disable_splash_rendering = true,
-        vrr = 0,
+        vrr = 2,                            -- adaptive sync only for fullscreen games/videos
         focus_on_activate = true,
         middle_click_paste = true,
         key_press_enables_dpms = true,
         allow_session_lock_restore = true,  -- if the lock screen ever crashes, a new one can take over
         disable_autoreload = true,          -- settings apply live; no surprise reloads (SUPER+SHIFT+R reloads)
     },
-    render = { new_render_scheduling = true },
+    render = { new_render_scheduling = true, direct_scanout = 2 },   -- fullscreen games skip compositing
     -- window tabs (SUPER + W groups): Tokyo Night pills
     group = {
         col = { border_active = { colors = { "rgba(b0b0b0ff)", "rgba(e0e0e0ff)" }, angle = 45 }, border_inactive = "rgba(3a3a3aaa)" },
@@ -280,6 +281,8 @@ hl.window_rule({ name = "pip", match = { title = "^([Pp]icture[- ][Ii]n[- ][Pp]i
 
 -- Glass: these stay fully solid (games, video players, fullscreen)
 hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|org.kde.gwenview|com.obsproject.Studio)$" }, opacity = "1.0 override 1.0 override" })
+-- games: allowed to tear when they turn vsync off (less input lag); nothing else ever tears
+hl.window_rule({ name = "games-immediate", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, immediate = true })
 hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true }, opacity = "1.0 override 1.0 override" })
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop|dropterm)$" }, opacity = "1.0 override 1.0 override" })

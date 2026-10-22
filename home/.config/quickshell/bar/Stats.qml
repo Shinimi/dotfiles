@@ -1,4 +1,4 @@
-// Polls stats.sh every 2 s and exposes the values. Made by Claude.
+// Polls stats.sh and exposes the values: every 2 s while a panel shows them, every 30 s otherwise. Made by Claude.
 pragma Singleton
 import QtQuick
 import Quickshell
@@ -14,5 +14,7 @@ Singleton {
             onStreamFinished: { try { d = JSON.parse(this.text) } catch (e) {} }
         }
     }
-    Timer { interval: 2000; running: true; repeat: true; triggeredOnStart: true; onTriggered: proc.running = true }
+    property int watchers: 0          // panels that are open and showing stats (they add/remove themselves)
+    onWatchersChanged: if (watchers > 0) proc.running = true
+    Timer { interval: watchers > 0 ? 2000 : 30000; running: true; repeat: true; triggeredOnStart: true; onTriggered: proc.running = true }
 }

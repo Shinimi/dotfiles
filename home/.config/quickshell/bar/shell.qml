@@ -8,10 +8,6 @@ ShellRoot {
     Screensaver {}
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
-        DesktopVinyl {}
-    }
-    Variants {
-        model: Quickshell.screens.filter(s => s.name === "DP-1")
         Ink { required property var modelData; screen: modelData }
     }
     Variants {

@@ -14,6 +14,8 @@ Scope {
     property string page: "appearance"
     property string kbMode: "kocho"
     property bool focusOn: false
+    property bool _statsOn: visible
+    on_StatsOnChanged: Stats.watchers = Math.max(0, Stats.watchers + (_statsOn ? 1 : -1))
     readonly property string qsDir: Quickshell.env("HOME") + "/.config/quickshell/bar"
     // sidebar: [id, icon, title, group, search words]
     readonly property var pages: [
@@ -572,7 +574,6 @@ Scope {
                             SetToggle { label: "Hot corner"; desc: "push the mouse into the top-left corner for the overview"; key: "hot_corner" }
                             SetToggle { label: "Pause music when locking"; desc: "Spotify & co. stop when the screen locks"; key: "pause_on_lock" }
                             SetToggle { label: "Song & volume cards"; desc: "a small card drops under the bar when they change"; key: "island_peeks" }
-                            SetToggle { label: "Record player on the desktop"; desc: "your song spins on a vinyl, bottom-right, behind windows"; key: "desktop_vinyl" }
                             SetToggle { label: "Screensaver"; desc: "drifting mana and a clock, halfway to the auto-lock"; key: "screensaver" }
                             SetChoice {
                                 label: "Wallpaper shuffle"; desc: "a different monochrome wallpaper now and then"
