@@ -7,8 +7,8 @@ for sd in "$base"/*/; do
   size=$(basename "$sd"); src="$(readlink -f "$sd")/places"; [ -d "$src" ] || continue
   mkdir -p "$out/$size/places"; dirs+=("$size/places")
   while IFS= read -r l; do
-    t=$(readlink "$l"); n=$(basename "$l")
-    case "$t" in *-blue*) nt="${t/-blue/-$c}"; [ -e "$src/$nt" ] && ln -s "$src/$nt" "$out/$size/places/$n" ;; esac
+    n=$(basename "$l"); t=$(basename "$(readlink -f "$l")")   # follow the whole link chain
+    case "$t" in *-blue*) nt="${t/-blue/-$c}"; [ -e "$src/$nt" ] && ln -sf "$src/$nt" "$out/$size/places/$n" ;; esac
   done < <(find "$src" -maxdepth 1 -type l)
 done
 {

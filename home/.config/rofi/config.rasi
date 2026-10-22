@@ -35,8 +35,8 @@ mainbox {
 inputbar { padding: 6px 8px; spacing: 12px; children: [ textbox-bf, entry ]; }
 textbox-bf {
   expand: false; vertical-align: 0.5;
-  text-color: @pink; font: "GeistMono Nerd Font 15";
-  content: "󱖉";
+  text-color: @dim; font: "GeistMono Nerd Font 15";
+  content: "󰍉";
 }
 entry {
   placeholder: "Search";

@@ -47,3 +47,26 @@ html, body, #app-mount, [class*="appMount"], [class*="app_"], [class*="bg_"], [c
 
 /* Kochō: same fonts as the desktop. Made by Claude. */
 :root { --font-primary: "Inter", sans-serif; --font-display: "Inter", sans-serif; --font-code: "GeistMono Nerd Font", monospace; }
+
+/* monochrome: replace Discord's blurple/brand colours with greys. Made by Claude. */
+:root, .theme-dark, .theme-darker, .theme-midnight, .visual-refresh {
+  --brand-experiment: #d6d6d6 !important; --brand-500: #d6d6d6 !important; --brand-560: #bdbdbd !important; --brand-600: #a0a0a0 !important;
+  --brand-360: #e6e6e6 !important; --brand-400: #dcdcdc !important; --brand-260: #eeeeee !important;
+  --control-brand-foreground: #eaeaea !important; --control-brand-foreground-new: #eaeaea !important;
+  --text-link: #eaeaea !important; --mention-foreground: #ffffff !important; --mention-background: #ffffff1f !important;
+  --background-mentioned: #ffffff12 !important; --background-mentioned-hover: #ffffff1a !important; --info-warning-foreground: #cfcfcf !important;
+  --button-filled-brand-background: #e0e0e0 !important; --button-filled-brand-background-hover: #ffffff !important; --button-filled-brand-text: #111111 !important;
+  --status-danger: #cf6b6b !important; --red-400: #cf6b6b !important;
+  --background-base-low: #111111 !important; --background-base-lower: #0b0b0b !important; --background-base-lowest: #080808 !important;
+  --bg-overlay-chat: transparent !important; --bg-base-secondary: #111111 !important; --bg-base-tertiary: #0b0b0b !important;
+}
+section[class*="panels"], div[class*="panels_"] , [class*="avatarWrapper"] { background: #0b0b0b !important; }
+[class*="unread_"], [class*="numberBadge"], [class*="newMessagesBar"] { background-color: #e0e0e0 !important; color: #111 !important; }
+:root, .theme-dark, .theme-darker, .theme-midnight, .visual-refresh {
+  --background-secondary-alt: #161616 !important; --bg-surface-raised: #161616 !important; --bg-surface-overlay: #161616 !important;
+  --background-floating: #161616 !important; --background-surface-high: #161616 !important; --background-surface-higher: #1c1c1c !important; --background-surface-highest: #242424 !important;
+  --custom-status-bubble-background: #1c1c1c !important; --background-base-low: #111111 !important;
+}
+[class*="panels_"] > [class*="container_"], [class*="panels_"] section { background: #161616 !important; }
+[class*="panels"] [class*="container"], [class*="panels"] [class*="wrapper"], [class*="panels"] > div { background: #161616 !important; background-image: none !important; }
+[class*="panels"] button[class*="button"]:not(:hover) { background: transparent !important; }

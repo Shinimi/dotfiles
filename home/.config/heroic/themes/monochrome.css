@@ -1,0 +1,20 @@
+/* Heroic · monochrome. Made by Claude. */
+body.monochrome {
+  --accent: #eaeaea; --accent-overlay: #ffffff; --accent-02: #ffffff22;
+  --navbar-accent: #ffffff; --navbar-background: #0b0b0b; --navbar-active-background: #1c1c1c;
+  --background: #111111; --body-background: #0b0b0b; --background-darker: #0b0b0b; --background-darker-80: #0b0b0bcc;
+  --background-light: #1c1c1c; --background-lighter: #242424; --background-secondary: #161616;
+  --current-background: var(--body-background); --gradient-body-background: #0b0b0b;
+  --input-background: #1c1c1c; --modal-background: #111111; --modal-border: #3a3a3a;
+  --download-button: #242424; --download-button-overlay: #3a3a3a;
+  --success: #e0e0e0; --success-hover: #ffffff; --success-button: #e0e0e0;
+  --primary: #e0e0e0; --primary-hover: #ffffff; --secondary-button: #3a3a3a;
+  --danger: #cf6b6b; --danger-hover: #dd8f8f; --cancel-button: #3a3a3a; --cancel-button-overlay: #4a4a4a;
+  --text-default: #eaeaea; --text-secondary: #a0a0a0; --text-tertiary: #7a7a7a; --text-title: #ffffff; --text-hover: #ffffff;
+  --brand-primary: #e0e0e0; --brand-primary-hover: #ffffff; --brand-secondary: #3a3a3a; --brand-secondary-hover: #4a4a4a;
+  --brand-text-01: #ffffff; --brand-text-02: #eaeaea; --brand-text-03: #a0a0a0; --brand-text-04: #7a7a7a; --brand-text-05: #555555;
+  --icons-background: #111111; --action-icon: #a0a0a0; --action-icon-hover: #ffffff; --action-icon-active: #ffffff;
+  --divider: #242424; --button-stroke: #3a3a3a; --disabled-button: #242424; --disabled-button-overlay: #2a2a2a;
+  --osk-background: #0b0b0b; --osk-button-background: #1c1c1c; --osk-button-border: #3a3a3a;
+}
+body.monochrome .button.is-primary, body.monochrome .button.is-success { color: #0b0b0b !important; }
