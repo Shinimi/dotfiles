@@ -492,14 +492,6 @@ Scope {
                         }
                         Label { width: parent.width; wrapMode: Text.WordWrap; text: "Icons and fonts update in GTK apps right away; Qt apps like Dolphin pick them up next time they open."; color: Theme.muted; font.pixelSize: 10 }
                         SetSection {
-                            width: parent.width; title: "Keyboard lighting"; icon: "\u{f030c}"
-                            SetChoice {
-                                label: "AULA F87 Pro colours (instant)"; current: root.kbMode
-                                options: [["kocho", "Kochō gradient"], ["violet", "Wisteria"], ["pink", "Haori pink"], ["off", "Off"]]
-                                onPicked: v => { root.kbMode = v; Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/kb-colors.sh", v]) }
-                            }
-                        }
-                        SetSection {
                             width: parent.width; title: "Terminal art (fastfetch)"; icon: "\u{f018d}"
                             SetChoice {
                                 label: "Shown next to your system info"; current: Settings.get("fetch_logo"); onPicked: v => Settings.set("fetch_logo", v)
