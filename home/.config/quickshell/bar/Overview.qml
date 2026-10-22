@@ -120,7 +120,7 @@ Scope {
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom
-                        text: tile.modelData; color: tile.cur ? Theme.blue : Theme.muted
+                        text: Theme.wsName(tile.modelData); color: tile.cur ? Theme.blue : Theme.muted
                         font.family: Theme.font; font.pixelSize: 13; font.bold: tile.cur
                     }
                 }

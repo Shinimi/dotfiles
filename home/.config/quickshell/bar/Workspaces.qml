@@ -21,18 +21,19 @@ Pill {
             readonly property bool isActive: !!(Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId)
                                              || !!(ws && ws.monitor && ws.monitor.name === "DP-1" && ws.monitor.activeWorkspace === ws)
             readonly property bool hasWindows: !!(ws && ws.toplevels && ws.toplevels.values.length > 0)
-            width: isActive ? 38 : 26; height: 24; radius: 12
+            width: Math.max(isActive ? 38 : 26, wsLabel.implicitWidth + 14); height: 24; radius: 12
             anchors.verticalCenter: parent ? parent.verticalCenter : undefined
             color: isActive ? Theme.on : (wsMouse.containsMouse ? "#17ffffff" : "transparent")
             Behavior on width { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
             Behavior on color { ColorAnimation { duration: 140 } }
             Label {
+                id: wsLabel
                 anchors.centerIn: parent
-                text: wsId; font.pixelSize: 11
+                text: Theme.wsName(wsId); font.pixelSize: Settings.cur("ws_kanji") ? 13 : 11; font.family: Settings.cur("ws_kanji") ? "Noto Sans CJK JP" : Theme.font
                 color: isActive ? Theme.onText : (hasWindows ? Theme.fg : "#555555")
             }
             Rectangle {   // tiny dot: this workspace has windows
-                visible: hasWindows && !isActive
+                visible: hasWindows && !isActive && !Settings.cur("ws_kanji")
                 anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 2
                 width: 3; height: 3; radius: 2; color: Theme.fgDim
             }

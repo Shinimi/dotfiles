@@ -33,6 +33,12 @@ Singleton {
     readonly property color yellow:  "#d6d6d6"
     readonly property color red:     "#cf6b6b"
 
+    // workspace names: kanji numerals (一 二 三 …) or plain numbers, Settings → Extras
+    readonly property var kanji: ["〇", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"]
+    function wsName(id) {
+        if (!Settings.cur("ws_kanji") || id < 1 || id > 20) return String(id)
+        return id <= 10 ? kanji[id] : "十" + kanji[id - 10]
+    }
     function fileUrl(p) { return p ? "file://" + p.split("/").map(encodeURIComponent).join("/") : "" }
     readonly property string font:   "GeistMono Nerd Font"
     readonly property int fontSize:  12

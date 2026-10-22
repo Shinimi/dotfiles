@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
-# lock-info.sh greeting|weather|music – small text snippets for hyprlock. Made by Claude.
+# lock-info.sh greeting|weather|music|line|island – small text snippets for hyprlock. Made by Claude.
 case "$1" in
+  line)   # today's line, the same one the desktop shows (read from Journey.qml)
+    python3 -I - <<'PY'
+import re,datetime,os
+t=open(os.path.expanduser("~/.config/quickshell/bar/Journey.qml")).read()
+lines=re.findall(r'^\s*"([^"]+)",?\s*$', t, re.M)
+d=datetime.date.today(); n=(d-datetime.date(d.year,1,1)).days+1
+print("— " + lines[n % len(lines)] if lines else "")
+PY
+    ;;
+  island)   # the pill at the top: workspace · time · date · weather
+    w=$(grep -o -- '-\?[0-9]*°C' "$HOME/.cache/lock-weather.txt" 2>/dev/null | head -1)
+    echo "󰌾   $(date +%H:%M)   ·   $(LC_TIME=C date +'%a %-d %b')${w:+   ·   $w}" ;;
   greeting)
     h=$(date +%-H); n=$(python3 -I -c "import json,os;print(json.load(open(os.path.expanduser('~/.config/hypr/settings.json'))).get('user_name',''))" 2>/dev/null); n=${n:-$USER}
     if   [ "$h" -lt 5 ];  then g="Good night"

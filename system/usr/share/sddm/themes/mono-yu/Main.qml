@@ -1,4 +1,5 @@
-// Monochrome login screen (SDDM, Qt 6): torii at night, slow zoom, drifting dust, floating clock. Made by Claude.
+// Monochrome login screen (SDDM, Qt 6), island style to match the lock screen: torii at night, slow zoom,
+// drifting dust, a black glass pill at the top, thin clock, today's line, avatar + pill password. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -122,13 +123,20 @@ Item {
         anchors.fill: parent
         gradient: Gradient {
             orientation: Gradient.Horizontal
-            GradientStop { position: 0.0;  color: "#000b0b0b" }
-            GradientStop { position: 0.55; color: "#110b0b0b" }
-            GradientStop { position: 1.0;  color: "#990b0b0b" }
+            GradientStop { position: 0.0;  color: "#330b0b0b" }
+            GradientStop { position: 1.0;  color: "#330b0b0b" }
         }
     }
 
     property date now: new Date()
+    readonly property var lines: ["a thousand years is just a long walk", "learn one useless spell today", "slow is still moving",
+        "the flowers bloom where you walked", "remember the small things", "every journey ends somewhere new",
+        "magic is patience, mostly", "the road remembers you", "rest is part of the journey",
+        "keep the people you meet", "one more step, then tea", "the stars were here before the map"]
+    readonly property string todayLine: {
+        const d = new Date(), start = new Date(d.getFullYear(), 0, 0)
+        return lines[Math.floor((d - start) / 86400000) % lines.length]
+    }
     Timer { interval: 1000; running: true; repeat: true; onTriggered: root.now = new Date() }
 
     // side screens: just a quiet clock
@@ -139,38 +147,71 @@ Item {
         color: "#bbeaeaea"; font.family: root.font; font.pixelSize: 96; font.weight: Font.Light
     }
 
-    // ---------- right-hand column (same layout as the lock screen) ----------
-    Column {
-        id: col
+    // ---------- the island (top centre) ----------
+    Rectangle {
         visible: root.isMain
-        width: 480
+        anchors.horizontalCenter: parent.horizontalCenter; y: 6
+        width: islandRow.implicitWidth + 40; height: 34; radius: 17
+        color: "#e6050505"; border.width: 1; border.color: "#16ffffff"
+        Row {
+            id: islandRow; anchors.centerIn: parent; spacing: 14
+            Text { text: "\u{f033e}"; color: root.fg; font.family: root.font; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: Qt.formatTime(root.now, "HH:mm"); color: "#ffffff"; font.family: root.font; font.pixelSize: 13; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: "·"; color: "#4a4a4a"; font.family: root.font; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: Qt.formatDate(root.now, "ddd d MMM"); color: root.fgDim; font.family: root.font; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
+        }
+    }
+
+    // ---------- clock, date, today's line (in the sky) ----------
+    Column {
+        visible: root.isMain
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: -360
-        spacing: 14
+        y: root.height / 2 - 420 - 110
+        spacing: 10
         opacity: 0
         NumberAnimation on opacity { from: 0; to: 1; duration: 1400; easing.type: Easing.OutCubic }
-        transform: Translate { id: glide; x: 40
-            NumberAnimation on x { from: 40; to: 0; duration: 1400; easing.type: Easing.OutCubic } }
         Text {
-            anchors.right: parent.right
+            anchors.horizontalCenter: parent.horizontalCenter
             text: Qt.formatTime(root.now, "HH:mm")
-            color: root.fg; font.family: root.font; font.pixelSize: 176; font.weight: Font.Thin
+            color: "#f5f5f5"; font.family: root.font; font.pixelSize: 200; font.weight: Font.Thin
             layer.enabled: true
             layer.effect: MultiEffect { shadowEnabled: true; shadowColor: "#880b0b0b"; shadowBlur: 0.9; shadowVerticalOffset: 3 }
         }
         Text {
-            anchors.right: parent.right; anchors.rightMargin: 8
-            text: Qt.formatDate(root.now, "dddd  ·  d MMMM").toLowerCase()
-            color: root.blue; font.family: root.font; font.pixelSize: 23
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: Qt.formatDate(root.now, "dddd, d MMMM").toLowerCase()
+            color: "#b0b0b0"; font.family: root.font; font.pixelSize: 21
         }
-        Item { width: 1; height: 26 }
-        Rectangle { anchors.right: parent.right; anchors.rightMargin: 8; width: 470; height: 1; color: "#55b0b0b0" }
-        Item { width: 1; height: 18 }
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            text: "— " + root.todayLine
+            color: "#66ffffff"; font.family: root.font; font.pixelSize: 16; font.italic: true
+        }
+    }
 
+    // ---------- you + password (on the dark beach) ----------
+    Column {
+        id: col
+        visible: root.isMain
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: root.height / 2 + 385 - 37
+        spacing: 16
+        opacity: 0
+        NumberAnimation on opacity { from: 0; to: 1; duration: 1600; easing.type: Easing.OutCubic }
+        Rectangle {   // avatar
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 74; height: 74; radius: 37; color: "#1c1c1c"; border.width: 1; border.color: "#26ffffff"
+            Image {
+                id: av; anchors.fill: parent; anchors.margins: 1; source: root.avatar; fillMode: Image.PreserveAspectCrop
+                visible: false; sourceSize.width: 148; sourceSize.height: 148
+            }
+            Rectangle { id: avMask; anchors.fill: av; radius: width / 2; visible: false; layer.enabled: true }
+            MultiEffect { anchors.fill: av; source: av; maskEnabled: true; maskSource: avMask; visible: root.avatar !== "" }
+        }
         Item {
             id: cardWrap
-            anchors.right: parent.right; anchors.rightMargin: 8
-            width: 470; height: 62
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: 300; height: 44
             SequentialAnimation {
                 id: shake
                 NumberAnimation { target: card; property: "x"; to: -14; duration: 45 }
@@ -188,10 +229,11 @@ Item {
                     echoMode: TextInput.Password
                     passwordCharacter: "●"
                     placeholderText: "password"
-                    placeholderTextColor: root.muted
+                    placeholderTextColor: "#6a6a6a"
+                    horizontalAlignment: TextInput.AlignHCenter
                     color: root.fg
-                    font.family: root.font; font.pixelSize: 18
-                    leftPadding: 58; rightPadding: 64
+                    font.family: root.font; font.pixelSize: 15
+                    leftPadding: 44; rightPadding: 44
                     selectByMouse: true
                     focus: root.isMain
                     enabled: !root.busy
@@ -199,21 +241,20 @@ Item {
                     onTextChanged: if (text.length) root.errorText = ""
                     background: Rectangle {
                         radius: height / 2
-                        color: "#aa0b0b0b"
+                        color: "#e6050505"
                         border.width: 1
-                        border.color: root.errorText ? root.red : (password.activeFocus ? root.purple : "#66e0e0e0")
+                        border.color: root.errorText ? root.red : (password.activeFocus ? "#40ffffff" : "#16ffffff")
                         Behavior on border.color { ColorAnimation { duration: 150 } }
                     }
-                    Text { x: 22; anchors.verticalCenter: parent.verticalCenter; text: "\u{f033e}"; color: root.purple; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 20 }
-                    Rectangle {
-                        anchors.right: parent.right; anchors.rightMargin: 7; anchors.verticalCenter: parent.verticalCenter
-                        width: 48; height: 48; radius: 24
-                        color: root.busy ? root.line : (goMouse.containsMouse ? "#cfcfcf" : root.purple)
-                        Behavior on color { ColorAnimation { duration: 120 } }
+                    Rectangle {   // go
+                        anchors.right: parent.right; anchors.rightMargin: 5; anchors.verticalCenter: parent.verticalCenter
+                        width: 34; height: 34; radius: 17
+                        visible: password.text.length > 0 || root.busy
+                        color: root.busy ? root.line : (goMouse.containsMouse ? "#ffffff" : "#ededed")
                         Text {
                             anchors.centerIn: parent
                             text: root.busy ? "\u{f0450}" : "\u{f0054}"
-                            color: "#0b0b0b"; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 20
+                            color: "#0b0b0b"; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 16
                             RotationAnimation on rotation { running: root.busy; from: 0; to: 360; duration: 900; loops: Animation.Infinite }
                         }
                         MouseArea { id: goMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.doLogin() }
@@ -222,10 +263,10 @@ Item {
             }
         }
         Text {
-            anchors.right: parent.right; anchors.rightMargin: 30
+            anchors.horizontalCenter: parent.horizontalCenter
             text: root.errorText ? root.errorText : (keyboard.capsLock ? "caps lock is on" : (root.realName || root.userName))
             color: root.errorText ? root.red : (keyboard.capsLock ? root.yellow : root.muted)
-            font.family: root.font; font.pixelSize: 14
+            font.family: root.font; font.pixelSize: 13
         }
     }
 
@@ -233,10 +274,10 @@ Item {
     component Chip: Rectangle {
         property string icon; property string label; property color accent: root.fgDim
         signal clicked()
-        height: 40; radius: 12
-        width: chipRow.implicitWidth + 28
-        color: chipMouse.containsMouse ? "#55242424" : "#330b0b0b"
-        border.width: 1; border.color: "#33e0e0e0"
+        height: 38; radius: 19
+        width: chipRow.implicitWidth + 30
+        color: chipMouse.containsMouse ? "#f01c1c1c" : "#e6050505"
+        border.width: 1; border.color: "#16ffffff"
         Behavior on color { ColorAnimation { duration: 120 } }
         Row {
             id: chipRow; anchors.centerIn: parent; spacing: 10
@@ -267,9 +308,9 @@ Item {
     Rectangle {   // session picker
         id: sessionMenu
         visible: false
-        x: 36; y: root.height - 36 - 40 - 10 - height
+        x: 36; y: root.height - 36 - 38 - 10 - height
         width: 260; height: sessCol.implicitHeight + 16
-        radius: 14; color: root.bg; border.width: 1; border.color: root.line
+        radius: 18; color: "#f2050505"; border.width: 1; border.color: "#16ffffff"
         Column {
             id: sessCol; x: 8; y: 8; width: parent.width - 16; spacing: 4
             Repeater {

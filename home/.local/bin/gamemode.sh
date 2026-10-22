@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# gamemode.sh on <window-class> | off – runs when a game opens / the last game closes.
-#  on : Do not disturb, the game's profile (Settings → Games): power profile, FPS cap, overlay
-#  off: puts everything back. Made by Claude.
+# gamemode.sh on <window-class> [window-address] | off – runs when a game opens / the last game closes.
+#  on : the game gets its own workspace (五, if on in Settings → Extras), Do not disturb, the game's
+#       profile (Settings → Games): power profile, FPS cap, overlay
+#  off: puts everything back and takes you to where you were. Made by Claude.
 S="$XDG_RUNTIME_DIR/gamemode.state"; Q="$HOME/.config/quickshell/bar"; M="$HOME/.config/MangoHud"
 J="$HOME/.config/hypr/settings.json"
 prof() { python3 -I - "$J" "$1" <<'PY'
@@ -12,8 +13,15 @@ p=(s.get("game_profiles") or {}).get(gid,{})
 print(int(s.get("game_mode",True)), p.get("fps",0), p.get("hud","off"), p.get("power","performance"))
 PY
 }
+GW="$XDG_RUNTIME_DIR/gamews.prev"
+main_ws() { hyprctl monitors -j | python3 -I -c "import json,sys;print(next(m['activeWorkspace']['id'] for m in json.load(sys.stdin) if m['name']=='DP-1'))"; }
 case "$1" in
   on)
+    # own workspace for games: remember where you were, move the game to 5 and follow it
+    if [ -n "${3:-}" ] && ! grep -q '"game_workspace": false' "$J"; then
+      cur=$(main_ws); [ "$cur" != 5 ] && [ ! -e "$GW" ] && echo "$cur" > "$GW"
+      hyprctl dispatch "hl.dsp.window.move({ window = \"address:$3\", workspace = \"5\", follow = true })" >/dev/null
+    fi
     [ -e "$S" ] && exit 0
     read -r enabled fps hud power <<<"$(prof "${2:-}")"
     [ "$enabled" = 0 ] && exit 0
@@ -27,6 +35,10 @@ case "$1" in
     } > "$M/MangoHud.conf"
     logger -t gamemode "on ${2:-} power=$power fps=$fps hud=$hud" ;;
   off)
+    if [ -e "$GW" ]; then   # back to where you were (only if you're still on the game workspace)
+      [ "$(main_ws)" = 5 ] && hyprctl dispatch "hl.dsp.focus({ workspace = \"$(cat "$GW")\" })" >/dev/null
+      rm -f "$GW"
+    fi
     [ -e "$S" ] || exit 0
     . "$S"; rm -f "$S"
     powerprofilesctl set "${profile:-balanced}" 2>/dev/null

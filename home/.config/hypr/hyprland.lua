@@ -230,7 +230,7 @@ hl.config({ master = { mfact = 0.5, new_status = "slave", orientation = "left" }
 -- Game mode: Do not disturb + Performance while a game is open (toggle in Settings → Power & lock)
 local function is_game(w) return w and w.class and (w.class:match("^steam_app_%d+$") or w.class == "cs2" or w.class == "gamescope") end
 local gamemode = os.getenv("HOME") .. "/.local/bin/gamemode.sh"
-hl.on("window.open", function(w) if is_game(w) then hl.exec_cmd(gamemode .. " on " .. w.class) end end)
+hl.on("window.open", function(w) if is_game(w) then hl.exec_cmd(gamemode .. " on " .. w.class .. " " .. w.address) end end)
 hl.on("window.close", function(w)
     if not is_game(w) then return end
     for _, o in ipairs(hl.get_windows() or {}) do
@@ -290,8 +290,8 @@ hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop|dropte
 hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview|launcher))$" }, blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
 
--- Games open on workspace 5; Steam popups float; Discord + Spotify live on the side screen
-hl.window_rule({ name = "games-own-workspace", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, workspace = "5" })
+-- Games go to workspace 5 via gamemode.sh (it remembers where you were and brings you back after)
+-- Steam popups float; Discord + Spotify live on the side screen
 hl.window_rule({ name = "steam-popups-float", match = { class = "^(steam)$", title = "^(Friends List|Steam Settings|Properties.*|.*Chat.*|Screenshot Manager|Game Servers|Players)$" }, float = true })
 hl.window_rule({ name = "discord-side", match = { class = "^(vesktop|discord)$" }, workspace = "name:side silent" })
 hl.window_rule({ name = "spotify-side", match = { class = "^(Spotify|spotify)$" }, workspace = "name:side silent" })
