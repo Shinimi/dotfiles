@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>New tab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="ascii"></canvas>
+<div class="shade"></div>
+<main>
+  <header class="tag"><span class="num">00</span> <span class="sl">//</span> <b>NEW TAB</b> <span class="jp">新規</span></header>
+  <div id="clock">--:--</div>
+  <div id="date"></div>
+  <div id="line"></div>
+  <form id="search" action="https://duckduckgo.com/" method="get">
+    <span class="caret">›</span>
+    <input name="q" id="q" autocomplete="off" autofocus placeholder="search the web…">
+    <span class="hint">ENTER</span>
+  </form>
+  <nav id="links"></nav>
+</main>
+<footer><span>01 ── 02 ── 03 ──</span> <b>04 ◆</b> <span class="jp">旅は続く</span></footer>
+<script src="links.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

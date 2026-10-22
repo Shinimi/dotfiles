@@ -603,6 +603,9 @@ Scope {
                             SetToggle { label: "Games get their own workspace"; desc: "a game opens on 五 (5); when it closes you're back where you were"; key: "game_workspace" }
                             SetToggle { label: "ASCII living wallpaper"; desc: "your wallpaper drawn in glowing characters, slowly moving"; key: "ascii_wall" }
                             SetToggle { label: "Wallpaper tint"; desc: "the glass picks up a little of your wallpaper's colour"; key: "wall_tint" }
+                            SetToggle { label: "Login hand-off"; desc: "after logging in, the ASCII dunes dissolve into your desktop"; key: "login_handoff" }
+                            SetToggle { label: "Workspace flash"; desc: "the workspace kanji fades through the screen when you switch"; key: "ws_flash" }
+                            SetToggle { label: "Workspace previews"; desc: "hover a workspace in the bar to see its windows"; key: "ws_preview" }
                             SetToggle { label: "Kanji workspaces"; desc: "一 二 三 四 instead of 1 2 3 4"; key: "ws_kanji" }
                             SetToggle { label: "Screensaver"; desc: "your wallpaper in glowing characters, halfway to the auto-lock"; key: "screensaver" }
                             SetChoice {

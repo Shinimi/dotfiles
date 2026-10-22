@@ -60,10 +60,11 @@ Scope {
         Rectangle {
             id: frame
             anchors.fill: parent
-            radius: 14
-            color: Theme.panel
+            radius: 3
+            color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn)
             border.width: 1
-            border.color: Theme.glassLine
+            border.color: "#3dffffff"
+            Brackets {}
             opacity: root.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 140 } }
             focus: true

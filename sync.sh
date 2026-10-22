@@ -19,7 +19,7 @@ home_paths=(
   .config/gtk-3.0/settings.ini .config/gtk-3.0/gtk.css .config/gtk-4.0/settings.ini .config/gtk-4.0/gtk.css
   .local/share/color-schemes/Monochrome.colors .icons/default/index.theme
   .config/starship.toml .config/fastfetch .config/btop .config/fish/config.fish .zshrc .p10k.zsh
-  .local/share/mono-chrome .config/heroic/themes .config/helium-browser-flags.conf .config/environment.d
+  .local/share/mono-chrome .local/share/mono-newtab .config/heroic/themes .config/helium-browser-flags.conf .config/environment.d
   .config/systemd/user/fixfuxi-volume.service .config/systemd/user/fixfuxi-volume.timer fixfuxi
   Downloads/Optiv10/OptiScaler.ini Downloads/Optiv10/README-Optiv10.txt Downloads/Optiv10/install-optiv10.sh
 )

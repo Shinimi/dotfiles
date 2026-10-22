@@ -1,6 +1,52 @@
-/* Tokyo Night for Spotify (made by Claude). Hyprland adds the glass. */
-.main-nowPlayingBar-container, .Root__now-playing-bar { border-top: 1px solid #242424 !important; }
+/* Monochrome for Spotify in the hub style: sharp corners, thin white lines, spaced mono headings.
+   Hyprland adds the glass. Made by Claude. */
 ::selection { background: rgba(224,224,224,.35); }
-
-/* Kochō: desktop fonts. Made by Claude. */
 body, .main-type-body, .encore-text { font-family: "Inter", sans-serif !important; }
+
+/* sharp corners everywhere except round things (play buttons, avatars, artist pictures) */
+.main-card-card, .main-card-imageContainer, .main-cardImage-imageWrapper, .main-image-image:not(.main-avatar-image),
+.Root__main-view, .Root__nav-bar, .Root__right-sidebar, .main-yourLibraryX-entryPoints, .main-yourLibraryX-library,
+.main-trackList-trackListRow, .x-searchInput-searchInputInput, .main-contextMenu-menu, .encore-text-body-small,
+button:not([class*="PlayButton"]):not([aria-label*="Play"]):not([aria-label*="Pause"]):not([class*="round"]),
+.main-entityHeader-image, .main-nowPlayingWidget-coverArt, .cover-art, .cover-art-image, [class*="Card"],
+.main-home-filterChipsSection button, [role="tablist"] button, .search-searchCategory-categoryGrid > div > div {
+  border-radius: 2px !important;
+}
+.main-avatar-image, .main-avatar-avatar, [class*="ArtistCard"] .main-image-image, [class*="PlayButton"] { border-radius: 50% !important; }
+
+/* panels: thin white edges instead of rounded boxes */
+.Root__main-view, .Root__nav-bar, .Root__right-sidebar { border: 1px solid rgba(255,255,255,.08) !important; }
+.main-nowPlayingBar-container, .Root__now-playing-bar { border-top: 1px solid rgba(255,255,255,.14) !important; }
+
+/* headings: spaced monospace, like the desktop */
+.main-shelf-title, .main-shelf-title *, .main-entityHeader-subtitle, .main-trackList-trackListHeaderRow,
+.main-yourLibraryX-libraryRootlist h1, [data-encore-id="type"].encore-text-title-small {
+  font-family: "GeistMono Nerd Font", monospace !important; letter-spacing: .12em !important; text-transform: uppercase;
+}
+.main-trackList-trackListHeaderRow { font-size: 11px !important; }
+
+/* the row you're on / the playing row: a white seam on the left */
+.main-trackList-trackListRow:hover, .main-trackList-active { box-shadow: inset 2px 0 0 #ffffff !important; }
+.main-yourLibraryX-listItem:hover, .main-yourLibraryX-listItem[aria-selected="true"] { box-shadow: inset 2px 0 0 #ffffff !important; border-radius: 2px !important; }
+
+/* progress and volume bars: thin white thread */
+.progress-bar { --progress-bar-height: 3px !important; --progress-bar-radius: 0px !important; --fg-color: #ffffff !important; }
+.progress-bar__slider { border-radius: 0 !important; width: 8px !important; height: 8px !important; }
+
+/* context menus: white highlight */
+.main-contextMenu-menu { border: 1px solid rgba(255,255,255,.16) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.5) !important; }
+.main-contextMenu-menuItemButton:hover, .main-contextMenu-menuItemButton:focus { background: #ededed !important; color: #0c0c0c !important; border-radius: 2px !important; }
+.main-contextMenu-menuItemButton:hover * { color: #0c0c0c !important; }
+
+/* catch-all: everything sharp, then give the truly round things their circle back */
+*, *::before, *::after { border-radius: 2px !important; }
+[data-encore-id="buttonPrimary"], [data-encore-id="buttonPrimary"] *, [class*="PlayButton"], [class*="avatar" i], [class*="Avatar"],
+.main-avatar-image, [data-testid="user-widget-avatar"], [data-testid="user-widget-avatar"] *, [data-testid="play-button"], [data-testid="play-button"] *,
+[data-testid="control-button-playpause"], [data-testid="control-button-playpause"] * { border-radius: 50% !important; }
+/* spaced mono section titles */
+h2[data-encore-id="text"], .encore-text-title-medium, .encore-text-title-small, section h2 a {
+  font-family: "GeistMono Nerd Font", monospace !important; letter-spacing: .1em !important; text-transform: uppercase; font-size: 15px !important;
+}
+/* chips: outlined, white when chosen */
+[data-encore-id="chip"] { background: transparent !important; border: 1px solid rgba(255,255,255,.22) !important; }
+[data-encore-id="chip"][aria-checked="true"], [data-encore-id="chip"][aria-selected="true"] { background: #ededed !important; color: #0c0c0c !important; }

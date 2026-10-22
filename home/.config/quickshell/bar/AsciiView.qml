@@ -9,6 +9,7 @@ Item {
     property string source: ""                 // image path
     property bool running: true
     readonly property size cell: Qt.size(9, 16)
+    readonly property bool ready: srcImg.status === Image.Ready
 
     Image {   // the picture, one pixel per character cell
         id: srcImg

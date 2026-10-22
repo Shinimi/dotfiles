@@ -1,4 +1,4 @@
-/* Tokyo Night glass for Discord (Vesktop) under Hyprland blur. Made by Claude. Delete this to go back to default. */
+/* Monochrome glass for Discord (Vesktop) under Hyprland blur, hub style at the end. Made by Claude. Delete this to go back to default. */
 html, body, #app-mount, [class*="appMount"], [class*="app_"], [class*="bg_"], [class*="layers_"], [class*="layer_"] { background: transparent !important; }
 :root, .theme-dark, .theme-darker, .theme-midnight, .visual-refresh {
   --tn-base: rgba(17,17,17, 0.62);
@@ -70,3 +70,28 @@ section[class*="panels"], div[class*="panels_"] , [class*="avatarWrapper"] { bac
 [class*="panels_"] > [class*="container_"], [class*="panels_"] section { background: #161616 !important; }
 [class*="panels"] [class*="container"], [class*="panels"] [class*="wrapper"], [class*="panels"] > div { background: #161616 !important; background-image: none !important; }
 [class*="panels"] button[class*="button"]:not(:hover) { background: transparent !important; }
+
+/* ---------- hub style: sharp corners, thin white lines, a seam on the message box. Made by Claude. ---------- */
+:root, .theme-dark, .theme-darker, .theme-midnight, .visual-refresh {
+  --radius-xs: 2px !important; --radius-sm: 2px !important; --radius-md: 3px !important; --radius-lg: 3px !important; --radius-xl: 3px !important;
+}
+[class*="button_"]:not([class*="avatar"]), [class*="menu_"], [class*="popout"], [class*="tooltip_"], [class*="modal"], [class*="root_"][role="dialog"],
+[class*="channelTextArea"], [class*="scrollableContainer"], [class*="searchBar"], [class*="input_"], [class*="card"], [class*="embedFull"],
+[class*="attachment"], [class*="reactions"] [class*="reaction_"], [class*="quickswitcher"], [class*="autocomplete"], [class*="container_"][class*="panel"] {
+  border-radius: 2px !important;
+}
+/* message box: thin frame + white seam on the left */
+[class*="channelTextArea"] > [class*="scrollableContainer"], form [class*="channelTextArea"] {
+  border: 1px solid rgba(255,255,255,.14) !important; box-shadow: inset 2px 0 0 #ffffff !important; background: rgba(10,10,10,.85) !important;
+}
+/* menus, pop-outs and dialogs: a thin white line along the top */
+[class*="menu_"], [class*="popout"]:not([class*="emoji"]), [role="dialog"] { border: 1px solid rgba(255,255,255,.16) !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.55) !important; }
+[class*="menu_"] [class*="focused_"] { background: #ededed !important; color: #0c0c0c !important; border-radius: 2px !important; }
+[class*="menu_"] [class*="focused_"] * { color: #0c0c0c !important; }
+/* channel list: selected channel gets a white seam, category names in spaced mono */
+[class*="modeSelected"] [class*="link_"], [class*="selected_"][class*="link"] { box-shadow: inset 2px 0 0 #ffffff !important; border-radius: 2px !important; }
+[class*="containerDefault"] h3, [class*="containerDefault"] [class*="name_"][class*="overflow"] {
+  font-family: "GeistMono Nerd Font", monospace !important; letter-spacing: .14em !important; font-size: 10px !important;
+}
+/* scrollbars: thin white threads */
+::-webkit-scrollbar { width: 6px !important; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.22) !important; border-radius: 0 !important; border: 0 !important; }

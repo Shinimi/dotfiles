@@ -104,7 +104,8 @@ Scope {
 
         Rectangle {
             id: frame
-            anchors.fill: parent; radius: 22; color: Theme.panel; border.width: 1; border.color: Theme.glassLine
+            anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn); border.width: 1; border.color: "#3dffffff"
+            Brackets {}
             focus: true
             Keys.onPressed: e => {
                 if (e.key === Qt.Key_Tab || e.key === Qt.Key_Right) { root.move(1); e.accepted = true }
@@ -125,7 +126,7 @@ Scope {
                 text: root.query; onTextEdited: root.query = text
                 placeholderText: "Type to find a window…"; placeholderTextColor: Theme.muted
                 color: Theme.fg; font.family: Theme.font; font.pixelSize: 13; leftPadding: 38
-                background: Rectangle { radius: 12; color: Theme.bgAlt; border.width: search.activeFocus ? 2 : 1; border.color: search.activeFocus ? Theme.blue : Theme.line }
+                background: Rectangle { radius: 2; color: Theme.bgAlt; border.width: search.activeFocus ? 2 : 1; border.color: search.activeFocus ? Theme.blue : Theme.line }
                 Label { x: 14; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 14 }
                 Keys.onReturnPressed: root.confirm()
                 Keys.onEscapePressed: root.cancel()
@@ -143,13 +144,13 @@ Scope {
                         required property var modelData
                         required property int index
                         readonly property bool selected: index === root.sel
-                        width: 300; height: 220; radius: 16
+                        width: 300; height: 220; radius: 2
                         color: selected ? Qt.rgba(0.88, 0.88, 0.88, 0.16) : (cm.containsMouse ? "#1eeaeaea" : Theme.card)
                         border.width: selected ? 2 : 1; border.color: selected ? Theme.blue : "#14eaeaea"
                         Behavior on color { ColorAnimation { duration: 90 } }
 
                         ClippingRectangle {   // live preview of the window
-                            x: 10; y: 10; width: parent.width - 20; height: 160; radius: 10; color: Theme.bgAlt
+                            x: 10; y: 10; width: parent.width - 20; height: 160; radius: 2; color: Theme.bgAlt
                             ScreencopyView {
                                 id: shot
                                 anchors.centerIn: parent
@@ -173,7 +174,7 @@ Scope {
                             Rectangle {
                                 id: wsTag
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: wsl.implicitWidth + 14; height: 20; radius: 6
+                                width: wsl.implicitWidth + 14; height: 20; radius: 2
                                 color: card.selected ? Theme.blue : Theme.bgAlt
                                 Label { id: wsl; anchors.centerIn: parent; text: card.modelData.wsName === "side" ? "side" : String(card.modelData.ws)
                                         color: card.selected ? Theme.bg : Theme.muted; font.pixelSize: 10 }

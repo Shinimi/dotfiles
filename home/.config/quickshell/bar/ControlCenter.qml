@@ -79,7 +79,7 @@ BarPopup {
     // ---------- now playing ----------
     ClippingRectangle {
         visible: cc.player !== null && cc.player.trackTitle !== ""
-        width: parent.width; height: 104; radius: 18; color: Theme.card
+        width: parent.width; height: 104; radius: 2; color: Theme.card
         border.width: 1; border.color: Theme.stroke
         Image { id: artBg; anchors.fill: parent; source: cc.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; visible: false }
         MultiEffect {   // album art, blurred and greyed, as a soft backdrop
@@ -91,7 +91,7 @@ BarPopup {
         RowLayout {
             anchors.fill: parent; anchors.margins: 14; spacing: 14
             ClippingRectangle {
-                width: 76; height: 76; radius: 12; color: Theme.bgAlt
+                width: 76; height: 76; radius: 2; color: Theme.bgAlt
                 Image { anchors.fill: parent; source: cc.art; fillMode: Image.PreserveAspectCrop; asynchronous: true }
                 Label { anchors.centerIn: parent; visible: cc.art === ""; text: "\u{f075a}"; font.pixelSize: 26; color: Theme.muted }
             }
@@ -163,7 +163,7 @@ BarPopup {
                 required property var modelData
                 readonly property bool on: modelData[3]
                 Layout.fillWidth: true; Layout.preferredWidth: 1
-                height: 56; radius: 28
+                height: 56; radius: 2
                 color: on ? (tm.containsMouse ? "#ffffff" : Theme.on) : (tm.containsMouse ? Theme.cardHi : Theme.card)
                 border.width: 1; border.color: on ? "transparent" : Theme.stroke
                 Behavior on color { ColorAnimation { duration: 150 } }
@@ -212,7 +212,7 @@ BarPopup {
                 // output devices: a segmented switch
                 Rectangle {
                     visible: cc.sinks.length > 1
-                    width: parent.width; height: 32; radius: 16; color: "#0affffff"; border.width: 1; border.color: Theme.stroke
+                    width: parent.width; height: 32; radius: 2; color: "#0affffff"; border.width: 1; border.color: Theme.stroke
                     Row {
                         anchors.fill: parent; anchors.margins: 3
                         Repeater {
@@ -236,7 +236,7 @@ BarPopup {
                     width: parent.width; spacing: 8
                     Label { text: "EQ"; color: Theme.muted; font.pixelSize: 10; font.letterSpacing: 1.2 }
                     Rectangle {
-                        Layout.fillWidth: true; height: 28; radius: 14; color: "#0affffff"; border.width: 1; border.color: Theme.stroke
+                        Layout.fillWidth: true; height: 28; radius: 2; color: "#0affffff"; border.width: 1; border.color: Theme.stroke
                         Row {
                             anchors.fill: parent; anchors.margins: 3
                             Repeater {
@@ -333,7 +333,7 @@ BarPopup {
                                                      ["25m", () => { Timers.setMinutes(25); Timers.toggleTimer() }], ["1h", () => { Timers.setMinutes(60); Timers.toggleTimer() }]]
                         Rectangle {
                             required property var modelData
-                            width: Math.max(36, tl.implicitWidth + 18); height: 26; radius: 13
+                            width: Math.max(36, tl.implicitWidth + 18); height: 26; radius: 2
                             color: tmm.containsMouse ? Theme.on : "#0affffff"; border.width: 1; border.color: Theme.stroke
                             Behavior on color { ColorAnimation { duration: 120 } }
                             Label { id: tl; anchors.centerIn: parent; text: modelData[0]; font.pixelSize: 10; color: tmm.containsMouse ? Theme.onText : Theme.fgDim }
@@ -363,7 +363,7 @@ BarPopup {
                 }
                 Rectangle {
                     visible: Notifs.count > 0
-                    width: parent.width; height: 28; radius: 14
+                    width: parent.width; height: 28; radius: 2
                     color: clrMouse.containsMouse ? Theme.cardHi : "#0affffff"; border.width: 1; border.color: Theme.stroke
                     Label { anchors.centerIn: parent; text: "Clear all"; color: Theme.fgDim; font.pixelSize: 10 }
                     MouseArea { id: clrMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Notifs.clearAll() }
@@ -397,7 +397,7 @@ BarPopup {
                     Item { Layout.fillWidth: true }
                     Rectangle {
                         visible: Updates.total > 0
-                        width: ul.implicitWidth + 24; height: 28; radius: 14
+                        width: ul.implicitWidth + 24; height: 28; radius: 2
                         color: uMouse.containsMouse ? "#ffffff" : Theme.on
                         Label { id: ul; anchors.centerIn: parent; text: "\u{f06b0}  Update " + Updates.total; color: Theme.onText; font.pixelSize: 10 }
                         MouseArea { id: uMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -423,7 +423,7 @@ BarPopup {
             ]
             Rectangle {
                 required property var modelData
-                Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; radius: 16
+                Layout.fillWidth: true; Layout.preferredWidth: 1; height: 54; radius: 2
                 color: qm.containsMouse ? Theme.cardHi : Theme.card
                 border.width: 1; border.color: qm.containsMouse ? "#2affffff" : Theme.stroke
                 Behavior on color { ColorAnimation { duration: 120 } }

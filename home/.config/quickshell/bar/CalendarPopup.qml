@@ -19,7 +19,7 @@ BarPopup {
     // weather
     Rectangle {
         visible: Weather.ready
-        width: parent.width; height: wcol.implicitHeight + 20; radius: 12; color: Theme.card
+        width: parent.width; height: wcol.implicitHeight + 20; radius: 2; color: Theme.card
         Column {
             id: wcol
             anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 10
@@ -63,7 +63,7 @@ BarPopup {
             model: [["", -1], ["", 0], ["", 1]]
             Rectangle {
                 required property var modelData
-                width: 26; height: 22; radius: 6
+                width: 26; height: 22; radius: 2
                 color: navMouse.containsMouse ? Theme.bgHover : "transparent"
                 Label { anchors.centerIn: parent; text: modelData[0]; font.pixelSize: modelData[1] === 0 ? 7 : 11; color: Theme.fgDim }
                 MouseArea {
@@ -90,7 +90,7 @@ BarPopup {
                 readonly property date day: new Date(popup.shown.getFullYear(), popup.shown.getMonth(), index - lead + 1)
                 readonly property bool inMonth: day.getMonth() === popup.shown.getMonth()
                 readonly property bool isToday: day.toDateString() === popup.now.toDateString()
-                width: grid.cell; height: 30; radius: 8
+                width: grid.cell; height: 30; radius: 2
                 color: isToday ? Theme.blue : "transparent"
                 Label {
                     anchors.centerIn: parent

@@ -32,8 +32,9 @@
 --    SUPER + SHIFT + C       color picker        SUPER + SHIFT + P  screens off / on
 --    CTRL + ALT + Delete / M task manager (btop)
 --    Print                   region screenshot   CTRL + Print       full screen   ALT + Print  window
---    SUPER + "  (left of 1)  drop-down terminal  SUPER + Z          focus mode (no gaps, bar or pop-ups)
+--    SUPER + "               drop-down terminal (key left of 1)   SUPER + Z          focus mode (no gaps, bar or pop-ups)
 --    mouse to top-left corner  workspace overview
+--    SUPER + N               quick notes
 --    SUPER + Esc             home screen         SUPER + D          draw on the screen  SUPER + ALT + scroll  magnifier (SUPER + ALT + Z resets)
 --    SUPER + SHIFT + R       fix desktop (reload + restart bar/wallpaper/etc. if they died)
 --    SUPER + SHIFT + /  or  SUPER + F1   show this list
@@ -287,7 +288,7 @@ hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true },
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop|dropterm)$" }, opacity = "1.0 override 1.0 override" })
 -- blur behind the bar, panels and pop-ups
-hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview|launcher))$" }, blur = true, ignore_alpha = 0.2 })
+hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview|launcher|notes|keys))$" }, blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
 
 -- Games go to workspace 5 via gamemode.sh (it remembers where you were and brings you back after)
@@ -332,12 +333,13 @@ b("SUPER + G",              run("qs ipc -p ~/.config/quickshell/bar call games t
 b("SUPER + SHIFT + C",      run("hyprpicker -a"))
 b("SUPER + ALT + N",        run(scripts .. "/nightlight.sh"))
 b("SUPER + ALT + I",        run(scripts .. "/idle-inhibit.sh"))
-b("SUPER + SHIFT + Slash",  run(scripts .. "/keybinds.sh"))
-b("SUPER + F1",             run(scripts .. "/keybinds.sh"))
+b("SUPER + SHIFT + Slash",  run("qs ipc -p ~/.config/quickshell/bar call keys toggle"))
+b("SUPER + F1",             run("qs ipc -p ~/.config/quickshell/bar call keys toggle"))   -- shortcut sheet
 b("SUPER + code:49",        run(scripts .. "/dropterm.sh"))        -- key left of 1: drop-down terminal
 b("SUPER + Z",              run(scripts .. "/focus-mode.sh"))      -- focus mode: no gaps, bar or pop-ups
 b("SUPER + D",              run("qs ipc -p ~/.config/quickshell/bar call ink toggle"))   -- draw on the screen
 b("SUPER + Escape",         run("qs ipc -p ~/.config/quickshell/bar call home toggle"))  -- home screen
+b("SUPER + N",              run("qs ipc -p ~/.config/quickshell/bar call notes toggle"))  -- quick notes
 b("SUPER + ALT + mouse_up",   run(scripts .. "/zoom.sh in"))      -- magnifier (scroll up = closer)
 b("SUPER + ALT + mouse_down", run(scripts .. "/zoom.sh out"))
 b("SUPER + ALT + Z",          run(scripts .. "/zoom.sh reset"))

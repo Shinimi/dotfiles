@@ -4,9 +4,22 @@
 import Quickshell
 
 ShellRoot {
+    Intro {}
     Curtain {}
     AsciiWall {}
     WallShuffle {}
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        WsFlash {}
+    }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        Notes { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        ShortcutSheet { required property var modelData; screen: modelData }
+    }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         NierHub { required property var modelData; screen: modelData }

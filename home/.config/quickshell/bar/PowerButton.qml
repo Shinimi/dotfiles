@@ -37,7 +37,7 @@ Pill {
             Rectangle {
                 required property var modelData
                 readonly property bool armedHere: panel.armed === modelData.key
-                width: parent.width; height: 38; radius: 10
+                width: parent.width; height: 38; radius: 2
                 color: armedHere ? modelData.color : (rowMouse.containsMouse ? Theme.bgHover : "transparent")
                 Behavior on color { ColorAnimation { duration: 120 } }
                 RowLayout {

@@ -1,0 +1,7 @@
+{
+  "manifest_version": 3,
+  "name": "Mono New Tab (local)",
+  "version": "1.0",
+  "description": "New tab page in the hub style: ASCII dunes, clock, search, numbered bookmarks. Made by Claude.",
+  "chrome_url_overrides": { "newtab": "index.html" }
+}

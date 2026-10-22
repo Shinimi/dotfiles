@@ -56,7 +56,7 @@ Scope {
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.namespace: "qsbar-overview"
         WlrLayershell.keyboardFocus: root.visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
-        color: "#e60b0b0b"
+        color: Theme.mix(Qt.rgba(0.02, 0.02, 0.02, 0.92), Theme.tint, 0.07 * Theme.tintOn)
 
         MouseArea { anchors.fill: parent; onClicked: root.visible = false }
         Item {
@@ -67,7 +67,7 @@ Scope {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter; y: 70
-            text: "w o r k s p a c e s"; color: Theme.purple; font.family: Theme.font; font.pixelSize: 15
+            text: "WORKSPACES  //  作業場"; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 15
         }
 
         Flow {
@@ -84,7 +84,7 @@ Scope {
                     width: root.tileW; height: root.mh * root.k + 30
                     Rectangle {
                         id: frame
-                        width: parent.width; height: root.mh * root.k; radius: 14; clip: true
+                        width: parent.width; height: root.mh * root.k; radius: 2; clip: true
                         color: Theme.bgAlt
                         border.width: drop.containsDrag ? 3 : (tile.cur ? 2 : 1)
                         border.color: drop.containsDrag ? Theme.purple : (tile.cur ? Theme.blue : "#22eaeaea")
@@ -100,7 +100,7 @@ Scope {
                                 property string addr: modelData.address
                                 x: modelData.at[0] * root.k; y: (modelData.at[1]) * root.k
                                 width: Math.max(24, modelData.size[0] * root.k); height: Math.max(18, modelData.size[1] * root.k)
-                                radius: 6; color: Theme.bg; clip: true
+                                radius: 2; color: Theme.bg; clip: true
                                 border.width: 1; border.color: dm.containsMouse ? Theme.purple : "#33eaeaea"
                                 Drag.active: dm.drag.active; Drag.source: win; Drag.hotSpot.x: width / 2; Drag.hotSpot.y: height / 2
                                 ScreencopyView {

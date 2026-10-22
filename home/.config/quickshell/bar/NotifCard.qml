@@ -122,7 +122,7 @@ Rectangle {
                 model: card.notif ? card.notif.actions : []
                 Rectangle {
                     required property var modelData
-                    width: aLabel.implicitWidth + 20; height: 26; radius: 8
+                    width: aLabel.implicitWidth + 20; height: 26; radius: 2
                     color: aMouse.containsMouse ? Theme.bgHover : Theme.bgAlt; border.width: 1; border.color: Theme.line
                     Label { id: aLabel; anchors.centerIn: parent; text: modelData.text; font.pixelSize: 11 }
                     MouseArea { id: aMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor

@@ -16,13 +16,13 @@ Item {
 
     Rectangle {
         id: track
-        anchors.fill: parent; radius: height / 2
+        anchors.fill: parent; radius: 2
         color: ma.containsMouse ? "#16ffffff" : "#0fffffff"
         border.width: 1; border.color: Theme.stroke
         clip: true
         Behavior on color { ColorAnimation { duration: 120 } }
         Rectangle {   // fill
-            height: parent.height; radius: height / 2
+            height: parent.height; radius: 2
             width: Math.max(height, parent.width * s.shown)
             color: s.muted ? "#33ffffff" : Theme.on
             Behavior on width { enabled: !ma.pressed; NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }

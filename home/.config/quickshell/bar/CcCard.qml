@@ -9,7 +9,7 @@ Rectangle {
     property string note: ""          // small text on the right of the header
     width: parent ? parent.width : 300
     height: cardCol.implicitHeight + 28
-    radius: 18; color: Theme.card
+    radius: 2; color: Theme.card
     border.width: 1; border.color: Theme.stroke
     Column {
         id: cardCol

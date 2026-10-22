@@ -47,7 +47,7 @@ Column {
             readonly property bool muted: lead && lead.audio ? lead.audio.muted : false
             width: root.width; spacing: 10
             Rectangle {
-                width: 32; height: 32; radius: 10
+                width: 32; height: 32; radius: 2
                 color: muted ? "#40cf6b6b" : (aMouse.containsMouse ? Theme.cardHi : Theme.card)
                 IconImage { anchors.centerIn: parent; implicitSize: 20; source: root.iconFor(modelData); opacity: muted ? 0.4 : 1 }
                 MouseArea { id: aMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor

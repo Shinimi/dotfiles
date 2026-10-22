@@ -52,6 +52,7 @@ Scope {
         ["Drop-down terminal", "terminal kitty console", "\u{f018d}", [scripts + "/dropterm.sh"]],
         ["Draw on screen", "ink annotate pen marker", "\u{f03eb}", ipc("ink")],
         ["Home screen", "dashboard clock calendar", "\u{f02dc}", ipc("home")],
+        ["Quick notes", "notes todo list remember write", "\u{f082e}", ipc("notes")],
         ["Control hub", "control center quick settings", "\u{f0493}", ipc("hub")],
         ["Screenshot region", "snip capture print", "\u{f0100}", ["sh", "-c", "sleep 0.3; " + scripts + "/screenshot.sh region"]],
         ["Color picker", "colour pick hex eyedropper", "\u{f0d52}", ["sh", "-c", "sleep 0.3; hyprpicker -a"]],

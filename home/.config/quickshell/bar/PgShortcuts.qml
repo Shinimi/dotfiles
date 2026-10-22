@@ -12,7 +12,7 @@ Column {
     readonly property var shown: q ? all.filter(x => (x.k + " " + x.d).toLowerCase().indexOf(q.toLowerCase()) >= 0) : all
     Process {
         running: pg.visible
-        command: ["sh", "-c", "sed -n '/KEYBINDS/,/^-- =====/p' \"$HOME/.config/hypr/hyprland.lua\" | sed '1d;$d; s/^--  *//'"]
+        command: ["sh", "-c", "awk '/KEYBINDS/{f=1;next} f && /^-- =====/{exit} f && /^--/' \"$HOME/.config/hypr/hyprland.lua\" | sed 's/^--  *//'"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const out = []

@@ -7,12 +7,12 @@ Rectangle {
     property int tab: Timers.swActive && !Timers.timerActive ? 1 : 0
     width: parent ? parent.width : 280
     height: col.implicitHeight + 24
-    radius: 12; color: Theme.card
+    radius: 2; color: Theme.card
 
     component Btn: Rectangle {
         property string text; property bool primary: false; property bool on: false; signal hit()
         Layout.fillWidth: true; Layout.preferredWidth: 1
-        height: 30; radius: 8
+        height: 30; radius: 2
         color: primary ? (bMouse.containsMouse ? "#f0f0f0" : Theme.blue) : (on ? Theme.bgHover : (bMouse.containsMouse ? Theme.bgHover : Theme.bg))
         border.width: on ? 1 : 0; border.color: Theme.blue
         Label { anchors.centerIn: parent; text: parent.text; color: parent.primary ? Theme.bg : Theme.fg; font.pixelSize: 11 }
@@ -28,7 +28,7 @@ Rectangle {
                 model: ["  Timer", "  Stopwatch"]
                 Rectangle {
                     required property var modelData; required property int index
-                    Layout.fillWidth: true; height: 26; radius: 7
+                    Layout.fillWidth: true; height: 26; radius: 2
                     color: card.tab === index ? Theme.bgHover : "transparent"
                     Label { anchors.centerIn: parent; text: modelData; font.pixelSize: 11; color: card.tab === index ? Theme.fg : Theme.muted }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: card.tab = index }
