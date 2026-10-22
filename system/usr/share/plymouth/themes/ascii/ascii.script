@@ -1,0 +1,84 @@
+# ASCII boot splash: the dunes drawn in glowing characters, line by line behind a white scan line,
+# with a thin progress line. It ends exactly where the login screen begins. Made by Claude.
+Window.SetBackgroundTopColor(0, 0, 0);
+Window.SetBackgroundBottomColor(0, 0, 0);
+X = Window.GetX(); Y = Window.GetY(); W = Window.GetWidth(); H = Window.GetHeight();
+k = W / 2560;
+N = 45;
+for (i = 0; i < N; i++) {
+  n = i; if (i < 10) n = "0" + i;
+  img = Image("row-" + n + ".png");
+  rows[i] = img.Scale(W, img.GetHeight() * k);
+  spr[i] = Sprite(rows[i]);
+  spr[i].SetPosition(X, Y + i * 32 * k, 1);
+  spr[i].SetOpacity(0);
+}
+
+lineimg = Image("line.png");
+scan = Sprite(lineimg.Scale(W, 2));
+scan.SetPosition(X, Y, 3);
+scan.SetOpacity(0);
+
+barw = W * 0.22;
+barx = X + (W - barw) / 2;
+bary = Y + H * 0.88;
+track = Sprite(Image("track.png").Scale(barw, 2));
+track.SetPosition(barx, bary, 4);
+track.SetOpacity(0);
+bar = Sprite();
+bar.SetPosition(barx, bary, 5);
+labimg = Image("label.png");
+label = Sprite(labimg);
+label.SetPosition(X + (W - labimg.GetWidth()) / 2, bary + 16, 5);
+label.SetOpacity(0);
+
+t = 0;
+done = 0;
+fun refresh() {
+  t++;
+  if (done) return;
+  for (i = 0; i < N; i++) {
+    a = (t - i * 1.4) / 9;
+    if (a > 1) a = 1;
+    if (a < 0) a = 0;
+    spr[i].SetOpacity(a);
+  }
+  edge = t / 1.4;
+  if (edge < N + 1) {
+    scan.SetPosition(X, Y + edge * 32 * k, 3);
+    scan.SetOpacity(0.55);
+  } else {
+    scan.SetOpacity(0);
+  }
+  u = (t - N * 1.4) / 20;
+  if (u > 0) {
+    if (u > 1) u = 1;
+    track.SetOpacity(u);
+    label.SetOpacity(u * 0.9);
+  }
+  if (t > N * 1.4 + 40) done = 1;
+}
+Plymouth.SetRefreshFunction(refresh);
+
+fun progress(duration, p) {
+  w = barw * p;
+  if (w >= 1) bar.SetImage(lineimg.Scale(w, 2));
+}
+Plymouth.SetBootProgressFunction(progress);
+
+# password prompt (only used with disk encryption)
+fun display_password(prompt, bullets) {
+  pw.image = Image.Text(prompt + "  " + bullets, 0.92, 0.92, 0.92, 1, "Sans 14");
+  pw.sprite = Sprite(pw.image);
+  pw.sprite.SetPosition(X + (W - pw.image.GetWidth()) / 2, Y + H * 0.78, 6);
+}
+fun display_normal() { pw.sprite = NULL; }
+Plymouth.SetDisplayPasswordFunction(display_password);
+Plymouth.SetDisplayNormalFunction(display_normal);
+
+fun message(text) {
+  msg.image = Image.Text(text, 0.5, 0.5, 0.5, 1, "Sans 11");
+  msg.sprite = Sprite(msg.image);
+  msg.sprite.SetPosition(X + (W - msg.image.GetWidth()) / 2, Y + H - 40, 6);
+}
+Plymouth.SetMessageFunction(message);

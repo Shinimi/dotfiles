@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=ASCII
+Description=The dunes drawn in glowing characters, line by line. Made by Claude.
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/ascii
+ScriptFile=/usr/share/plymouth/themes/ascii/ascii.script

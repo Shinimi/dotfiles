@@ -27,7 +27,7 @@ system_paths=(
   /etc/sddm.conf.d/10-tokyo-night-yu.conf /etc/scx_loader.toml
   /etc/systemd/system/amdgpu-power-cap.service /etc/systemd/system/cpu-boost-cap.service
   /etc/systemd/system/paccache.service.d/keep2.conf
-  /usr/share/plymouth/themes/mono /usr/share/sddm/themes/mono-yu
+  /usr/share/plymouth/themes/mono /usr/share/plymouth/themes/ascii /usr/share/sddm/themes/mono-yu
 )
 for p in "${home_paths[@]}"; do
   [ -e "$H/$p" ] || continue

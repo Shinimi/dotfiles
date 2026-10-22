@@ -72,8 +72,8 @@ if ask "Install system files (needs sudo)?"; then
     sudo systemctl enable --now amdgpu-power-cap.service cpu-boost-cap.service
   fi
   sudo systemctl enable sddm.service 2>/dev/null || true
-  if [ -d /usr/share/plymouth/themes/mono ] && ask "  Use the monochrome boot splash? (rebuilds the boot image)"; then
-    sudo plymouth-set-default-theme -R mono
+  if [ -d /usr/share/plymouth/themes/ascii ] && ask "  Use the ASCII boot splash? (rebuilds the boot image)"; then
+    sudo plymouth-set-default-theme -R ascii
   fi
   ok "system files"
 fi
