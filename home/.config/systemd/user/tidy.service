@@ -1,0 +1,8 @@
+[Unit]
+Description=Monthly tidy of caches, trash and build leftovers (made by Claude)
+
+[Service]
+Type=oneshot
+Nice=19
+IOSchedulingClass=idle
+ExecStart=%h/.local/bin/tidy.sh

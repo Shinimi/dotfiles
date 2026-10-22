@@ -1,0 +1,10 @@
+[Unit]
+Description=Run tidy.sh once a month
+
+[Timer]
+OnCalendar=monthly
+Persistent=true
+RandomizedDelaySec=1h
+
+[Install]
+WantedBy=timers.target

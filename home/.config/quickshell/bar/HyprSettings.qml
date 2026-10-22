@@ -608,6 +608,9 @@ Scope {
                                 SetButton { icon: "\u{f0450}"; text: "Restore last"; onClicked: Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/settings-snapshot.sh", "restore"]) }
                             }
                             Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal
+                                    text: "Once a month the system tidies itself: old thumbnails, AUR build leftovers, 30-day-old trash and unused cache files (game shader caches are kept)." }
+                            SetButton { icon: "\u{f00e2}"; text: "Tidy now"; onClicked: Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/tidy.sh"]) }
+                            Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal
                                     text: "Screenshots: Print = area, Ctrl+Print = screen, Alt+Print = window. They land in ~/Pictures/Screenshots." }
                         }
                     }
