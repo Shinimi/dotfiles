@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls.Basic
 import Quickshell
 import Quickshell.Widgets
+import "."   // our own Label (Geist Mono) wins over the Qt Controls one
 
 Column {
     id: pg

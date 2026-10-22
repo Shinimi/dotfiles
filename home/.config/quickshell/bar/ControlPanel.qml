@@ -49,6 +49,7 @@ Scope {
     function speed(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + " MB/s" : b >= 1024 ? Math.round(b / 1024) + " KB/s" : b + " B/s" }
     function mmss(t) { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0") }
     function nice(n) { return (n ? (n.nickname || n.description || n.name || "") : "").replace(/ Analog Stereo| Digital Stereo \(HDMI\)| Stereo/g, "") }
+    function n(k) { return String(k - (cc.player ? 0 : 1)).padStart(2, "0") }   // section number (music hidden → shift up)
     function go(cmd) { cc.visible = false; Quickshell.execDetached(cmd) }
     function qs(target, fn) { go(["qs", "ipc", "-p", qsDir, "call", target, fn || "toggle"]) }
     readonly property string greeting: {
@@ -130,7 +131,8 @@ Scope {
         Rectangle {
             id: panel
             width: 480
-            y: Theme.barHeight + 16; height: parent.height - y - 12
+            y: Theme.barHeight + 16
+            height: Math.min(parent.height - y - 12, flick.y + body.implicitHeight + 8 + foot.height)   // as tall as it needs, no empty gap
             x: cc.visible ? parent.width - width - 10 : parent.width + 24
             Behavior on x { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
             radius: 3; color: Theme.mix(Qt.rgba(0.03, 0.03, 0.03, 0.95), Theme.tint, 0.07 * Theme.tintOn)
@@ -164,9 +166,10 @@ Scope {
                     width: flick.width; spacing: 12
 
                     // ===== 01 now playing =====
-                    Head { num: "01"; title: "NOW PLAYING"; jp: "再生"; note: cc.player ? (cc.player.isPlaying ? "▸ playing" : "paused") : "" }
+                    Head { visible: !!cc.player; num: "01"; title: "NOW PLAYING"; jp: "再生"; note: cc.player ? (cc.player.isPlaying ? "▸ playing" : "paused") : "" }
                     Item {
-                        width: parent.width; height: cc.player ? 186 : 44
+                        visible: !!cc.player
+                        width: parent.width; height: cc.player ? 186 : 0
                         Text { visible: !cc.player; anchors.centerIn: parent; text: "nothing playing"; color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 11 }
                         ClippingRectangle {
                             id: cover
@@ -225,7 +228,7 @@ Scope {
                     }
 
                     // ===== 02 today =====
-                    Head { num: "02"; title: "TODAY"; jp: "今日"; note: Weather.ready ? Weather.place.toLowerCase() : "" }
+                    Head { num: cc.n(2); title: "TODAY"; jp: "今日"; note: Weather.ready ? Weather.place.toLowerCase() : "" }
                     Row {   // this week, today in white
                         width: parent.width; spacing: 4
                         Repeater {
@@ -290,7 +293,7 @@ Scope {
                     }
 
                     // ===== 03 quick =====
-                    Head { num: "03"; title: "QUICK"; jp: "操作" }
+                    Head { num: cc.n(3); title: "QUICK"; jp: "操作" }
                     Grid {
                         width: parent.width; columns: 3; spacing: 6
                         Repeater {
@@ -320,7 +323,7 @@ Scope {
                     }
 
                     // ===== 04 sound =====
-                    Head { num: "04"; title: "SOUND"; jp: "音響"; note: SysState.fx.eq ? "eq " + SysState.fx.preset : "" }
+                    Head { num: cc.n(4); title: "SOUND"; jp: "音響"; note: SysState.fx.eq ? "eq " + SysState.fx.preset : "" }
                     CcSlider {
                         icon: "\u{f057e}"; text: cc.nice(cc.sink).slice(0, 22)
                         muted: !!(cc.sink && cc.sink.audio && cc.sink.audio.muted)
@@ -350,7 +353,7 @@ Scope {
                     AppVolumes { id: apps; visible: apps.apps.length > 0; showTitle: false }
 
                     // ===== 05 screens =====
-                    Head { num: "05"; title: "SCREENS"; jp: "表示"; note: SysState.night ? "night light on" : "" }
+                    Head { num: cc.n(5); title: "SCREENS"; jp: "表示"; note: SysState.night ? "night light on" : "" }
                     Repeater {
                         model: [["DP-1", "main"], ["DP-2", "side"]]
                         CcSlider {
@@ -362,7 +365,7 @@ Scope {
                     }
 
                     // ===== 06 system =====
-                    Head { num: "06"; title: "SYSTEM"; jp: "系統"; note: "↓ " + cc.speed(Stats.d.netRx || 0) + "  ↑ " + cc.speed(Stats.d.netTx || 0) }
+                    Head { num: cc.n(6); title: "SYSTEM"; jp: "系統"; note: "↓ " + cc.speed(Stats.d.netRx || 0) + "  ↑ " + cc.speed(Stats.d.netTx || 0) }
                     Bar { label: "CPU"; value: Stats.d.cpu / 100; val: Stats.d.cpu + "%"; extra: Stats.d.cpuTemp + "°  " + Stats.d.cpuFreq + "G" }
                     Bar { label: "GPU"; value: Stats.d.gpu / 100; val: Stats.d.gpu + "%"; extra: Stats.d.gpuTemp + "°  " + Stats.d.gpuPower + "W" }
                     Bar { label: "RAM"; value: Stats.d.ram / 100; val: Stats.d.ram + "%"; extra: Stats.d.ramUsed.toFixed(1) + " / " + Stats.d.ramTotal.toFixed(0) + "G" }
@@ -370,7 +373,7 @@ Scope {
                           val: Math.round(Stats.d.vramTotal ? 100 * Stats.d.vramUsed / Stats.d.vramTotal : 0) + "%"; extra: (Stats.d.vramUsed || 0).toFixed(1) + " / " + (Stats.d.vramTotal || 0).toFixed(0) + "G" }
 
                     // ===== 07 notifications =====
-                    Head { num: "07"; title: "NOTIFICATIONS"; jp: "通知"; note: Notifs.count > 0 ? String(Notifs.count) : "" }
+                    Head { num: cc.n(7); title: "NOTIFICATIONS"; jp: "通知"; note: Notifs.count > 0 ? String(Notifs.count) : "" }
                     Text { visible: Notifs.count === 0; width: parent.width; horizontalAlignment: Text.AlignHCenter; topPadding: 6; bottomPadding: 6
                            text: "all caught up"; color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 11 }
                     Column {

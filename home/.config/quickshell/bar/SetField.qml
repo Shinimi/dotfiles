@@ -1,6 +1,7 @@
 // Settings: label + text box bound to a setting (draft). Made by Claude.
 import QtQuick
 import QtQuick.Controls.Basic
+import "."   // our own Label (Geist Mono) wins over the Qt Controls one
 
 Column {
     id: r

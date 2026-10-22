@@ -251,7 +251,7 @@ Scope {
                                color: sb.containsMouse && !parent.parent.armed ? Theme.onText : "#e0e0e0" }
                         MouseArea { id: sb; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                             onClicked: {   // log out / restart / shut down ask for a second click
-                                if (index >= 2 && !parent.parent.armed) { parent.parent.armed = true; disarm.restart(); return }
+                                if (index >= 2 && Settings.cur("confirm_power") && !parent.parent.armed) { parent.parent.armed = true; disarm.restart(); return }
                                 root.go(modelData[2])
                             } }
                     }

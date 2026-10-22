@@ -37,7 +37,7 @@ Singleton {
         user_name: "yu", avatar: "", cc_logo: "avatar", wall_main: "", wall_side: "", default_apps: ({}), autostart: [],
         weather_place: "", weather_label: "", game_profiles: ({}),
         // extras
-        hot_corner: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true, screensaver: true, ws_kanji: true, game_workspace: true, wall_tint: true, ascii_wall: false, ws_preview: true, login_handoff: true
+        hot_corner: true, instant_apply: false, confirm_power: true, volume_step: 3, shot_save: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true, screensaver: true, ws_kanji: true, game_workspace: true, wall_tint: true, ascii_wall: false, ws_preview: true, login_handoff: true
     })
     property var v: defaults        // applied
     property var draft: defaults    // being edited
@@ -52,7 +52,8 @@ Singleton {
 
     function get(k) { return draft[k] !== undefined ? draft[k] : defaults[k] }
     function cur(k) { return v[k] !== undefined ? v[k] : defaults[k] }
-    function set(k, val) { const n = Object.assign({}, draft); n[k] = val; draft = n }
+    function set(k, val) { const n = Object.assign({}, draft); n[k] = val; draft = n; if (k !== "instant_apply" && cur("instant_apply")) applyLater.restart() }
+    Timer { id: applyLater; interval: 350; onTriggered: s.apply() }   // instant apply: sliders settle first
     function setMon(name, field, val, live) {
         const all = Object.assign({}, get("monitors"))
         all[name] = Object.assign({}, live || {}, all[name] || {}); all[name][field] = val
@@ -68,7 +69,9 @@ Singleton {
     // for scripts (qs ipc … settings set): change and apply at once
     function setNow(k, val) { set(k, val); apply() }
 
+    function reload() { loader.running = true }
     Process {
+        id: loader
         running: true
         command: ["cat", s.file]
         stdout: StdioCollector {

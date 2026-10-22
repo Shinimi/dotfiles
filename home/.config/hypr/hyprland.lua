@@ -427,8 +427,8 @@ b("CTRL + Print",               run(scripts .. "/screenshot.sh full"))
 b("ALT + Print",                run(scripts .. "/screenshot.sh window"))
 
 -- Media / volume (3% steps like DMS)
-b("XF86AudioRaiseVolume", run("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 3%+"), { locked = true, repeating = true })
-b("XF86AudioLowerVolume", run("wpctl set-volume @DEFAULT_AUDIO_SINK@ 3%-"),      { locked = true, repeating = true })
+b("XF86AudioRaiseVolume", run(scripts .. "/vol.sh up"),   { locked = true, repeating = true })   -- step: Settings → Comfort
+b("XF86AudioLowerVolume", run(scripts .. "/vol.sh down"), { locked = true, repeating = true })
 b("XF86AudioMute",        run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true })
 b("XF86AudioMicMute",     run("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true })
 b("XF86AudioPlay",        run("playerctl play-pause"), { locked = true })

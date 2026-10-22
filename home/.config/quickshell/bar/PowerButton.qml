@@ -60,7 +60,7 @@ Pill {
                 MouseArea {
                     id: rowMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        if (modelData.confirm && !armedHere) { panel.armed = modelData.key; disarm.restart(); return }
+                        if (modelData.confirm && Settings.cur("confirm_power") && !armedHere) { panel.armed = modelData.key; disarm.restart(); return }
                         panel.visible = false
                         Quickshell.execDetached(modelData.cmd)
                     }

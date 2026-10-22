@@ -9,6 +9,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Widgets
+import "."   // our own Label (Geist Mono) wins over the Qt Controls one
 
 Scope {
     id: root
@@ -285,7 +286,7 @@ Scope {
                                           visible: row.modelData.kind === "app" || row.modelData.kind === "file" }
                             Text { visible: row.modelData.kind === "glyph"; anchors.centerIn: parent; text: row.modelData.glyph || ""
                                    font.family: Theme.font; font.pixelSize: 15; color: row.cur ? "#ffffff" : "#b0b0b0" }
-                            Text { visible: row.modelData.kind === "emoji"; anchors.centerIn: parent; text: row.modelData.emoji || ""; font.pixelSize: 19 }
+                            Text { font.family: Theme.font; visible: row.modelData.kind === "emoji"; anchors.centerIn: parent; text: row.modelData.emoji || ""; font.pixelSize: 19 }
                         }
                         Column {
                             anchors.left: ic.right; anchors.leftMargin: 14; anchors.right: catLbl.left; anchors.rightMargin: 12

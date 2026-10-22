@@ -9,6 +9,7 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import Quickshell.Widgets
+import "."   // our own Label (Geist Mono) wins over the Qt Controls one
 
 Scope {
     id: root

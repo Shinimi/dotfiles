@@ -6,6 +6,7 @@ import QtQuick.Controls.Basic
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
+import "."   // our own Label (Geist Mono) wins over the Qt Controls one
 
 Scope {
     id: root
@@ -94,7 +95,7 @@ Scope {
                     Rectangle {   // tick box
                         x: 36; y: 13; width: 16; height: 16; radius: 1
                         color: row.modelData.done ? Theme.on : "transparent"; border.width: 1; border.color: row.modelData.done ? Theme.on : "#66ffffff"
-                        Text { anchors.centerIn: parent; visible: row.modelData.done; text: "✓"; color: Theme.onText; font.pixelSize: 11; font.bold: true }
+                        Text { font.family: Theme.font; anchors.centerIn: parent; visible: row.modelData.done; text: "✓"; color: Theme.onText; font.pixelSize: 11; font.bold: true }
                         MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: root.tick(row.index) }
                     }
                     Text {

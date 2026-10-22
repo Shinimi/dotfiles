@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
+import "."   // our own Label (Geist Mono) wins over the Qt Controls one
 
 Scope {
     id: root
@@ -26,6 +27,7 @@ Scope {
         ["glass", "\u{f0c8a}", "Glass & blur", "Look & feel", "transparency opacity blur"],
         ["wallpaper", "\u{f02e9}", "Wallpaper", "Look & feel", "background picture"],
         ["bar", "\u{f0e9e}", "Bar & notifications", "Desktop", "clock seconds popup do not disturb"],
+        ["comfort", "\u{f02dc}", "Comfort", "Desktop", "instant apply volume step screenshot confirm power snapshot backup restore"],
         ["extras", "\u{f0674}", "Extras", "Desktop", "hot corner focus mode drop-down terminal screensaver ink draw magnifier zoom picture in picture wallpaper shuffle pause music lock"],
         ["shortcuts", "\u{f030c}", "Shortcuts", "Desktop", "keybinds keys hotkeys"],
         ["defaults", "\u{f03d6}", "Default apps", "Desktop", "browser file manager open with"],
@@ -76,6 +78,7 @@ Scope {
             Settings.setNow(key, value === "true" ? true : value === "false" ? false : isNaN(Number(value)) ? value : Number(value))
         }
         function apply(): void { Settings.apply() }
+        function reload(): void { Settings.reload() }
         function discard(): void { Settings.discard() }
     }
 
@@ -270,6 +273,7 @@ Scope {
             // ================= apply bar (always there) =================
             Rectangle {
                 id: applyBar
+                visible: !Settings.cur("instant_apply")
                 anchors { left: side.right; right: parent.right; bottom: parent.bottom; margins: 14 }
                 height: 56; radius: 2
                 color: Settings.dirty ? "#14ffffff" : "transparent"
@@ -294,7 +298,7 @@ Scope {
             // ================= page =================
             Flickable {
                 id: flick
-                anchors { left: side.right; right: parent.right; top: parent.top; bottom: applyBar.top; margins: 24; bottomMargin: 10 }
+                anchors { left: side.right; right: parent.right; top: parent.top; bottom: applyBar.visible ? applyBar.top : parent.bottom; margins: 24; bottomMargin: 10 }
                 contentHeight: pageCol.implicitHeight; clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 Connections { target: root; function onPageChanged() { flick.contentY = 0; fadeIn.restart() } }
@@ -314,14 +318,14 @@ Scope {
                             Text { anchors.baseline: ttl.baseline; text: "//"; color: "#454545"; font.family: Theme.font; font.pixelSize: 13 }
                             Text { id: ttl; text: root.pageInfo[2].toUpperCase(); color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 20; font.letterSpacing: 3; font.bold: true }
                             Text { anchors.baseline: ttl.baseline; text: ({ account: "利用者", appearance: "外観", effects: "効果", theme: "主題", glass: "硝子", wallpaper: "壁紙",
-                                     bar: "通知", extras: "追加", shortcuts: "近道", defaults: "既定", autostart: "起動", games: "遊戯", display: "表示", sound: "音響",
+                                     bar: "通知", comfort: "快適", extras: "追加", shortcuts: "近道", defaults: "既定", autostart: "起動", games: "遊戯", display: "表示", sound: "音響",
                                      input: "入力", network: "通信", bluetooth: "無線", storage: "記憶", power: "電力", datetime: "日時", about: "情報" })[root.page] || ""
                                    color: "#7a7a7a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 14 }
                         }
                         Rectangle { width: pageCol.width; height: 1; color: "#1affffff" }
                         Label {
                             color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal
-                            text: ({ account: "Your picture and name", appearance: "Colours, borders, gaps and window layout",
+                            text: ({ comfort: "Little things that make the desktop nicer to live with", account: "Your picture and name", appearance: "Colours, borders, gaps and window layout",
                                      effects: "Glow, shadows, dimming and animations", theme: "Icons, folders, cursor and fonts",
                                      glass: "How see-through windows and panels are", wallpaper: "Pick a picture for each screen",
                                      bar: "Clock, bar items and pop-ups", shortcuts: "Every keyboard shortcut",
@@ -577,6 +581,34 @@ Scope {
                             }
                             SetToggle { label: "Sounds"; desc: "soft sounds for notifications, login and screenshots"; key: "sounds" }
                             SetSwitch { label: "Do not disturb"; desc: "hide pop-ups (instant)"; on: Notifs.dnd; accent: Theme.purple; onToggled: Notifs.dnd = !Notifs.dnd }
+                        }
+                    }
+
+                    // ---------- Comfort ----------
+                    Row {
+                        visible: root.page === "comfort"; width: parent.width; spacing: 14
+                        SetSection {
+                            width: (parent.width - 14) / 2; title: "Everyday"; icon: "\u{f02dc}"
+                            SetToggle { label: "Apply changes instantly"; desc: "no Apply button: every change here takes effect right away"; key: "instant_apply" }
+                            SetToggle { label: "Ask before power actions"; desc: "log out, restart and shut down need a second click"; key: "confirm_power" }
+                            SetChoice {
+                                label: "Volume key step"; desc: "how much one press of the volume keys changes"
+                                current: Settings.get("volume_step"); onPicked: v => Settings.set("volume_step", v)
+                                options: [[1, "1%"], [2, "2%"], [3, "3%"], [5, "5%"], [10, "10%"]]
+                            }
+                            SetToggle { label: "Keep screenshot files"; desc: "off: screenshots only go to the clipboard"; key: "shot_save" }
+                        }
+                        SetSection {
+                            width: (parent.width - 14) / 2; title: "Settings backup"; icon: "\u{f0bc7}"
+                            Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal
+                                    text: "Save a copy of everything you set here before experimenting. The last 20 copies are kept." }
+                            Row {
+                                spacing: 8
+                                SetButton { icon: "\u{f0193}"; text: "Save snapshot"; onClicked: Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/settings-snapshot.sh", "save"]) }
+                                SetButton { icon: "\u{f0450}"; text: "Restore last"; onClicked: Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/settings-snapshot.sh", "restore"]) }
+                            }
+                            Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal
+                                    text: "Screenshots: Print = area, Ctrl+Print = screen, Alt+Print = window. They land in ~/Pictures/Screenshots." }
                         }
                     }
 
