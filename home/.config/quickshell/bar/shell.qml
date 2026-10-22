@@ -50,10 +50,6 @@ ShellRoot {
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
-        Butterflies { required property var modelData; screen: modelData }
-    }
-    Variants {
-        model: Quickshell.screens.filter(s => s.name === "DP-1")
         Overview { required property var modelData; screen: modelData }
     }
 }

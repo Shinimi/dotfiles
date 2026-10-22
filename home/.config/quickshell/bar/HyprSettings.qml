@@ -408,8 +408,6 @@ Scope {
                             SetSection {
                                 width: (parent.width - 14) / 2; title: "Animations"; icon: "\u{f0d4a}"
                                 SetToggle { label: "Animations"; desc: "open, close and workspace motion"; key: "animations" }
-                                SetToggle { label: "Butterflies on the desktop"; desc: "drift over the wallpaper when a workspace is empty"; key: "butterflies" }
-                                SetSlider { visible: Settings.get("butterflies"); label: "How many"; key: "butterfly_count"; from: 3; to: 14 }
                                 SetChoice {
                                     visible: Settings.get("animations"); label: "Speed"; accent: Theme.cyan
                                     current: Settings.get("anim_speed"); onPicked: v => Settings.set("anim_speed", v)
@@ -499,7 +497,7 @@ Scope {
                             width: parent.width; title: "Terminal art (fastfetch)"; icon: "\u{f018d}"
                             SetChoice {
                                 label: "Shown next to your system info"; current: Settings.get("fetch_logo"); onPicked: v => Settings.set("fetch_logo", v)
-                                options: [["kamon", "Kochō crest"], ["butterfly", "Butterfly"], ["portrait", "Shinobu portrait"], ["picture", "My picture"], ["ascii", "Text art"], ["distro", "CachyOS logo"]]
+                                options: [["crest", "Glowing crest"], ["kamon", "Crest (dots)"], ["butterfly", "Butterfly"], ["portrait", "Shinobu portrait"], ["picture", "My picture"], ["ascii", "Text art"], ["distro", "CachyOS logo"]]
                             }
                             Row {
                                 visible: Settings.get("fetch_logo") === "ascii"; spacing: 8

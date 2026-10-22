@@ -27,7 +27,7 @@ Singleton {
         night_temp: 4500, night_auto: false, night_from: 21, night_to: 7, vibrance: 100, monitors: ({}),
         // theme
         folder_color: "blue", icon_base: "Papirus-Dark", cursor_theme: "Kocho-cursors", cursor_size: 24,
-        ui_font: "Noto Sans", ui_font_size: 10, fetch_logo: "kamon", fetch_source: "",
+        ui_font: "Noto Sans", ui_font_size: 10, fetch_logo: "crest", fetch_source: "",
         // bar & notifications
         clock_seconds: false, clock_12h: false, clock_date: true, bar_weather: true, bar_media: true,
         notif_timeout: 5, notif_center: false, sounds: true, desktop_clock: true, desktop_clock_pos: "left",

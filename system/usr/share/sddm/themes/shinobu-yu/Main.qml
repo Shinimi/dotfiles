@@ -1,8 +1,9 @@
-// 胡蝶しのぶ login screen (SDDM, Qt 6): moonlit art, drifting butterflies, floating clock. Made by Claude.
+// 胡蝶しのぶ login screen (SDDM, Qt 6): living moonlit art – slow zoom, breathing moon, falling wisteria petals, butterflies, brush-stroke name. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
 import QtQuick.Controls.Basic
+import QtQuick.Particles
 
 Item {
     id: root
@@ -85,11 +86,53 @@ Item {
 
     // ---------- background: the art stays sharp; a soft shade on the right for the text ----------
     Image {
+        id: bgArt
         anchors.fill: parent
         source: root.isMain ? config.background : (config.background2 || config.background)
         fillMode: Image.PreserveAspectCrop
         asynchronous: false
+        transformOrigin: Item.Center
+        SequentialAnimation on scale { loops: Animation.Infinite
+            NumberAnimation { from: 1.0; to: 1.09; duration: 38000; easing.type: Easing.InOutSine }
+            NumberAnimation { from: 1.09; to: 1.0; duration: 38000; easing.type: Easing.InOutSine } }
+        SequentialAnimation on x { loops: Animation.Infinite
+            NumberAnimation { from: 0; to: -60; duration: 30000; easing.type: Easing.InOutSine }
+            NumberAnimation { from: -60; to: 0; duration: 30000; easing.type: Easing.InOutSine } }
     }
+    Rectangle {   // the moon breathes
+        visible: root.isMain
+        x: root.width * 0.395 - width / 2; y: root.height * 0.177 - height / 2
+        width: 420; height: 420; radius: 210
+        gradient: Gradient { GradientStop { position: 0.0; color: "#00ffffff" } }
+        Rectangle {
+            anchors.centerIn: parent; width: parent.width; height: parent.height; radius: width / 2
+            color: "#e39ec0"
+            SequentialAnimation on opacity { loops: Animation.Infinite
+                NumberAnimation { from: 0.05; to: 0.16; duration: 4200; easing.type: Easing.InOutSine }
+                NumberAnimation { from: 0.16; to: 0.05; duration: 4200; easing.type: Easing.InOutSine } }
+            layer.enabled: true
+            layer.effect: MultiEffect { blurEnabled: true; blur: 1.0; blurMax: 64 }
+        }
+    }
+    // falling wisteria petals
+    ParticleSystem { id: petals; anchors.fill: parent; running: true }
+    ImageParticle {
+        system: petals
+        source: Qt.resolvedUrl("assets/petal.svg")
+        color: "#c9a8f0"; colorVariation: 0.18
+        alpha: 0.75; alphaVariation: 0.25
+        rotation: 0; rotationVariation: 180
+        autoRotation: false; rotationVelocity: 40; rotationVelocityVariation: 60
+    }
+    Emitter {
+        system: petals
+        x: -200; y: -40; width: root.width + 400; height: 20
+        emitRate: root.isMain ? 7 : 3; lifeSpan: 16000
+        size: 22; sizeVariation: 12
+        velocity: AngleDirection { angle: 80; angleVariation: 18; magnitude: 70; magnitudeVariation: 30 }
+        acceleration: PointDirection { x: 8; xVariation: 12; y: 4 }
+    }
+    Wander { system: petals; xVariance: 70; pace: 120; affectedParameter: Wander.Velocity }
     Rectangle {
         anchors.fill: parent
         gradient: Gradient {
@@ -146,13 +189,28 @@ Item {
     }
 
     // ---------- right-hand column (same layout as the lock screen) ----------
-    Text {   // her name, vertical
+    Column {   // her name, vertical, written one character at a time
         visible: root.isMain
         anchors.right: parent.right; anchors.rightMargin: 110
         anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: -150
-        text: "胡\n蝶\nし\nの\nぶ"; lineHeight: 1.05
-        color: root.purple; font.family: root.jp; font.pixelSize: 36; font.weight: Font.Bold
-        horizontalAlignment: Text.AlignHCenter
+        spacing: 4
+        Repeater {
+            model: ["胡", "蝶", "し", "の", "ぶ"]
+            Text {
+                required property string modelData
+                required property int index
+                text: modelData
+                color: root.purple; font.family: root.jp; font.pixelSize: 36; font.weight: Font.Bold
+                opacity: 0
+                SequentialAnimation on opacity { running: true
+                    PauseAnimation { duration: 900 + index * 380 }
+                    NumberAnimation { to: 1; duration: 700; easing.type: Easing.OutCubic } }
+                transform: Translate { id: drop; y: -12
+                    SequentialAnimation on y { running: true
+                        PauseAnimation { duration: 900 + index * 380 }
+                        NumberAnimation { from: -12; to: 0; duration: 700; easing.type: Easing.OutCubic } } }
+            }
+        }
     }
     Column {
         id: col
@@ -161,6 +219,10 @@ Item {
         anchors.right: parent.right; anchors.rightMargin: 230
         anchors.verticalCenter: parent.verticalCenter; anchors.verticalCenterOffset: -120
         spacing: 14
+        opacity: 0
+        NumberAnimation on opacity { from: 0; to: 1; duration: 1400; easing.type: Easing.OutCubic }
+        transform: Translate { id: glide; x: 40
+            NumberAnimation on x { from: 40; to: 0; duration: 1400; easing.type: Easing.OutCubic } }
         Text {
             anchors.right: parent.right
             text: Qt.formatTime(root.now, "HH:mm")

@@ -12,7 +12,7 @@ home_paths=(
   .config/systemd/user/audio-fx.service .config/systemd/user/spicetify-refresh.service
   .config/systemd/user/weekly-checkup.service .config/systemd/user/weekly-checkup.timer
   .local/bin/audio-fx.sh .local/bin/weekly-checkup.sh .local/bin/papirus-folders-color.sh .local/bin/hypr-doctor.sh .local/bin/gamemode.sh .local/bin/fetch-logo.sh .local/bin/fetch-ascii.sh .local/bin/recolor-theme.py .local/bin/retheme.py .local/bin/kocho-cursor.py .local/bin/kb-colors.sh .local/bin/safe-update.sh .local/bin/kocho-sound.sh .local/bin/launcher.sh
-  .local/share/sounds/kocho .local/share/applications/steam.desktop .config/MangoHud .config/millennium/quick.css .config/spotify-launcher.conf
+  .local/share/sounds/kocho .local/share/sounds/kocho-voice/README.txt .local/share/Steam/millennium/themes/Material-Theme .config/millennium/config.json .local/share/applications/steam.desktop .config/MangoHud .config/millennium/quick.css .config/spotify-launcher.conf
   .local/share/icons/Kocho-cursors
   .config/vesktop-flags.conf .config/spotify-launcher.conf
   .config/systemd/user/hypr-doctor.service .config/systemd/user/hypr-doctor.timer
