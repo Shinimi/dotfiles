@@ -1,63 +1,48 @@
-/* ╭──────────────────────────────────────────────╮
-   │  rofi · Shinobu Kochō launcher  made by Claude │
-   ╰──────────────────────────────────────────────╯ */
+/* rofi · Kochō minimal launcher. Made by Claude. */
 @theme "/dev/null"
 configuration {
   modi: "drun,run,window";
   show-icons: true;
   icon-theme: "Papirus-Dark";
-  display-drun: "󱖉 apps";
-  display-run: " run";
-  display-window: " windows";
   drun-display-format: "{name}";
-  font: "GeistMono Nerd Font Medium 12";
+  font: "GeistMono Nerd Font 12";
   hover-select: true;
   me-select-entry: "";
   me-accept-entry: "MousePrimary";
 }
 * {
-  bg:      #0d0c13e6;
-  surface: #221f33cc;
-  hl:      #a28ae82e;
-  fg:      #efeaf8;
-  dim:     #807a9c;
-  lilac:   #a28ae8;
-  pink:    #e39ec0;
+  bg:    #0d0c13d9;
+  fg:    #efeaf8;
+  dim:   #5f5878;
+  pink:  #e39ec0;
+  violet:#a28ae8;
   background-color: transparent;
   text-color: @fg;
 }
 window {
-  width: 860px; height: 520px;
+  width: 520px;
   background-color: @bg;
-  border: 1px; border-color: #e39ec055; border-radius: 22px;
+  border: 1px; border-color: #ffffff12; border-radius: 18px;
+  padding: 22px 18px 16px 18px;
 }
-mainbox { orientation: horizontal; children: [ art, side ]; }
-art {
-  expand: false; width: 340px;
-  background-image: url("~/.config/rofi/shinobu-side.png", height);
-  border-radius: 22px 0 0 22px;
-}
-side { orientation: vertical; padding: 22px 22px 18px 22px; spacing: 14px; children: [ inputbar, listview, mode-switcher ]; }
-inputbar {
-  background-color: @surface; border-radius: 14px; padding: 12px 14px; spacing: 12px;
-  border: 1px; border-color: #a28ae833;
-  children: [ textbox-icon, entry ];
-}
-prompt { enabled: false; }
-textbox-icon {
+mainbox { spacing: 14px; children: [ inputbar, sep, listview ]; }
+inputbar { padding: 4px 8px; spacing: 14px; children: [ textbox-bf, entry ]; }
+textbox-bf {
   expand: false; vertical-align: 0.5;
-  text-color: @pink; font: "GeistMono Nerd Font 16";
+  text-color: @pink; font: "GeistMono Nerd Font 15";
   content: "󱖉";
 }
-entry { placeholder: "Search apps…"; placeholder-color: @dim; vertical-align: 0.5; cursor: text; }
-listview { lines: 7; columns: 1; spacing: 6px; scrollbar: false; fixed-height: true; }
-element { padding: 9px 12px; border-radius: 12px; spacing: 14px; cursor: pointer; }
-element normal.normal, element alternate.normal, element normal.active, element alternate.active { background-color: transparent; text-color: @fg; }
-element selected.normal, element selected.active { background-color: @hl; text-color: @lilac; border: 1px; border-color: #a28ae855; }
-element normal.urgent, element alternate.urgent, element selected.urgent { text-color: #ec6f8f; }
-element-icon { size: 26px; vertical-align: 0.5; }
+entry {
+  placeholder: "search";
+  placeholder-color: @dim;
+  vertical-align: 0.5;
+  font: "GeistMono Nerd Font 14";
+}
+sep { expand: false; content: ""; font: "GeistMono Nerd Font 1"; border: 0 0 1px 0; border-color: #e39ec033; margin: 0 8px; }
+listview { lines: 8; spacing: 2px; scrollbar: false; fixed-height: true; }
+element { padding: 9px 10px; border-radius: 10px; spacing: 14px; cursor: pointer; }
+element normal.normal, element alternate.normal, element normal.active, element alternate.active { background-color: transparent; text-color: #cfc8e2; }
+element selected.normal, element selected.active { background-color: #a28ae81f; text-color: @fg; }
+element-icon { size: 22px; vertical-align: 0.5; }
 element-text { text-color: inherit; vertical-align: 0.5; }
-mode-switcher { spacing: 8px; }
-button { padding: 8px; border-radius: 10px; background-color: @surface; text-color: @dim; font: "GeistMono Nerd Font 13"; cursor: pointer; }
-button selected { background-color: #e39ec0; text-color: #0d0c13; }
-message { background-color: @surface; border-radius: 10px; padding: 8px; }
+message { padding: 8px; }

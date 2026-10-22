@@ -30,7 +30,7 @@ PKGS=(
   # look
   papirus-icon-theme capitaine-cursors adw-gtk-theme ttf-jetbrains-mono-nerd inter-font noto-fonts noto-fonts-emoji plymouth
   # terminal & gaming
-  otf-geist-mono-nerd ttf-victor-mono-nerd noto-fonts-cjk
+  otf-geist-mono-nerd ttf-victor-mono-nerd noto-fonts-cjk openrgb
   fish starship fastfetch chafa btop mangohud scx-tools ddcutil
   # apps
   vesktop-bin git github-cli

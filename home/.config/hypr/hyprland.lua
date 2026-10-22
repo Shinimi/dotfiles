@@ -80,6 +80,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme prefer-dark")
     hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/autostart.sh")     -- your apps (Settings → Autostart)
+    hl.exec_cmd("sleep 4; " .. os.getenv("HOME") .. "/.local/bin/kb-colors.sh")   -- keyboard RGB in the Kochō colours
 end)
 
 
