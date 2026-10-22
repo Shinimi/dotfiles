@@ -8,4 +8,4 @@ case "$1" in
   window) g=$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"'); grim -g "$g" "$f" ;;
   *)      grim -o "$(hyprctl monitors -j | jq -r '.[] | select(.focused) | .name')" "$f" ;;
 esac
-wl-copy < "$f" && notify-send -i "$f" "Screenshot saved" "$(basename "$f") — copied to clipboard"
+wl-copy < "$f" && "$HOME/.local/bin/kocho-sound.sh" screen-capture; notify-send -h boolean:suppress-sound:true -i "$f" "Screenshot saved" "$(basename "$f") — copied to clipboard"

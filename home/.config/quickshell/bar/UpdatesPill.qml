@@ -7,8 +7,7 @@ Pill {
     padding: 10
     Label { text: "  " + Updates.total; color: Theme.blue }
     onClicked: {
-        Quickshell.execDetached(["kitty", "--class", "updater", "-e", "bash", "-c",
-            "echo 'Updating system (repo: " + Updates.repo + ", AUR: " + Updates.aur + ")'; yay -Syu; echo; read -n1 -rsp 'Done – press any key to close'"])
+        Quickshell.execDetached(["kitty", "--class", "updater", "-e", Quickshell.env("HOME") + "/.local/bin/safe-update.sh"])
         recheck.start()
     }
     Timer { id: recheck; interval: 120000; onTriggered: Updates.check() }

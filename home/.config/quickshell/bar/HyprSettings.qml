@@ -26,6 +26,7 @@ Scope {
         ["shortcuts", "\u{f030c}", "Shortcuts", "Desktop", "keybinds keys hotkeys"],
         ["defaults", "\u{f03d6}", "Default apps", "Desktop", "browser file manager open with"],
         ["autostart", "\u{f0412}", "Autostart", "Desktop", "login startup apps"],
+        ["games", "\u{f0eb5}", "Games", "Desktop", "fps cap overlay mangohud profile power"],
         ["display", "\u{f0379}", "Display", "Devices", "monitor resolution refresh hz colour night light vibrance"],
         ["sound", "\u{f057e}", "Sound", "Devices", "audio volume mic eq headset"],
         ["input", "\u{f037d}", "Mouse & keyboard", "Devices", "pointer scroll layout typing repeat"],
@@ -44,16 +45,16 @@ Scope {
     }
     readonly property var keyPage: ({
         accent: "appearance", border_spin: "appearance", border_angle: "appearance", gaps_in: "appearance", gaps_out: "appearance", border_size: "appearance", rounding: "appearance", layout: "appearance", smart_split: "appearance", snap: "appearance", resize_on_border: "appearance",
-        glow: "effects", glow_range: "effects", glow_strength: "effects", shadows: "effects", shadow_range: "effects", shadow_tint: "effects", dim_inactive: "effects", dim_strength: "effects", animations: "effects", anim_speed: "effects", ws_anim: "effects",
+        glow: "effects", glow_range: "effects", glow_strength: "effects", shadows: "effects", shadow_range: "effects", shadow_tint: "effects", dim_inactive: "effects", dim_strength: "effects", animations: "effects", anim_speed: "effects", butterflies: "effects", butterfly_count: "effects", ws_anim: "effects",
         folder_color: "theme", icon_base: "theme", cursor_theme: "theme", cursor_size: "theme", ui_font: "theme", ui_font_size: "theme", fetch_logo: "theme", fetch_source: "theme",
         opacity_active: "glass", opacity_inactive: "glass", glass: "glass", blur: "glass", blur_size: "glass", blur_passes: "glass", vibrancy: "glass", blur_brightness: "glass", blur_noise: "glass", blur_xray: "glass", blur_popups: "glass",
-        clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_weather: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
+        clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_weather: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", sounds: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
         sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", scroll_mode: "input", middle_paste: "input", focus_on_activate: "input",
         repeat_rate: "input", repeat_delay: "input", kb_layout: "input", numlock: "input", hide_cursor_typing: "input", cursor_hide_after: "input", ws_back_forth: "input", swallow: "input",
         night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", monitors: "display", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power"
 ,
         user_name: "account", avatar: "account", cc_logo: "account", wall_main: "wallpaper", wall_side: "wallpaper",
-        default_apps: "defaults", autostart: "autostart", weather_place: "datetime", weather_label: "datetime"
+        default_apps: "defaults", autostart: "autostart", weather_place: "datetime", weather_label: "datetime", game_profiles: "games"
     })
     function pageDirty(id) { return Settings.changedKeys.some(k => keyPage[k] === id) }
     function toggle() { visible = !visible }
@@ -303,7 +304,7 @@ Scope {
                                      effects: "Glow, shadows, dimming and animations", theme: "Icons, folders, cursor and fonts",
                                      glass: "How see-through windows and panels are", wallpaper: "Pick a picture for each screen",
                                      bar: "Clock, bar items and pop-ups", shortcuts: "Every keyboard shortcut",
-                                     defaults: "Which app opens links, folders, pictures and more", autostart: "Apps that open when you log in",
+                                     defaults: "Which app opens links, folders, pictures and more", autostart: "Apps that open when you log in", games: "A profile for each game, applied while it runs",
                                      display: "Resolution, refresh rate and colour", sound: "Devices, clean mic and headset EQ (changes here are instant)",
                                      input: "Pointer, scrolling, typing and focus", network: "Your connection", bluetooth: "Wireless devices",
                                      storage: "Drives, health and free space", power: "Performance, auto-lock and screens off",
@@ -316,6 +317,7 @@ Scope {
                     PgShortcuts { visible: root.page === "shortcuts"; width: parent.width }
                     PgDefaults { visible: root.page === "defaults"; width: parent.width }
                     PgAutostart { visible: root.page === "autostart"; width: parent.width }
+                    PgGames { visible: root.page === "games"; width: parent.width }
                     PgNetwork { visible: root.page === "network"; width: parent.width }
                     PgBluetooth { visible: root.page === "bluetooth"; width: parent.width }
                     PgStorage { visible: root.page === "storage"; width: parent.width }
@@ -406,6 +408,8 @@ Scope {
                             SetSection {
                                 width: (parent.width - 14) / 2; title: "Animations"; icon: "\u{f0d4a}"
                                 SetToggle { label: "Animations"; desc: "open, close and workspace motion"; key: "animations" }
+                                SetToggle { label: "Butterflies on the desktop"; desc: "drift over the wallpaper when a workspace is empty"; key: "butterflies" }
+                                SetSlider { visible: Settings.get("butterflies"); label: "How many"; key: "butterfly_count"; from: 3; to: 14 }
                                 SetChoice {
                                     visible: Settings.get("animations"); label: "Speed"; accent: Theme.cyan
                                     current: Settings.get("anim_speed"); onPicked: v => Settings.set("anim_speed", v)
@@ -553,6 +557,7 @@ Scope {
                                 options: [["r", "Top right"], ["c", "Top centre"]]
                                 onPicked: v => Settings.set("notif_center", v === "c")
                             }
+                            SetToggle { label: "Sounds"; desc: "soft Kochō chimes for notifications, login and screenshots"; key: "sounds" }
                             SetSwitch { label: "Do not disturb"; desc: "hide pop-ups (instant)"; on: Notifs.dnd; accent: Theme.purple; onToggled: Notifs.dnd = !Notifs.dnd }
                         }
                     }
@@ -810,11 +815,23 @@ Scope {
                         }
                         PgUpdates { width: parent.width }
                         SetSection {
+                            width: parent.width; title: "Safety"; icon: "\u{f0499}"
+                            Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.fgDim; font.pixelSize: 11
+                                text: "A snapshot of the system is saved automatically before and after every update. Updates from here also check that Hyprland and the bar still load afterwards." }
+                            Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.muted; font.pixelSize: 11
+                                text: "If an update ever breaks something: reboot, open Snapshots in the boot menu and pick the one from before the update." }
+                            Flow {
+                                width: parent.width; spacing: 8
+                                SetButton { icon: "\u{f0e9c}"; text: "Save a snapshot now"; onClicked: root.exec(["kitty", "--class", "updater", "-e", "bash", "-c", "sudo snapper -c root create -d 'manual (Settings)' && echo '✓ snapshot saved'; sudo snapper -c root list | tail -5; read -n1 -rsp 'press any key'"]) }
+                                SetButton { icon: "\u{f0279}"; text: "Show snapshots"; onClicked: root.exec(["kitty", "--class", "updater", "-e", "bash", "-c", "sudo snapper -c root list; read -n1 -rsp 'press any key'"]) }
+                            }
+                        }
+                        SetSection {
                             width: parent.width; title: "Maintenance"; icon: "\u{f0ad}"
                             Flow {
                                 width: parent.width; spacing: 8
                                 SetButton { icon: "\u{f06b0}"; text: "Update system"; primary: true
-                                    onClicked: root.exec(["kitty", "--class", "updater", "-e", "bash", "-c", "yay -Syu; echo; read -n1 -rsp 'Done – press any key to close'"]) }
+                                    onClicked: root.exec(["kitty", "--class", "updater", "-e", "bash", "-c", Quickshell.env("HOME") + "/.local/bin/safe-update.sh"]) }
                                 SetButton { icon: "\u{f04d9}"; text: "Run check-up"; onClicked: root.exec([Quickshell.env("HOME") + "/.local/bin/weekly-checkup.sh"]) }
                                 SetButton { icon: "\u{f02a2}"; text: "Back up config to GitHub"
                                     onClicked: root.exec(["sh", "-c", "out=$(~/dotfiles/sync.sh 2>&1 | tail -2); notify-send -a Dotfiles 'Config backup' \"$out\""]) }

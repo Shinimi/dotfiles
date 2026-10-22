@@ -12,7 +12,7 @@
 --    SUPER + Space           app launcher        ALT + Space        app launcher
 --    SUPER + V               clipboard history   SUPER + A          control center
 --    SUPER + CTRL + N        notification center SUPER + comma      settings
---    SUPER + Tab / O         all windows (search)     SUPER + X          power menu
+--    SUPER + Tab             workspace overview  SUPER + O          find a window (search)     SUPER + X          power menu
 --    SUPER + Q               close window
 --    SUPER + F               maximize            SUPER + SHIFT + F  fullscreen
 --    SUPER + SHIFT + T       float / tile        SUPER + W          group (tabs)
@@ -79,7 +79,8 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --type text  --watch cliphist store")  -- clipboard history
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme prefer-dark")
-    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/autostart.sh")     -- your apps (Settings → Autostart)
+    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/autostart.sh")
+    hl.exec_cmd("sleep 2; " .. os.getenv("HOME") .. "/.local/bin/kocho-sound.sh desktop-login")   -- login chime     -- your apps (Settings → Autostart)
 end)
 
 
@@ -225,7 +226,7 @@ hl.config({ master = { mfact = 0.66, new_status = "slave", orientation = "left" 
 -- Game mode: Do not disturb + Performance while a game is open (toggle in Settings → Power & lock)
 local function is_game(w) return w and w.class and (w.class:match("^steam_app_%d+$") or w.class == "cs2" or w.class == "gamescope") end
 local gamemode = os.getenv("HOME") .. "/.local/bin/gamemode.sh"
-hl.on("window.open", function(w) if is_game(w) then hl.exec_cmd(gamemode .. " on") end end)
+hl.on("window.open", function(w) if is_game(w) then hl.exec_cmd(gamemode .. " on " .. w.class) end end)
 hl.on("window.close", function(w)
     if not is_game(w) then return end
     for _, o in ipairs(hl.get_windows() or {}) do
@@ -272,7 +273,7 @@ hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true },
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop)$" }, opacity = "1.0 override 1.0 override" })
 -- blur behind the bar, panels and pop-ups
-hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media))$" }, blur = true, ignore_alpha = 0.2 })
+hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview))$" }, blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
 
 -- Games open on workspace 5; Steam popups float; Discord + Spotify live on the side screen
@@ -305,7 +306,7 @@ b("SUPER + V",              run("qs ipc -p " .. os.getenv("HOME") .. "/.config/q
 b("SUPER + comma",          run("qs ipc -p ~/.config/quickshell/bar call settings toggle"))
 b("SUPER + A",              run("qs ipc -p ~/.config/quickshell/bar call bar control"))
 b("SUPER + CTRL + N",       run("qs ipc -p ~/.config/quickshell/bar call bar notifications"))
-b("SUPER + TAB",            run("qs ipc -p ~/.config/quickshell/bar call alttab overview"))   -- all windows with previews, type to search
+b("SUPER + TAB",            run("qs ipc -p ~/.config/quickshell/bar call overview toggle"))   -- workspace overview (drag windows between)
 b("SUPER + O",              run("qs ipc -p ~/.config/quickshell/bar call alttab overview"))
 b("SUPER + X",              run("qs ipc -p ~/.config/quickshell/bar call bar power"))
 b("SUPER + E",              run(fileManager))

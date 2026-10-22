@@ -45,6 +45,9 @@ Singleton {
             if (root.dnd && n.urgency !== NotificationUrgency.Critical) return
             root.removePopup(n.id)                       // replaced notification: show it fresh
             root.popups.insert(0, { nid: n.id })
+            if (Settings.cur("sounds") !== false && !n.hints["suppress-sound"])
+                Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/kocho-sound.sh",
+                    n.urgency === NotificationUrgency.Critical ? "dialog-warning" : "message-new-instant"])
             while (root.popups.count > 4) root.popups.remove(root.popups.count - 1)
         }
     }

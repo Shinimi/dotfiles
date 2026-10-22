@@ -1,0 +1,8 @@
+[Sound Theme]
+Name=Kochō
+Comment=Soft wind-bell chimes in a pentatonic scale. Made by Claude.
+Directories=stereo
+Inherits=freedesktop
+
+[stereo]
+OutputProfile=stereo

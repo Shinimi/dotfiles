@@ -363,7 +363,7 @@ BarPopup {
                         color: uMouse.containsMouse ? "#b5a2f2" : Theme.blue
                         Label { id: ul; anchors.centerIn: parent; text: "\u{f06b0}  Update " + Updates.total; color: Theme.bg; font.pixelSize: 10 }
                         MouseArea { id: uMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                            onClicked: cc.go(["kitty", "--class", "updater", "-e", "bash", "-c", "yay -Syu; echo; read -n1 -rsp 'Done – press any key to close'"]) }
+                            onClicked: cc.go(["kitty", "--class", "updater", "-e", "bash", "-c", Quickshell.env("HOME") + "/.local/bin/safe-update.sh"]) }
                     }
                 }
             }

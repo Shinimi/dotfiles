@@ -37,5 +37,5 @@ acts=(--action=details=Details); [ $upd -gt 0 ] && acts+=(--action=update="Updat
 choice=$(notify-send -a "System check-up" -i dialog-information "  Weekly check-up" "$summary" "${acts[@]}" 2>/dev/null)
 case "$choice" in
   details) kitty --class checkup -e sh -c "cat '$R'; echo; read -n1 -rsp 'Press any key to close'" ;;
-  update)  kitty --class updater -e bash -c "yay -Syu; echo; read -n1 -rsp 'Done – press any key to close'" ;;
+  update)  kitty --class updater -e "$HOME/.local/bin/safe-update.sh" ;;
 esac

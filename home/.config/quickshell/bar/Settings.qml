@@ -15,7 +15,7 @@ Singleton {
         glow: false, glow_range: 14, glow_strength: 40, shadows: true, shadow_range: 6, shadow_tint: false,
         dim_inactive: false, dim_strength: 12, layout: "dwindle", smart_split: false, snap: true, resize_on_border: true,
         // motion
-        animations: true, anim_speed: "normal", ws_anim: "slidefade",
+        animations: true, anim_speed: "normal", butterflies: true, butterfly_count: 7, ws_anim: "slidefade",
         // glass
         opacity_active: 90, opacity_inactive: 80, glass: 60, blur: true, blur_size: 7, blur_passes: 3, vibrancy: 18,
         blur_brightness: 85, blur_noise: 2, blur_xray: false, blur_popups: true,
@@ -30,12 +30,12 @@ Singleton {
         ui_font: "Noto Sans", ui_font_size: 10, fetch_logo: "kamon", fetch_source: "",
         // bar & notifications
         clock_seconds: false, clock_12h: false, clock_date: true, bar_weather: true, bar_media: true,
-        notif_timeout: 5, notif_center: false, desktop_clock: true, desktop_clock_pos: "left",
+        notif_timeout: 5, notif_center: false, sounds: true, desktop_clock: true, desktop_clock_pos: "left",
         // power
         lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true,
         // account, wallpaper, apps, time
         user_name: "yu", avatar: "", cc_logo: "avatar", wall_main: "", wall_side: "", default_apps: ({}), autostart: [],
-        weather_place: "", weather_label: ""
+        weather_place: "", weather_label: "", game_profiles: ({})
     })
     property var v: defaults        // applied
     property var draft: defaults    // being edited
