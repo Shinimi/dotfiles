@@ -16,44 +16,6 @@ BarPopup {
         Label { text: Qt.formatDateTime(popup.now, "HH:mm:ss"); font.pixelSize: 34; font.weight: Font.Bold; color: Theme.fg }
         Label { text: Qt.formatDateTime(popup.now, "dddd, d MMMM yyyy"); color: Theme.blue }
     }
-    // weather
-    Rectangle {
-        visible: Weather.ready
-        width: parent.width; height: wcol.implicitHeight + 20; radius: 2; color: Theme.card
-        Column {
-            id: wcol
-            anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 10
-            spacing: 8
-            RowLayout {
-                width: parent.width; spacing: 10
-                Label { text: Weather.icon; font.pixelSize: 26; color: Theme.yellow }
-                Column {
-                    Layout.fillWidth: true
-                    Label { text: Weather.temp + "°  " + Weather.desc; font.pixelSize: 14 }
-                    Label { text: "\uf041 " + Weather.place + "  ·  feels " + Weather.feels + "°"; color: Theme.muted; font.pixelSize: 11 }
-                }
-            }
-            RowLayout {
-                width: parent.width
-                Label { text: "\ue373 " + Weather.humidity + "%"; color: Theme.cyan; font.pixelSize: 11; Layout.fillWidth: true }
-                Label { text: "\ue34b " + Weather.wind + " km/h"; color: Theme.fgDim; font.pixelSize: 11 }
-            }
-            Row {
-                width: parent.width
-                Repeater {
-                    model: Weather.days
-                    Column {
-                        required property var modelData
-                        required property int index
-                        width: parent.width / 3; spacing: 2
-                        Label { anchors.horizontalCenter: parent.horizontalCenter; text: index === 0 ? "Today" : Qt.formatDate(new Date(modelData.date), "ddd"); color: Theme.muted; font.pixelSize: 11 }
-                        Label { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.icon; color: Theme.yellow; font.pixelSize: 16 }
-                        Label { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.max + "° / " + modelData.min + "°"; font.pixelSize: 11 }
-                    }
-                }
-            }
-        }
-    }
     Rectangle { width: parent.width; height: 1; color: Theme.border }
 
     RowLayout {

@@ -29,13 +29,13 @@ Singleton {
         folder_color: "grey", icon_base: "Tela-mono", cursor_theme: "Vimix-white-cursors", cursor_size: 24,
         ui_font: "Noto Sans", ui_font_size: 10, fetch_logo: "katana", fetch_source: "",
         // bar & notifications
-        clock_seconds: false, clock_12h: false, clock_date: true, bar_weather: true, bar_media: true,
+        clock_seconds: false, clock_12h: false, clock_date: true, bar_media: true,
         notif_timeout: 5, notif_center: false, sounds: true, desktop_clock: true, desktop_clock_pos: "left",
         // power
         lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true,
         // account, wallpaper, apps, time
         user_name: "yu", avatar: "", cc_logo: "avatar", wall_main: "", wall_side: "", default_apps: ({}), autostart: [],
-        weather_place: "", weather_label: "", game_profiles: ({}),
+        game_profiles: ({}),
         // extras
         hot_corner: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true, screensaver: true, ws_kanji: true, game_workspace: true, wall_tint: true, ascii_wall: false, ws_preview: true, login_handoff: true
     })

@@ -1,4 +1,4 @@
-// Desktop clock on the wallpaper (behind windows): time, date, weather and today's line.
+// Desktop clock on the wallpaper (behind windows): time, date and today's line.
 // On/off and position in Settings → Bar & notifications. Made by Claude.
 import QtQuick
 import Quickshell
@@ -42,14 +42,6 @@ PanelWindow {
             text: Qt.formatDateTime(clk.date, "dddd, d MMMM").toLowerCase()
             font.family: Theme.font; font.pixelSize: 26; font.letterSpacing: 2
             color: Theme.blue; style: Text.Raised; styleColor: "#aa000000"
-        }
-        Text {
-            visible: Weather.ready
-            anchors.horizontalCenter: w.pos === "center" ? parent.horizontalCenter : undefined
-            topPadding: 6
-            text: Weather.icon + "  " + Weather.temp + "°  " + Weather.desc.toLowerCase() + "  ·  " + (Weather.place || "")
-            font.family: Theme.font; font.pixelSize: 17
-            color: Theme.fgDim; style: Text.Raised; styleColor: "#aa000000"
         }
         Text {   // today's line
             anchors.horizontalCenter: w.pos === "center" ? parent.horizontalCenter : undefined

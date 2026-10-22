@@ -25,7 +25,7 @@ Scope {
         ["theme", "\u{f0e09}", "Theme", "Look & feel", "icons folder cursor font"],
         ["glass", "\u{f0c8a}", "Glass & blur", "Look & feel", "transparency opacity blur"],
         ["wallpaper", "\u{f02e9}", "Wallpaper", "Look & feel", "background picture"],
-        ["bar", "\u{f0e9e}", "Bar & notifications", "Desktop", "clock seconds weather popup do not disturb"],
+        ["bar", "\u{f0e9e}", "Bar & notifications", "Desktop", "clock seconds popup do not disturb"],
         ["extras", "\u{f0674}", "Extras", "Desktop", "hot corner focus mode drop-down terminal screensaver ink draw magnifier zoom picture in picture wallpaper shuffle pause music lock"],
         ["shortcuts", "\u{f030c}", "Shortcuts", "Desktop", "keybinds keys hotkeys"],
         ["defaults", "\u{f03d6}", "Default apps", "Desktop", "browser file manager open with"],
@@ -38,7 +38,7 @@ Scope {
         ["bluetooth", "\u{f00af}", "Bluetooth", "Devices", "headphones devices pair"],
         ["storage", "\u{f02ca}", "Storage", "Devices", "disk ssd space health"],
         ["power", "\u{f0425}", "Power & lock", "System", "sleep lock screen off game mode performance"],
-        ["datetime", "\u{f0954}", "Date & time", "System", "clock timezone ntp weather location"],
+        ["datetime", "\u{f0954}", "Date & time", "System", "clock timezone ntp"],
         ["about", "\u{f0493}", "About & updates", "System", "system info updates maintenance cpu gpu"]
     ]
     readonly property var pageInfo: pages.find(p => p[0] === page) || pages[0]
@@ -52,13 +52,13 @@ Scope {
         glow: "effects", glow_range: "effects", glow_strength: "effects", shadows: "effects", shadow_range: "effects", shadow_tint: "effects", dim_inactive: "effects", dim_strength: "effects", animations: "effects", anim_speed: "effects", butterflies: "effects", butterfly_count: "effects", ws_anim: "effects",
         folder_color: "theme", icon_base: "theme", cursor_theme: "theme", cursor_size: "theme", ui_font: "theme", ui_font_size: "theme", fetch_logo: "theme", fetch_source: "theme",
         opacity_active: "glass", opacity_inactive: "glass", glass: "glass", blur: "glass", blur_size: "glass", blur_passes: "glass", vibrancy: "glass", blur_brightness: "glass", blur_noise: "glass", blur_xray: "glass", blur_popups: "glass",
-        clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_weather: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", sounds: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
+        clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", sounds: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
         sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", scroll_mode: "input", middle_paste: "input", focus_on_activate: "input",
         repeat_rate: "input", repeat_delay: "input", kb_layout: "input", numlock: "input", hide_cursor_typing: "input", cursor_hide_after: "input", ws_back_forth: "input", swallow: "input",
         night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", monitors: "display", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power"
 ,
         user_name: "account", avatar: "account", cc_logo: "account", wall_main: "wallpaper", wall_side: "wallpaper",
-        default_apps: "defaults", autostart: "autostart", weather_place: "datetime", weather_label: "datetime", game_profiles: "games"
+        default_apps: "defaults", autostart: "autostart", game_profiles: "games"
     })
     function pageDirty(id) { return Settings.changedKeys.some(k => keyPage[k] === id) }
     function toggle() { visible = !visible }
@@ -329,7 +329,7 @@ Scope {
                                      display: "Resolution, refresh rate and colour", sound: "Devices, clean mic and headset EQ (changes here are instant)",
                                      input: "Pointer, scrolling, typing and focus", network: "Your connection", bluetooth: "Wireless devices",
                                      storage: "Drives, health and free space", power: "Performance, auto-lock and screens off",
-                                     datetime: "Clock, time sync and weather location", about: "This PC, updates and maintenance" })[root.page] || ""
+                                     datetime: "Clock and time sync", about: "This PC, updates and maintenance" })[root.page] || ""
                         }
                     }
 
@@ -559,9 +559,8 @@ Scope {
                             SetToggle { label: "Show seconds"; key: "clock_seconds" }
                             SetToggle { label: "12-hour clock"; desc: "3:45 PM instead of 15:45"; key: "clock_12h" }
                             SetToggle { label: "Show the date"; key: "clock_date" }
-                            SetToggle { label: "Show the weather"; key: "bar_weather" }
                             SetToggle { label: "Show what's playing"; key: "bar_media" }
-                            SetToggle { label: "Desktop clock"; desc: "big clock, weather and music on the wallpaper"; key: "desktop_clock" }
+                            SetToggle { label: "Desktop clock"; desc: "big clock, date and today's line on the wallpaper"; key: "desktop_clock" }
                             SetChoice {
                                 visible: Settings.get("desktop_clock"); label: "Desktop clock position"
                                 current: Settings.get("desktop_clock_pos"); onPicked: v => Settings.set("desktop_clock_pos", v)
@@ -588,7 +587,7 @@ Scope {
                             width: (parent.width - 14) / 2; title: "Little helpers"; icon: "\u{f0674}"
                             SetToggle { label: "Hot corner"; desc: "push the mouse into the top-left corner for the overview"; key: "hot_corner" }
                             SetToggle { label: "Pause music when locking"; desc: "Spotify & co. stop when the screen locks"; key: "pause_on_lock" }
-                            SetToggle { label: "Song & volume cards"; desc: "a small card drops under the bar when they change"; key: "island_peeks" }
+                            SetToggle { label: "Song card"; desc: "a small card drops under the bar when the song changes"; key: "island_peeks" }
                             SetToggle { label: "Games get their own workspace"; desc: "a game opens on 五 (5); when it closes you're back where you were"; key: "game_workspace" }
                             SetToggle { label: "ASCII living wallpaper"; desc: "your wallpaper drawn in glowing characters, slowly moving"; key: "ascii_wall" }
                             SetToggle { label: "Wallpaper tint"; desc: "the glass picks up a little of your wallpaper's colour"; key: "wall_tint" }

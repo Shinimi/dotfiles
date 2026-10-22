@@ -33,8 +33,8 @@ ShellRoot {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         HotCorner {}
     }
-    Variants {
-        model: Quickshell.screens.filter(s => s.name === "DP-1")
+    Variants {   // the bar on every screen
+        model: Quickshell.screens
         Island {}
     }
     Variants {

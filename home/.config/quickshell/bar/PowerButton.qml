@@ -9,7 +9,8 @@ Pill {
     padding: 10
     active: panel.visible
     Label { text: ""; color: pill.hovered ? "#ffffff" : Theme.fgDim; font.pixelSize: 14 }
-    onClicked: panel.toggle()
+    property bool menu: true             // false: open the main screen's menu instead (side screen bar)
+    onClicked: menu ? panel.toggle() : Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "bar", "power"])
 
     BarPopup {
         id: panel

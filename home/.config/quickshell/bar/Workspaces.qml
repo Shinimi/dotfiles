@@ -74,7 +74,9 @@ Pill {
         .filter(w => w.id > 4 && w.monitor && w.monitor.name === "DP-1"
                      && ((w.toplevels && w.toplevels.values.length > 0) || (Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === w.id)))
         .map(w => w.id)
-    readonly property var ids: [1, 2, 3, 4].concat(extra.filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b))
+    readonly property var allIds: [1, 2, 3, 4].concat(extra.filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b))
+    property int part: 0                 // 0 = all, 1 = first half, 2 = second half (the bar splits them around the clock)
+    readonly property var ids: part === 0 ? allIds : part === 1 ? allIds.slice(0, Math.ceil(allIds.length / 2)) : allIds.slice(Math.ceil(allIds.length / 2))
 
     Repeater {
         model: ids
