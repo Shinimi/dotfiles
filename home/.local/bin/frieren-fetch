@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+# frieren-fetch – monochrome system fetch: Frieren braille art beside a rounded info box.
+# Art: ~/.config/fastfetch/frieren.txt (any ANSI/braille text works). Made by Claude.
+import os, re, subprocess, shutil, time, unicodedata
+
+ART = os.path.expanduser("~/.config/fastfetch/frieren.txt")
+G = lambda v: f"\033[38;2;{v};{v};{v}m"
+R = "\033[0m"; B = "\033[1m"
+EDGE, KEY, VAL, DIM, HEAD = G(85), G(120), G(230), G(110), G(255)
+
+def sh(cmd):
+    try: return subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=3).stdout.strip()
+    except Exception: return ""
+
+def width(s):
+    s = re.sub(r"\033\[[0-9;]*m", "", s)
+    return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in s)
+
+def human(sec):
+    d, r = divmod(int(sec), 86400); h, r = divmod(r, 3600); m = r // 60
+    return " ".join(x for x in (f"{d}d" if d else "", f"{h}h" if h else "", f"{m}m") if x)
+
+def info():
+    osr = dict(l.split("=", 1) for l in open("/etc/os-release").read().splitlines() if "=" in l)
+    up = float(open("/proc/uptime").read().split()[0])
+    mem = {l.split(":")[0]: int(l.split()[1]) for l in open("/proc/meminfo")}
+    used = (mem["MemTotal"] - mem["MemAvailable"]) / 1048576; total = mem["MemTotal"] / 1048576
+    st = shutil.disk_usage("/")
+    cpu = re.sub(r"\s+\d+-Core Processor|\(R\)|\(TM\)", "", sh("grep -m1 'model name' /proc/cpuinfo | cut -d: -f2")).strip()
+    gpu = sh("lspci | grep -m1 -E 'VGA|Display' | sed 's/.*\\[//; s/\\].*//'") or "?"
+    if "/" in gpu: gpu = "Radeon RX " + gpu.split("/")[-1].strip()
+    born = sh("head -n1 /var/log/pacman.log | cut -c2-11")
+    try: age = f"{(time.time() - time.mktime(time.strptime(born, '%Y-%m-%d'))) // 86400:.0f} days"
+    except Exception: age = "?"
+    song = sh("playerctl metadata --format '{{title}} · {{artist}}' 2>/dev/null")
+    rows = [
+        ("os",       osr.get("NAME", "Linux").strip('"')),
+        ("kernel",   os.uname().release.split("-")[0]),
+        ("uptime",   human(up)),
+        ("shell",    sh("ps -o comm= -p $(ps -o ppid= -p $PPID)") or "fish"),
+        ("wm",       "hyprland"),
+        ("os age",   age),
+        None,
+        ("cpu",      cpu),
+        ("gpu",      gpu),
+        ("ram",      f"{used:.1f} / {total:.1f} GiB"),
+        ("disk",     f"{st.used / 2**30:.0f} / {st.total / 2**30:.0f} GiB"),
+        ("packages", sh("pacman -Qq | wc -l")),
+    ]
+    if song: rows += [None, ("♪", song[:30] + ("…" if len(song) > 30 else ""))]
+    return rows
+
+def box(rows, inner=40):
+    title = f" {B}{HEAD}フリーレン{R} "
+    top = f"{EDGE}╭──{R}{title}{EDGE}" + "─" * (inner - 2 - width(title)) + f"╮{R}"
+    out = [top, f"{EDGE}│{R}" + " " * inner + f"{EDGE}│{R}"]
+    for r in rows:
+        if r is None:
+            out.append(f"{EDGE}│{R}  {G(65)}" + "·" * (inner - 4) + f"{R}  {EDGE}│{R}"); continue
+        k, v = r
+        pad = inner - 4 - width(k) - width(v)
+        out.append(f"{EDGE}│{R}  {KEY}{k}{R}" + " " * max(1, pad) + f"{VAL}{v}{R}  {EDGE}│{R}")
+    foot = f"{DIM}the journey continues  {EDGE}—{R}  {HEAD}旅は続く{R}"
+    fpad = inner - width(foot)
+    out += [f"{EDGE}│{R}" + " " * inner + f"{EDGE}│{R}",
+            f"{EDGE}│{R}" + " " * (fpad // 2) + foot + " " * (fpad - fpad // 2) + f"{EDGE}│{R}",
+            f"{EDGE}╰" + "─" * inner + f"╯{R}"]
+    return out
+
+art = open(ART, encoding="utf-8").read().rstrip("\n").split("\n") if os.path.exists(ART) else []
+right = box(info())
+aw = max((width(a) for a in art), default=0)
+h = max(len(art), len(right)); top = (h - len(right)) // 2; atop = (h - len(art)) // 2
+print()
+for i in range(h):
+    a = art[i - atop] if 0 <= i - atop < len(art) else ""
+    b = right[i - top] if 0 <= i - top < len(right) else ""
+    print("  " + a + " " * (aw - width(a)) + "    " + b)
+print()
