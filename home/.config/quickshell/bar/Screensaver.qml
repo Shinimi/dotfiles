@@ -1,8 +1,7 @@
 // Screensaver: when you've been away a while (before the lock), the screen fades to black and
-// motes of mana drift upward around a thin clock and today's line. Any key or mouse move wakes it.
+// your wallpaper is redrawn in glowing ASCII characters around a thin clock and today's line. Any key or mouse move wakes it.
 // Started by hypridle (qs ipc call screensaver start|stop). On/off in Settings → Extras. Made by Claude.
 import QtQuick
-import QtQuick.Particles
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -35,20 +34,17 @@ Scope {
                 opacity: root.on ? 1 : 0
                 Behavior on opacity { NumberAnimation { id: fade; duration: 1600; easing.type: Easing.InOutQuad } }
 
-                ParticleSystem { id: sys; running: root.on }
-                ImageParticle {   // soft glowing motes
-                    system: sys; source: "qrc:///particleresources/glowdot.png"
-                    color: "#55ffffff"; colorVariation: 0.0; alpha: 0.6; alphaVariation: 0.4
-                    entryEffect: ImageParticle.Fade
+                AsciiView {   // your wallpaper, drawn in glowing characters
+                    anchors.fill: parent
+                    source: Settings.cur(modelData.name === "DP-2" ? "wall_side" : "wall_main")
+                    running: root.on
                 }
-                Emitter {
-                    system: sys
-                    anchors.bottom: parent.bottom; width: parent.width; height: 40
-                    emitRate: 9; lifeSpan: 16000; lifeSpanVariation: 5000
-                    size: 10; sizeVariation: 14; endSize: 4
-                    velocity: AngleDirection { angle: 270; angleVariation: 14; magnitude: 70; magnitudeVariation: 40 }
+                Rectangle {   // a dark band behind the clock so it always reads
+                    anchors.centerIn: parent; width: parent.width; height: 480
+                    gradient: Gradient {
+                        GradientStop { position: 0.0; color: "#00000000" } GradientStop { position: 0.25; color: "#ee000000" }
+                        GradientStop { position: 0.75; color: "#ee000000" } GradientStop { position: 1.0; color: "#00000000" } }
                 }
-                Wander { system: sys; xVariance: 60; pace: 40 }   // gentle sideways sway
 
                 Column {
                     anchors.centerIn: parent; spacing: 10
@@ -67,7 +63,7 @@ Scope {
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: "— " + Journey.today()
-                        font.family: Theme.font; font.pixelSize: 15; font.italic: true; font.letterSpacing: 1; color: "#5e5e5e"
+                        font.family: Theme.font; font.pixelSize: 15; font.italic: true; font.letterSpacing: 1; color: "#9a9a9a"
                     }
                 }
 
