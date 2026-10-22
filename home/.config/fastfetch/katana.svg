@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="900" viewBox="0 0 900 900">
+<rect width="900" height="900" fill="black"/>
+<g transform="rotate(-45 450 450)">
+  <!-- blade: slight curve, white edge, spine line -->
+  <path d="M450 40 C476 60 486 120 486 200 L486 560 L414 560 L414 200 C414 130 424 70 450 40 Z" fill="white"/>
+  <path d="M440 120 C438 200 436 380 436 552" stroke="black" stroke-width="5" fill="none"/>
+  <!-- habaki -->
+  <rect x="420" y="560" width="60" height="26" fill="white"/>
+  <!-- tsuba -->
+  <ellipse cx="450" cy="600" rx="92" ry="26" fill="white"/>
+  <ellipse cx="450" cy="600" rx="44" ry="9" fill="black"/>
+  <!-- tsuka with ito wrap diamonds -->
+  <rect x="418" y="620" width="64" height="210" rx="10" fill="white"/>
+  <g fill="black">
+    <path d="M450 632 L470 652 L450 672 L430 652 Z"/><path d="M450 682 L470 702 L450 722 L430 702 Z"/>
+    <path d="M450 732 L470 752 L450 772 L430 752 Z"/><path d="M450 782 L470 802 L450 822 L430 802 Z"/>
+  </g>
+  <rect x="422" y="828" width="56" height="18" rx="6" fill="white"/>
+</g></svg>

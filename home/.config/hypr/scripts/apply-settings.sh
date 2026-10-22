@@ -195,7 +195,8 @@ if mode=="ascii": subprocess.run([os.path.expanduser("~/.local/bin/fetch-ascii.s
 if mode in ("portrait","picture"):
     pic=os.path.expanduser("~/.config/fastfetch/shinobu-portrait.png") if mode=="portrait" else os.path.expanduser("~/.face.icon")
     subprocess.run([os.path.expanduser("~/.local/bin/fetch-logo.sh"),pic],capture_output=True)
-logo={"guts":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/guts-framed.png", "width": 26, "height": 12, "padding": { "top": 1, "left": 2, "right": 4 } }',
+logo={"katana":'{ "type": "file-raw", "source": "~/.config/fastfetch/katana.txt", "padding": { "top": 0, "left": 2, "right": 5 } }',
+      "guts":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/guts-framed.png", "width": 26, "height": 12, "padding": { "top": 1, "left": 2, "right": 4 } }',
       "mono":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/mono.png", "width": 26, "height": 11, "padding": { "top": 1, "left": 2, "right": 4 } }',
       "crest":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/crest.png", "width": 26, "height": 11, "padding": { "top": 1, "left": 2, "right": 4 } }',
       "kamon":'{ "type": "file-raw", "source": "~/.config/fastfetch/kamon.txt", "padding": { "top": 1, "left": 3, "right": 6 } }',

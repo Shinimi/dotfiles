@@ -1,26 +1,28 @@
-// fastfetch – monochrome · Guts (Berserk). Ink portrait left, a quiet list right. Made by Claude.
+// fastfetch – monochrome · ガッツ. A katana in braille, a tree of what matters. Made by Claude.
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": { "type": "kitty-direct", "source": "~/.config/fastfetch/guts-framed.png", "width": 26, "height": 12, "padding": { "top": 1, "left": 2, "right": 4 } }, // LOGO (Settings → Theme)
+  "logo": { "type": "file-raw", "source": "~/.config/fastfetch/katana.txt", "padding": { "top": 0, "left": 2, "right": 5 } }, // LOGO (Settings → Theme)
   "display": {
-    "separator": "  ",
-    "color": { "keys": "#7a7a7a", "output": "#eaeaea" },
-    "key": { "width": 10 },
-    "percent": { "type": 3, "color": { "green": "#d6d6d6", "yellow": "#b0b0b0", "red": "#cf6b6b" } }
+    "separator": " ",
+    "color": { "keys": "#6e6e6e", "output": "#e6e6e6" },
+    "key": { "width": 12 },
+    "bar": { "char": { "elapsed": "━", "total": "━" }, "border": { "left": "", "right": "" }, "width": 14, "color": { "elapsed": "#e6e6e6", "total": "#2e2e2e" } },
+    "percent": { "type": ["bar", "num"], "color": { "green": "#bdbdbd", "yellow": "#e6e6e6", "red": "#cf6b6b" } }
   },
   "modules": [
-    "break",
-    { "type": "custom", "format": "{#1;38;2;255;255;255}ガ ッ ツ   {#0;38;2;110;110;110}黒い剣士   {#38;2;58;58;58}── {#3;38;2;150;150;150}the black swordsman" },
-    "break",
-    { "type": "os",       "key": "{#38;2;230;230;230} {#38;2;110;110;110}os",     "format": "{name} · {#38;2;110;110;110}{kernel-release}" },
-    { "type": "wm",       "key": "{#38;2;230;230;230} {#38;2;110;110;110}wm",     "format": "{pretty-name} {version}" },
-    { "type": "shell",    "key": "{#38;2;230;230;230} {#38;2;110;110;110}shell",  "format": "fish · kitty" },
-    { "type": "uptime",   "key": "{#38;2;230;230;230} {#38;2;110;110;110}up" },
-    "break",
-    { "type": "cpu",      "key": "{#38;2;160;160;160} {#38;2;110;110;110}cpu",    "format": "{name}  {#38;2;110;110;110}{temperature}", "temp": true },
-    { "type": "gpu",      "key": "{#38;2;160;160;160} {#38;2;110;110;110}gpu",    "format": "{name}" },
-    { "type": "memory",   "key": "{#38;2;160;160;160} {#38;2;110;110;110}mem",    "format": "{used} of {total}  {percentage}" },
-    "break",
-    { "type": "custom", "format": "{#38;2;255;255;255}██{#38;2;200;200;200}██{#38;2;150;150;150}██{#38;2;100;100;100}██{#38;2;60;60;60}██{#38;2;30;30;30}██" }
+    { "type": "custom", "format": "{#1;38;2;255;255;255}ガ ッ ツ" },
+    { "type": "custom", "format": "{#38;2;46;46;46}────────────────────────────────" },
+    { "type": "custom", "format": "{#38;2;120;120;120}┌ {#38;2;200;200;200}hardware" },
+    { "type": "cpu",    "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}cpu",  "format": "{name}  {#38;2;110;110;110}{temperature}", "temp": true },
+    { "type": "gpu",    "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}gpu",  "format": "{name}" },
+    { "type": "memory", "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}mem",  "format": "{percentage-bar} {#38;2;110;110;110}{used}" },
+    { "type": "disk",   "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}disk", "folders": "/", "format": "{size-percentage-bar} {#38;2;110;110;110}{size-used}" },
+    { "type": "custom", "format": "{#38;2;120;120;120}├ {#38;2;200;200;200}software" },
+    { "type": "os",       "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}os",   "format": "{name} {#38;2;110;110;110}{kernel-release}" },
+    { "type": "wm",       "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}wm",   "format": "{pretty-name} {version}" },
+    { "type": "packages", "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}pkgs", "format": "{all}" },
+    { "type": "uptime",   "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}up" },
+    { "type": "media",    "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}♪",    "format": "{title} {#38;2;110;110;110}· {artist}" },
+    { "type": "custom", "format": "{#38;2;120;120;120}└ {#38;2;255;255;255}● {#38;2;200;200;200}● {#38;2;150;150;150}● {#38;2;100;100;100}● {#38;2;60;60;60}●" }
   ]
 }
