@@ -34,7 +34,7 @@ Item {
                 width: v.cell.width; height: v.cell.height
                 horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                 text: atlasRow.chars[index]; color: "#ffffff"
-                font.family: "GeistMono Nerd Font"; font.pixelSize: 13; font.weight: Font.Bold
+                font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 13; font.weight: Font.Bold
             }
         }
     }

@@ -29,7 +29,7 @@ function prepare() {
   const px = o.getImageData(0, 0, cols, rows).data;
   lum = new Float32Array(cols * rows);
   for (let i = 0; i < cols * rows; i++) lum[i] = (px[i * 4] * .299 + px[i * 4 + 1] * .587 + px[i * 4 + 2] * .114) / 255;
-  cx.font = `bold 13px "GeistMono Nerd Font", monospace`; cx.textAlign = "center"; cx.textBaseline = "middle";
+  cx.font = `bold 13px "JetBrainsMono Nerd Font", monospace`; cx.textAlign = "center"; cx.textBaseline = "middle";
 }
 const ss = (a, b, x) => { const v = Math.min(1, Math.max(0, (x - a) / (b - a))); return v * v * (3 - 2 * v); };
 function draw(now) {

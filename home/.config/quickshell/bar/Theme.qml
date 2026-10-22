@@ -53,7 +53,7 @@ Singleton {
         return id <= 10 ? kanji[id] : "十" + kanji[id - 10]
     }
     function fileUrl(p) { return p ? "file://" + p.split("/").map(encodeURIComponent).join("/") : "" }
-    readonly property string font:   "GeistMono Nerd Font"
+    readonly property string font:   "JetBrainsMono Nerd Font"
     readonly property int fontSize:  12
     readonly property int barHeight: 34
     readonly property int pillHeight: 26

@@ -21,7 +21,7 @@ button:not([class*="PlayButton"]):not([aria-label*="Play"]):not([aria-label*="Pa
 /* headings: spaced monospace, like the desktop */
 .main-shelf-title, .main-shelf-title *, .main-entityHeader-subtitle, .main-trackList-trackListHeaderRow,
 .main-yourLibraryX-libraryRootlist h1, [data-encore-id="type"].encore-text-title-small {
-  font-family: "GeistMono Nerd Font", monospace !important; letter-spacing: .12em !important; text-transform: uppercase;
+  font-family: "JetBrainsMono Nerd Font", monospace !important; letter-spacing: .12em !important; text-transform: uppercase;
 }
 .main-trackList-trackListHeaderRow { font-size: 11px !important; }
 
@@ -45,7 +45,7 @@ button:not([class*="PlayButton"]):not([aria-label*="Play"]):not([aria-label*="Pa
 [data-testid="control-button-playpause"], [data-testid="control-button-playpause"] * { border-radius: 50% !important; }
 /* spaced mono section titles */
 h2[data-encore-id="text"], .encore-text-title-medium, .encore-text-title-small, section h2 a {
-  font-family: "GeistMono Nerd Font", monospace !important; letter-spacing: .1em !important; text-transform: uppercase; font-size: 15px !important;
+  font-family: "JetBrainsMono Nerd Font", monospace !important; letter-spacing: .1em !important; text-transform: uppercase; font-size: 15px !important;
 }
 /* chips: outlined, white when chosen */
 [data-encore-id="chip"] { background: transparent !important; border: 1px solid rgba(255,255,255,.22) !important; }

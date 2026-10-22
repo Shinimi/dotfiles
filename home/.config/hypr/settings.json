@@ -78,7 +78,7 @@
   "ui_font_size": 10,
   "fetch_logo": "portrait",
   "fetch_source": "",
-  "clock_seconds": false,
+  "clock_seconds": true,
   "clock_12h": false,
   "clock_date": false,
   "bar_media": true,
@@ -94,8 +94,8 @@
   "user_name": "YU",
   "avatar": "/home/yu/Pictures/PFP/Black/Leon Kennedy.jpg",
   "cc_logo": "avatar",
-  "wall_main": "/home/yu/Pictures/wallpaper/mono-snow.jpg",
-  "wall_side": "/home/yu/Pictures/wallpaper/mono-samurai.jpg",
+  "wall_main": "/home/yu/Pictures/wallpaper/mono-ink.jpg",
+  "wall_side": "/home/yu/Pictures/wallpaper/mono-torii-night.jpg",
   "default_apps": {
     "files": "org.kde.dolphin.desktop",
     "images": "org.kde.gwenview.desktop",
@@ -103,6 +103,8 @@
     "pdf": "helium.desktop"
   },
   "autostart": [],
+  "weather_place": "",
+  "weather_label": "",
   "game_profiles": {
     "1973530": {
       "fps": 60,
@@ -111,6 +113,10 @@
     }
   },
   "hot_corner": true,
+  "instant_apply": false,
+  "confirm_power": true,
+  "volume_step": 3,
+  "shot_save": true,
   "wall_shuffle": 0,
   "pause_on_lock": true,
   "island_peeks": true,
@@ -122,7 +128,5 @@
   "ws_preview": true,
   "login_handoff": true,
   "bar_weather": true,
-  "weather_place": "",
-  "weather_label": "",
   "ws_flash": true
 }

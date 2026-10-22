@@ -195,13 +195,20 @@ Scope {
                         id: hero
                         width: parent.width; height: cc.player ? 236 : 176; radius: 12; color: "#0b0b0b"
                         Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                        Image {
-                            id: heroImg; anchors.fill: parent; visible: false; asynchronous: true; fillMode: Image.PreserveAspectCrop; sourceSize.width: 900
-                            source: cc.player && cc.art ? cc.art : (Settings.cur("wall_main") ? "file://" + Settings.cur("wall_main") : "")
+                        Image {   // the hero picture (assets/hero.jpg): dark sky on the left for the clock, the peak on the right
+                            anchors.fill: parent; asynchronous: true; fillMode: Image.PreserveAspectCrop; sourceSize.width: 1240
+                            source: Qt.resolvedUrl("assets/hero.jpg"); opacity: cc.player && cc.art ? 0 : 1
+                            Behavior on opacity { NumberAnimation { duration: 300 } }
                         }
-                        MultiEffect { anchors.fill: parent; source: heroImg; blurEnabled: true; blur: 1.0; blurMax: 56; brightness: -0.42; saturation: -0.35 }
+                        Image { id: artImg; anchors.fill: parent; visible: false; asynchronous: true; fillMode: Image.PreserveAspectCrop; sourceSize.width: 600; source: cc.art }
+                        MultiEffect {   // while music plays: the album art, blurred
+                            anchors.fill: parent; source: artImg; blurEnabled: true; blur: 1.0; blurMax: 56; brightness: -0.45; saturation: -0.3
+                            opacity: cc.player && cc.art ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 300 } }
+                        }
+                        Rectangle { anchors.fill: parent; gradient: Gradient { orientation: Gradient.Horizontal
+                            GradientStop { position: 0.0; color: "#99000000" } GradientStop { position: 0.55; color: "#33000000" } GradientStop { position: 1.0; color: "#00000000" } } }
                         Rectangle { anchors.fill: parent; gradient: Gradient {
-                            GradientStop { position: 0.0; color: "#40000000" } GradientStop { position: 1.0; color: "#b0000000" } } }
+                            GradientStop { position: 0.0; color: "#59000000" } GradientStop { position: 0.35; color: "#00000000" } GradientStop { position: 1.0; color: cc.player ? "#cc000000" : "#40000000" } } }
 
                         Row {   // you + quick buttons, top
                             x: 14; y: 14; spacing: 10
@@ -371,56 +378,65 @@ Scope {
                     }
 
                     // ================= shortcuts + tray =================
-                    Rectangle { width: parent.width; height: 1; color: "#14ffffff" }
-                    RowLayout {
-                        width: parent.width; spacing: 4
+                    GridLayout {
+                        width: parent.width; columns: 4; rowSpacing: 6; columnSpacing: 6
                         Repeater {
-                            model: [["\u{f0100}", "snip", () => cc.go(["sh", "-c", "sleep 0.3; ~/.config/hypr/scripts/screenshot.sh region"])],
-                                    ["\u{f0d52}", "colour", () => cc.go(["sh", "-c", "sleep 0.3; hyprpicker -a"])],
-                                    ["\u{f014c}", "clips", () => cc.qs("clipboard")], ["\u{f02e9}", "walls", () => cc.qs("wallpaper")],
-                                    ["\u{f082e}", "notes", () => cc.qs("notes")], ["\u{f0eb5}", "games", () => cc.qs("games")], ["\u{f030c}", "keys", () => cc.qs("keys")]]
-                            Item {
+                            model: [["\u{f0100}", "screenshot", () => cc.go(["sh", "-c", "sleep 0.3; ~/.config/hypr/scripts/screenshot.sh region"])],
+                                    ["\u{f014c}", "clipboard", () => cc.qs("clipboard")],
+                                    ["\u{f02e9}", "wallpaper", () => cc.qs("wallpaper")],
+                                    ["\u{f082e}", "notes", () => cc.qs("notes")],
+                                    ["\u{f0d52}", "colour pick", () => cc.go(["sh", "-c", "sleep 0.3; hyprpicker -a"])],
+                                    ["\u{f0eb5}", "games", () => cc.qs("games")],
+                                    ["\u{f030c}", "shortcuts", () => cc.qs("keys")],
+                                    ["\u{f0349}", "launcher", () => cc.qs("launcher")]]
+                            Rectangle {
                                 required property var modelData
-                                Layout.fillWidth: true; height: 44
-                                Rectangle { anchors.fill: parent; radius: 10; color: sh.containsMouse ? "#14ffffff" : "transparent" }
+                                Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 12
+                                color: sh.containsMouse ? Theme.on : "#0affffff"; border.width: 1; border.color: sh.containsMouse ? Theme.on : "#14ffffff"
+                                Behavior on color { ColorAnimation { duration: 130 } }
                                 Column {
-                                    anchors.centerIn: parent; spacing: 3
-                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[0]; color: sh.containsMouse ? "#ffffff" : "#c8c8c8"; font.family: Theme.font; font.pixelSize: 15 }
-                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[1]; color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 8 }
+                                    anchors.centerIn: parent; spacing: 5
+                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[0]; color: sh.containsMouse ? Theme.onText : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 17 }
+                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[1]; color: sh.containsMouse ? "#99000000" : "#7a7a7a"; font.family: Theme.font; font.pixelSize: 9 }
                                 }
                                 MouseArea { id: sh; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData[2]() }
                             }
                         }
                     }
-                    RowLayout {
-                        width: parent.width; spacing: 12
+                    Rectangle {
+                        width: parent.width; height: 40; radius: 12; color: "#06ffffff"; border.width: 1; border.color: "#10ffffff"
                         visible: SystemTray.items.values.length > 0 || Updates.total > 0
-                        Repeater {
-                            model: SystemTray.items
-                            Item {
-                                required property var modelData
-                                width: 16; height: 16
-                                IconImage { id: trIcon; anchors.fill: parent; source: modelData.icon; visible: false }
-                                MultiEffect { anchors.fill: trIcon; source: trIcon; saturation: -1.0; opacity: trM.containsMouse ? 1 : 0.55 }
-                                MouseArea {
-                                    id: trM; anchors.fill: parent; anchors.margins: -4; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                    onClicked: m => {
-                                        if (m.button === Qt.RightButton || modelData.onlyMenu) {
-                                            const win = parent.QsWindow.window
-                                            const p = mapToItem(win.contentItem, 0, height + 6)
-                                            modelData.display(win, p.x, p.y)
-                                        } else modelData.activate()
+                        RowLayout {
+                            anchors.fill: parent; anchors.leftMargin: 14; anchors.rightMargin: 6; spacing: 14
+                            Repeater {
+                                model: SystemTray.items
+                                Item {
+                                    required property var modelData
+                                    width: 16; height: 16
+                                    IconImage { id: trIcon; anchors.fill: parent; source: modelData.icon; visible: false }
+                                    MultiEffect { anchors.fill: trIcon; source: trIcon; saturation: -1.0; opacity: trM.containsMouse ? 1 : 0.6 }
+                                    MouseArea {
+                                        id: trM; anchors.fill: parent; anchors.margins: -4; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                        acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                        onClicked: m => {
+                                            if (m.button === Qt.RightButton || modelData.onlyMenu) {
+                                                const win = parent.QsWindow.window
+                                                const p = mapToItem(win.contentItem, 0, height + 6)
+                                                modelData.display(win, p.x, p.y)
+                                            } else modelData.activate()
+                                        }
                                     }
                                 }
                             }
-                        }
-                        Item { Layout.fillWidth: true }
-                        Text {
-                            visible: Updates.total > 0
-                            text: "\u{f06b0}  " + Updates.total + " updates"; color: um.containsMouse ? "#ffffff" : "#9a9a9a"; font.family: Theme.font; font.pixelSize: 10
-                            MouseArea { id: um; anchors.fill: parent; anchors.margins: -6; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                onClicked: cc.go(["kitty", "--class", "updater", "-e", "bash", "-c", Quickshell.env("HOME") + "/.local/bin/safe-update.sh"]) }
+                            Item { Layout.fillWidth: true }
+                            Rectangle {
+                                visible: Updates.total > 0
+                                width: upl.implicitWidth + 24; height: 28; radius: 14
+                                color: um.containsMouse ? "#ffffff" : Theme.on
+                                Text { id: upl; anchors.centerIn: parent; text: "\u{f06b0}  " + Updates.total + " updates"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 10; font.bold: true }
+                                MouseArea { id: um; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                    onClicked: cc.go(["kitty", "--class", "updater", "-e", "bash", "-c", Quickshell.env("HOME") + "/.local/bin/safe-update.sh"]) }
+                            }
                         }
                     }
                 }
