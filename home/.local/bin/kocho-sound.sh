@@ -11,4 +11,4 @@ if [ ${#clips[@]} -gt 0 ]; then
 else
   f="$HOME/.local/share/sounds/mono/stereo/$1.oga"; [ -f "$f" ] || exit 0
 fi
-pw-play --volume 0.75 "$f" >/dev/null 2>&1 &
+pw-play --volume 0.6 "$f" >/dev/null 2>&1 &
