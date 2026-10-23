@@ -6,13 +6,13 @@ import Quickshell.Services.Pipewire
 
 Pill {
     id: pill
-    padding: 11
+    implicitWidth: 34
     readonly property var sink: Pipewire.defaultAudioSink
     PwObjectTracker { objects: [Pipewire.defaultAudioSink] }
     Item {
         width: 16; height: 16
         anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-        Label { anchors.centerIn: parent; text: ""; color: Theme.fg; font.pixelSize: 14 }
+        Label { anchors.centerIn: parent; text: "\uf1de"; color: Theme.fg; font.pixelSize: 15 }
         Rectangle {
             visible: Notifs.count > 0 && !Notifs.dnd
             width: 6; height: 6; radius: 3

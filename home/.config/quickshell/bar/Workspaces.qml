@@ -88,13 +88,13 @@ Pill {
                                              || !!(ws && ws.monitor && ws.monitor.name === "DP-1" && ws.monitor.activeWorkspace === ws)
             readonly property bool hasWindows: !!(ws && ws.toplevels && ws.toplevels.values.length > 0)
             // dots: faint = empty, grey = has windows, a white pill with its kanji = the one you're on
-            width: isActive ? 40 : 18; height: 24
+            width: isActive ? 36 : 18; height: 26
             color: "transparent"
             Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
             Rectangle {
                 id: dot
                 anchors.centerIn: parent
-                width: isActive ? 34 : (wsMouse.containsMouse ? 10 : 7); height: isActive ? 18 : width; radius: height / 2
+                width: isActive ? 30 : (wsMouse.containsMouse ? 10 : 8); height: isActive ? 18 : width; radius: height / 2
                 color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#d0d0d0" : (hasWindows ? "#8a8a8a" : "#3a3a3a")
                 Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
                 Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
@@ -104,7 +104,7 @@ Pill {
                     anchors.centerIn: parent
                     opacity: isActive ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 160 } }
                     text: Theme.wsName(wsId); color: "#0c0c0c"; font.bold: true
-                    font.family: Theme.font; font.pixelSize: 10
+                    font.family: Theme.font; font.pixelSize: 11
                 }
             }
             MouseArea {

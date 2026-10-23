@@ -8,9 +8,9 @@ import Quickshell.Widgets
 Pill {
     property alias popup: panel
     id: pill
-    padding: 10
+    implicitWidth: 34
     active: panel.visible
-    Label { text: "\u{f0425}"; color: pill.hovered ? "#ffffff" : Theme.fgDim; font.pixelSize: 14 }
+    Label { text: "\uf011"; color: pill.hovered ? "#ffffff" : Theme.fg; font.pixelSize: 15 }
     property bool menu: true             // false: open the main screen's menu instead (side screen bar)
     onClicked: menu ? panel.toggle() : Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "bar", "power"])
 
