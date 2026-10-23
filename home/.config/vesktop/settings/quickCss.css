@@ -46,7 +46,11 @@ html, body, #app-mount, [class*="appMount"], [class*="app_"], [class*="bg_"], [c
 ::selection { background: rgba(224,224,224, 0.35); }
 
 /* Kochō: same fonts as the desktop. Made by Claude. */
-:root { --font-primary: "Inter", sans-serif; --font-display: "Inter", sans-serif; --font-code: "JetBrainsMono Nerd Font", monospace; }
+:root { --font-primary: "JetBrainsMono Nerd Font", "Noto Color Emoji", sans-serif; --font-display: "JetBrainsMono Nerd Font", sans-serif;
+        --font-headline: "JetBrainsMono Nerd Font", sans-serif; --font-code: "JetBrainsMono Nerd Font", monospace; }
+body, input, textarea, button, select, [class*="markup"], [class*="username"], [class*="title"], [class*="name_"] {
+  font-family: "JetBrainsMono Nerd Font", "Noto Color Emoji", sans-serif !important;
+}
 
 /* monochrome: replace Discord's blurple/brand colours with greys. Made by Claude. */
 :root, .theme-dark, .theme-darker, .theme-midnight, .visual-refresh {
@@ -91,7 +95,7 @@ section[class*="panels"], div[class*="panels_"] , [class*="avatarWrapper"] { bac
 /* channel list: selected channel gets a white seam, category names in spaced mono */
 [class*="modeSelected"] [class*="link_"], [class*="selected_"][class*="link"] { box-shadow: inset 2px 0 0 #ffffff !important; border-radius: 2px !important; }
 [class*="containerDefault"] h3, [class*="containerDefault"] [class*="name_"][class*="overflow"] {
-  font-family: "JetBrainsMono Nerd Font", monospace !important; letter-spacing: .14em !important; font-size: 10px !important;
+  font-family: "JetBrainsMono Nerd Font", monospace !important; letter-spacing: .04em !important; font-size: 11px !important;
 }
 /* scrollbars: thin white threads */
 ::-webkit-scrollbar { width: 6px !important; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.22) !important; border-radius: 0 !important; border: 0 !important; }
