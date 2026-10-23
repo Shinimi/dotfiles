@@ -1,5 +1,6 @@
 // Launcher (SUPER + Space): a big search field, category chips under it, the results, and
-// terminal / files / lock / power along the bottom. Type to search apps and quick actions (fix audio, lock, focus mode…).
+// terminal / files / lock / power along the bottom.
+//   = also converts: = 5 usd to try · = 72 f to c · = 10 km to mi · = 15% of 240 · = time tokyo Type to search apps and quick actions (fix audio, lock, focus mode…).
 //   ? query → web     : name → emoji (Enter copies)     / name → files     = 12*7 → math     > cmd → run
 // ↑↓ move · Tab / Shift+Tab category · Enter open · Esc or click outside closes. Made by Claude.
 import QtQuick
@@ -89,6 +90,38 @@ Scope {
         let i = 0; for (const c of n) if (c === q[i]) i++          // fuzzy: letters in order
         return i === q.length ? 100 : -1
     }
+    // anything plain JavaScript can't do (units, currencies, percentages) goes to qalc
+    readonly property string qalcExpr: {
+        if (mode !== "calc" || calc !== null || !arg) return ""
+        return arg.replace(/(\d)\s*°?f\s+(to|in)\s+°?c\b/i, "$1 °F to °C").replace(/(\d)\s*°?c\s+(to|in)\s+°?f\b/i, "$1 °C to °F")
+                  .replace(/(\d+(\.\d+)?)\s*%\s+of\s+/i, "$1% * ").replace(/\s+in\s+([a-z€$£₺]+)\s*$/i, " to $1")
+    }
+    property string qalcOut: ""
+    onQalcExprChanged: { qalcOut = ""; if (qalcExpr && !timeZone) qalcDelay.restart() }
+    Timer { id: qalcDelay; interval: 160; onTriggered: if (root.qalcExpr) qalcProc.running = true }
+    Process {
+        id: qalcProc
+        command: ["qalc", "-t", root.qalcExpr]
+        stdout: StdioCollector { onStreamFinished: {
+            const t = this.text.trim().split("\n").pop()
+            root.qalcOut = t && !/error|warning|rem\(/i.test(t) && t !== root.qalcExpr ? t : ""
+        } }
+    }
+    // = time tokyo  /  = time in new york  → that city's clock
+    property var zones: []
+    Process { id: zoneList; command: ["timedatectl", "list-timezones"]
+              stdout: StdioCollector { onStreamFinished: root.zones = this.text.split("\n").filter(z => z.indexOf("/") > 0) } }
+    readonly property string timeZone: {
+        const m = mode === "calc" ? arg.match(/^time\s+(in\s+)?(.+)$/i) : null
+        if (!m) return ""
+        const want = m[2].trim().toLowerCase().replace(/\s+/g, "_")
+        return zones.find(z => z.split("/").pop().toLowerCase() === want) || zones.find(z => z.toLowerCase().indexOf(want) >= 0) || ""
+    }
+    property string zoneOut: ""
+    onTimeZoneChanged: { zoneOut = ""; if (timeZone) zoneProc.running = true }
+    Process { id: zoneProc; command: ["sh", "-c", "TZ=\"$1\" date '+%H:%M · %a %d %b'", "sh", root.timeZone]
+              stdout: StdioCollector { onStreamFinished: root.zoneOut = this.text.trim() } }
+
     readonly property var calc: {
         if (mode !== "calc") return null
         const e = arg.replace(/\^/g, "**").replace(/x/g, "*")
@@ -105,8 +138,13 @@ Scope {
     // ---------- one list for everything: {kind, key, name, sub, cat, icon, glyph, emoji, run} ----------
     readonly property var shown: {
         const a = arg.toLowerCase()
-        if (mode === "calc") return calc === null ? [] : [{ kind: "glyph", glyph: "\u{f00ec}", name: "= " + calc, sub: "Enter copies the result", cat: "math",
-                                                             run: () => Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy", "sh", calc]) }]
+        if (mode === "calc") {
+            if (timeZone) return zoneOut ? [{ kind: "glyph", glyph: "\u{f0954}", name: zoneOut, sub: timeZone.replace(/_/g, " "), cat: "time",
+                                              run: () => Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy", "sh", zoneOut]) }] : []
+            const res = calc !== null ? calc : qalcOut
+            return res ? [{ kind: "glyph", glyph: "\u{f00ec}", name: "= " + res, sub: "Enter copies the result", cat: "math",
+                            run: () => Quickshell.execDetached(["sh", "-c", "printf '%s' \"$1\" | wl-copy", "sh", res]) }] : []
+        }
         if (mode === "cmd") return arg ? [{ kind: "glyph", glyph: "\u{f018d}", name: arg, sub: "run command", cat: "shell", run: () => Quickshell.execDetached(["sh", "-c", arg]) }] : []
         if (mode === "web") return arg ? [{ kind: "glyph", glyph: "\u{f059f}", name: arg, sub: "search the web", cat: "web",
                                             run: () => Quickshell.execDetached(["xdg-open", "https://duckduckgo.com/?q=" + encodeURIComponent(arg)]) }] : []
@@ -125,7 +163,7 @@ Scope {
     }
     onShownChanged: sel = 0
     onArgChanged: if (mode === "files") { files = []; fileDelay.restart() }
-    onModeChanged: if (mode === "emoji" && emojis.length === 0) loadEmoji.running = true
+    onModeChanged: { if (mode === "emoji" && emojis.length === 0) loadEmoji.running = true; if (mode === "calc" && zones.length === 0) zoneList.running = true }
 
     function toggle() { visible = !visible }
     onVisibleChanged: if (visible) { query = ""; sel = 0; cat = "all"; PopupState.current = root; loadUsage.running = true }
@@ -274,7 +312,7 @@ Scope {
                         anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
                         width: row.cur ? hl.implicitWidth + 20 : hl.implicitWidth; height: 26; radius: 13
                         color: row.cur ? "#ececec" : "transparent"
-                        Text { id: hl; anchors.centerIn: parent; text: row.cur ? "\u{f0311} open" : (row.modelData.cat || "")
+                        Text { id: hl; anchors.centerIn: parent; text: row.cur ? "\u{f0311} " + (["math", "time", "emoji"].indexOf(row.modelData.cat) >= 0 ? "copy" : "open") : (row.modelData.cat || "")
                                color: row.cur ? "#0b0b0b" : "#454545"; font.family: Theme.font; font.pixelSize: 10; font.bold: row.cur }
                     }
                     MouseArea { id: rm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
@@ -298,7 +336,7 @@ Scope {
                 Row {
                     x: 22; anchors.verticalCenter: parent.verticalCenter; spacing: 14
                     Repeater {
-                        model: [["?", "web"], [":", "emoji"], ["/", "files"], ["=", "math"], [">", "run"]]
+                        model: [["?", "web"], [":", "emoji"], ["/", "files"], ["=", "math · convert"], [">", "run"]]
                         Row {
                             required property var modelData
                             spacing: 6

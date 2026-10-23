@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # gamemode.sh on <window-class> [window-address] | off – runs when a game opens / the last game closes.
-#  on : the game gets its own workspace (五, if on in Settings → Extras), Do not disturb, the game's
+#  on : the game gets its own workspace (5, if on in Settings → Extras), Do not disturb, the game's
 #       profile (Settings → Games): power profile, FPS cap, overlay
-#  off: puts everything back and takes you to where you were. Made by Claude.
+#  off: puts everything back, takes you to where you were and sums up what you missed. Made by Claude.
 S="$XDG_RUNTIME_DIR/gamemode.state"; Q="$HOME/.config/quickshell/bar"; M="$HOME/.config/MangoHud"
 J="$HOME/.config/hypr/settings.json"
 prof() { python3 -I - "$J" "$1" <<'PY'
@@ -43,6 +43,7 @@ case "$1" in
     . "$S"; rm -f "$S"
     powerprofilesctl set "${profile:-balanced}" 2>/dev/null
     qs ipc -p "$Q" call bar dnd false >/dev/null 2>&1
+    qs ipc -p "$Q" call bar gameSummary >/dev/null 2>&1
     cp "$M/base.conf" "$M/MangoHud.conf"
     logger -t gamemode off ;;
 esac

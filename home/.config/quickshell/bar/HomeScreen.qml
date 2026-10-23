@@ -16,7 +16,7 @@ Scope {
     required property var screen
     property bool visible: false
     function toggle() { visible = !visible }
-    onVisibleChanged: if (visible) { PopupState.current = root; month = new Date(); now = new Date() }
+    onVisibleChanged: if (visible) { PopupState.current = root; month = new Date(); now = new Date(); ScreenTime.loadWeek() }
     Connections { target: PopupState; function onCurrentChanged() { if (PopupState.current !== root) root.visible = false } }
     IpcHandler { target: "home"; function toggle(): void { root.toggle() } }
     property bool _statsOn: visible
@@ -192,6 +192,47 @@ Scope {
                     }
                     Text { Layout.alignment: Qt.AlignHCenter; text: "up " + Stats.d.uptime + "   ·   vram " + (Stats.d.vramUsed || 0).toFixed(1) + " / " + (Stats.d.vramTotal || 0).toFixed(0) + " GB"
                            color: Theme.muted; font.family: Theme.font; font.pixelSize: 10 }
+                }
+            }
+
+            // screen time
+            Card {
+                visible: ScreenTime.enabled
+                title: "screen time"
+                Layout.preferredWidth: 300; Layout.fillHeight: true
+                MouseArea { anchors.fill: parent }
+                Column {
+                    anchors.fill: parent; spacing: 10
+                    Row {
+                        spacing: 10
+                        Text { text: ScreenTime.fmt(ScreenTime.total(ScreenTime.today)); color: "#ffffff"; font.family: Theme.font; font.pixelSize: 26; font.bold: true }
+                        Text { anchors.baseline: parent.children[0].baseline; text: "today"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 11 }
+                    }
+                    Repeater {
+                        model: ScreenTime.top(ScreenTime.today, 5)
+                        Column {
+                            id: st
+                            required property var modelData
+                            readonly property real share: modelData.secs / Math.max(1, ScreenTime.top(ScreenTime.today, 1)[0].secs)
+                            width: parent.width; spacing: 4
+                            Item {
+                                width: parent.width; height: 14
+                                Text { width: parent.width - 60; elide: Text.ElideRight; text: st.modelData.label; color: "#dcdcdc"; font.family: Theme.font; font.pixelSize: 11 }
+                                Text { anchors.right: parent.right; text: ScreenTime.fmt(st.modelData.secs); color: Theme.muted; font.family: Theme.font; font.pixelSize: 10 }
+                            }
+                            Rectangle {
+                                width: parent.width; height: 4; radius: 2; color: "#1fffffff"
+                                Rectangle { width: Math.max(4, parent.width * st.share); height: 4; radius: 2; color: Theme.on }
+                            }
+                        }
+                    }
+                    Text { visible: ScreenTime.total(ScreenTime.today) === 0; text: "nothing yet today"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 11 }
+                }
+                Text {
+                    anchors.bottom: parent.bottom; anchors.bottomMargin: 16; x: 18
+                    text: "last 7 days  " + ScreenTime.fmt(ScreenTime.total(ScreenTime.weekAll))
+                          + (ScreenTime.top(ScreenTime.weekAll, 1).length ? "  ·  most: " + ScreenTime.top(ScreenTime.weekAll, 1)[0].label : "")
+                    width: parent.width - 36; elide: Text.ElideRight; color: Theme.muted; font.family: Theme.font; font.pixelSize: 10
                 }
             }
 

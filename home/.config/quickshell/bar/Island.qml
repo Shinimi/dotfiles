@@ -57,6 +57,12 @@ PanelWindow {
 
         Row {   // right: control center + power, nothing else
             anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+            PrivacyPill { anchors.verticalCenter: parent.verticalCenter }
+            Pill {   // only when the mouse needs charging
+                visible: Battery.low; anchors.verticalCenter: parent.verticalCenter
+                Label { text: Battery.icon + " " + Battery.percent + "%"; color: "#ffffff"; font.pixelSize: 12 }
+                onClicked: win.panel()
+            }
             StatusPill { anchors.verticalCenter: parent.verticalCenter }
             PowerButton { id: powerPill; anchors.verticalCenter: parent.verticalCenter }
         }
@@ -106,6 +112,7 @@ PanelWindow {
             function stats(): void { win.panel() }
             function focus(on: bool): void { PopupState.focusMode = on }
             function dnd(on: bool): void { Notifs.dnd = on }
+            function gameSummary(): void { Notifs.summary() }
             function timer(minutes: int): void { Timers.resetTimer(); Timers.setMinutes(minutes); Timers.toggleTimer() }
             function timerReset(): void { Timers.resetTimer() }
             function clearNotifications(): void { Notifs.clearAll() }

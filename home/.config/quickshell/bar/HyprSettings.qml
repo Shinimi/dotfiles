@@ -57,7 +57,7 @@ Scope {
         clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", sounds: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
         sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", scroll_mode: "input", middle_paste: "input", focus_on_activate: "input",
         repeat_rate: "input", repeat_delay: "input", kb_layout: "input", numlock: "input", hide_cursor_typing: "input", cursor_hide_after: "input", ws_back_forth: "input", swallow: "input",
-        night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", monitors: "display", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power"
+        night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", monitors: "display", auto_pause: "comfort", sort_downloads: "comfort", screen_time: "comfort", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power"
 ,
         user_name: "account", avatar: "account", cc_logo: "account", wall_main: "wallpaper", wall_side: "wallpaper",
         default_apps: "defaults", autostart: "autostart", game_profiles: "games"
@@ -582,6 +582,9 @@ Scope {
                                 options: [[1, "1%"], [2, "2%"], [3, "3%"], [5, "5%"], [10, "10%"]]
                             }
                             SetToggle { label: "Keep screenshot files"; desc: "off: screenshots only go to the clipboard"; key: "shot_save" }
+                            SetToggle { label: "Pause music for calls and videos"; desc: "Spotify pauses when the mic opens or a video plays, then continues"; key: "auto_pause" }
+                            SetToggle { label: "Sort downloads into folders"; desc: "Images, Videos, Music, Documents, Archives, Installers"; key: "sort_downloads" }
+                            SetToggle { label: "Track screen time"; desc: "time per app, shown on the home screen (stays on this PC)"; key: "screen_time" }
                         }
                         SetSection {
                             width: (parent.width - 14) / 2; title: "Settings backup"; icon: "\u{f0bc7}"

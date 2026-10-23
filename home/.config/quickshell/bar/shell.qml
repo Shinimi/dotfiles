@@ -4,6 +4,7 @@
 import Quickshell
 
 ShellRoot {
+    readonly property bool _screenTime: ScreenTime.enabled   // starts the screen time tracker with the shell
     Intro {}
     Curtain {}
     AsciiWall {}
@@ -25,6 +26,7 @@ ShellRoot {
         HomeScreen { required property var modelData; screen: modelData }
     }
     Screensaver {}
+    AutoPause {}
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         Ink { required property var modelData; screen: modelData }

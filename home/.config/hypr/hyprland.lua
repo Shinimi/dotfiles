@@ -34,7 +34,7 @@
 --    Print                   region screenshot   CTRL + Print       full screen   ALT + Print  window
 --    SUPER + "               drop-down terminal (key left of 1)   SUPER + Z          focus mode (no gaps, bar or pop-ups)
 --    mouse to top-left corner  workspace overview
---    SUPER + N               quick notes
+--    SUPER + N               quick notes         SUPER + M          Spotify drop-down   SUPER + C  Discord drop-down
 --    SUPER + Esc             home screen         SUPER + D          draw on the screen  SUPER + ALT + scroll  magnifier (SUPER + ALT + Z resets)
 --    SUPER + SHIFT + R       fix desktop (reload + restart bar/wallpaper/etc. if they died)
 --    SUPER + SHIFT + /  or  SUPER + F1   show this list
@@ -339,6 +339,8 @@ b("SUPER + Z",              run(scripts .. "/focus-mode.sh"))      -- focus mode
 b("SUPER + D",              run("qs ipc -p ~/.config/quickshell/bar call ink toggle"))   -- draw on the screen
 b("SUPER + Escape",         run("qs ipc -p ~/.config/quickshell/bar call home toggle"))  -- home screen
 b("SUPER + N",              run("qs ipc -p ~/.config/quickshell/bar call notes toggle"))  -- quick notes
+b("SUPER + M",              run(scripts .. "/dropapp.sh music '[Ss]potify' spotify-launcher"))   -- Spotify drops over what you're doing
+b("SUPER + C",              run(scripts .. "/dropapp.sh chat 'vesktop|discord' vesktop"))      -- Discord drops over what you're doing
 b("SUPER + ALT + mouse_up",   run(scripts .. "/zoom.sh in"))      -- magnifier (scroll up = closer)
 b("SUPER + ALT + mouse_down", run(scripts .. "/zoom.sh out"))
 b("SUPER + ALT + Z",          run(scripts .. "/zoom.sh reset"))

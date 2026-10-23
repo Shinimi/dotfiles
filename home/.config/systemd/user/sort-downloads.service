@@ -1,0 +1,6 @@
+[Unit]
+Description=Sort finished downloads into folders
+[Service]
+Type=oneshot
+KillMode=process
+ExecStart=%h/.local/bin/sort-downloads.sh

@@ -9,6 +9,16 @@ import Quickshell.Services.Notifications
 Singleton {
     id: root
     property bool dnd: false
+    property var missed: []          // app names of notifications that arrived while silent (for the game summary)
+    onDndChanged: if (dnd) missed = []
+    function summary() {             // one line after a game: "4 notifications while you played"
+        if (!missed.length) return
+        const by = {}; for (const a of missed) by[a] = (by[a] || 0) + 1
+        const body = Object.keys(by).map(a => by[a] > 1 ? a + " ×" + by[a] : a).join(", ")
+        const n = missed.length; missed = []
+        Quickshell.execDetached(["notify-send", "-a", "Game mode", "-i", "input-gaming",
+                                 n + (n === 1 ? " notification" : " notifications") + " while you played", body])
+    }
     readonly property var model: server.trackedNotifications      // crash-safe live list for the panel
     readonly property int count: server.trackedNotifications.values.length
     property ListModel popups: ListModel {}
@@ -42,7 +52,10 @@ Singleton {
         imageSupported: true
         onNotification: n => {
             n.tracked = true
-            if (root.dnd && n.urgency !== NotificationUrgency.Critical) return
+            if (root.dnd && n.urgency !== NotificationUrgency.Critical) {
+                if (n.appName !== "Game mode") root.missed = root.missed.concat([n.appName || "app"])
+                return
+            }
             root.removePopup(n.id)                       // replaced notification: show it fresh
             root.popups.insert(0, { nid: n.id })
             if (Settings.cur("sounds") !== false && !n.hints["suppress-sound"])

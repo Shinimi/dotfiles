@@ -21,7 +21,7 @@ Scope {
     readonly property string qsDir: Quickshell.env("HOME") + "/.config/quickshell/bar"
     function toggle() { visible = !visible }
     onVisibleChanged: {
-        if (visible) { shown = true; now = new Date(); PopupState.current = cc; SysState.refresh(); brGet.running = true }
+        if (visible) { shown = true; now = new Date(); PopupState.current = cc; SysState.refresh(); Battery.refresh(); brGet.running = true }
         else hideLater.restart()
     }
     Timer { id: hideLater; interval: 220; onTriggered: if (!cc.visible) cc.shown = false }
@@ -151,7 +151,11 @@ Scope {
                     Column {
                         Layout.fillWidth: true; spacing: 4
                         Text { text: cc.greeting + ", " + (Settings.cur("user_name") || "yu"); color: "#ffffff"; font.family: Theme.font; font.pixelSize: 16; font.bold: true }
-                        Text { text: Qt.formatDate(cc.now, "dddd d MMMM") + "   ·   up " + Stats.d.uptime; color: cc.dim; font.family: Theme.font; font.pixelSize: 11 }
+                        Text {
+                            text: Qt.formatDate(cc.now, "dddd d MMMM") + "   ·   up " + Stats.d.uptime
+                                  + (Battery.known ? "   ·   " + Battery.icon + " " + Battery.percent + "%" + (Battery.charging ? " charging" : "") : "")
+                            color: cc.dim; font.family: Theme.font; font.pixelSize: 11
+                        }
                     }
                     Repeater {
                         model: [["\u{f0493}", () => cc.qs("settings")],
@@ -298,6 +302,31 @@ Scope {
                                 current: SysState.fx.eq ? SysState.fx.preset : "off"
                                 onPicked: v => { if (v === "off") { if (SysState.fx.eq) SysState.fxToggle("eq"); return }
                                                  if (!SysState.fx.eq) SysState.fxToggle("eq"); SysState.fxPreset(v) }
+                            }
+                            Column {   // every app that's making sound, with its own volume
+                                visible: Streams.apps.length > 0
+                                width: parent.width; spacing: 8; topPadding: 2
+                                Rectangle { width: parent.width; height: 1; color: cc.line }
+                                Repeater {
+                                    model: Streams.apps
+                                    RowLayout {
+                                        id: av
+                                        required property var modelData
+                                        readonly property bool muted: Streams.appMuted(modelData)
+                                        width: parent.width; height: 26; spacing: 10
+                                        Item {
+                                            width: 18; height: 18
+                                            IconImage { id: avIcon; anchors.fill: parent; visible: false
+                                                        source: Quickshell.iconPath(av.modelData.icon, true) || Quickshell.iconPath("audio-x-generic") }
+                                            MultiEffect { anchors.fill: avIcon; source: avIcon; saturation: -1.0; opacity: av.muted ? 0.35 : 0.9 }
+                                            MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: Streams.toggleAppMute(av.modelData) }
+                                        }
+                                        Text { Layout.preferredWidth: 78; elide: Text.ElideRight; text: av.modelData.name; color: av.muted ? "#5a5a5a" : "#d8d8d8"; font.family: Theme.font; font.pixelSize: 11 }
+                                        Slider { Layout.fillWidth: true; value: av.muted ? 0 : Math.min(1, Streams.appVolume(av.modelData)); onMoved: v => Streams.setAppVolume(av.modelData, v) }
+                                        Text { Layout.preferredWidth: 34; horizontalAlignment: Text.AlignRight; text: av.muted ? "off" : Math.round(Streams.appVolume(av.modelData) * 100) + "%"
+                                               color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10 }
+                                    }
+                                }
                             }
                         }
 

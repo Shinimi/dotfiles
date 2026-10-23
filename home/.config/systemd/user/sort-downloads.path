@@ -1,0 +1,8 @@
+[Unit]
+Description=Watch Downloads for finished files
+[Path]
+PathChanged=%h/Downloads
+TriggerLimitIntervalSec=10
+TriggerLimitBurst=20
+[Install]
+WantedBy=default.target
