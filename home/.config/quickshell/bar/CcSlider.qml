@@ -10,19 +10,19 @@ Item {
     property bool muted: false
     signal moved(real v)
     signal iconClicked()
-    height: 36
+    height: 38
     width: parent ? parent.width : 200
     readonly property real shown: muted ? 0 : Math.max(0, Math.min(1, value))
 
     Rectangle {
         id: track
-        anchors.fill: parent; radius: 2
+        anchors.fill: parent; radius: 8
         color: ma.containsMouse ? "#16ffffff" : "#0fffffff"
         border.width: 1; border.color: Theme.stroke
         clip: true
         Behavior on color { ColorAnimation { duration: 120 } }
         Rectangle {   // fill
-            height: parent.height; radius: 2
+            height: parent.height; radius: 8
             width: Math.max(height, parent.width * s.shown)
             color: s.muted ? "#33ffffff" : Theme.on
             Behavior on width { enabled: !ma.pressed; NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
