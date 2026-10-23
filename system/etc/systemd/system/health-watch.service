@@ -1,0 +1,5 @@
+[Unit]
+Description=Weekly drive health check (btrfs + SMART)
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/health-watch.sh

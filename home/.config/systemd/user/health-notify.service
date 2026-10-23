@@ -1,0 +1,5 @@
+[Unit]
+Description=Notify about drive health problems
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/health-notify.sh

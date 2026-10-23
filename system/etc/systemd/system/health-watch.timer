@@ -1,0 +1,8 @@
+[Unit]
+Description=Run the drive health check weekly
+[Timer]
+OnCalendar=weekly
+Persistent=true
+RandomizedDelaySec=1h
+[Install]
+WantedBy=timers.target

@@ -14,6 +14,10 @@ for d in $(busctl --system tree org.freedesktop.UDisks2 2>/dev/null | grep -oE '
   [ -z "$w" ] && continue
   if [ "$w" = "as 0" ]; then echo "  $m: OK (${t}°C)"; else echo "  $m: WARNING ($w)"; issues+=("SSD $m reports a warning"); fi
 done
+# file system checksums + scrub results, from the root health-watch timer
+if read -r hv hw hrest < /var/lib/health-watch/status 2>/dev/null; then
+  if [ "$hv" = ok ]; then echo "  File system: no errors (checked ${hw%%T*})"; else echo "  File system: PROBLEM – $hrest"; issues+=("drive check: $hrest"); fi
+fi
 echo; echo "■ Failed services"
 fs=$(systemctl --failed --no-legend --plain 2>/dev/null | awk '{print $1}'); fu=$(systemctl --user --failed --no-legend --plain 2>/dev/null | awk '{print $1}')
 if [ -z "$fs$fu" ]; then echo "  none"; else for u in $fs $fu; do echo "  $u"; done; issues+=("$(echo $fs $fu | wc -w) failed service(s)"); fi
