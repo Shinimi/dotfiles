@@ -51,18 +51,16 @@ Scope {
             y: 50
             x: root.visible ? parent.width - width - 18 : parent.width + 20
             Behavior on x { NumberAnimation { duration: 260; easing.type: Easing.OutCubic } }
-            radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.95), Theme.tint, 0.07 * Theme.tintOn)
-            border.width: 1; border.color: "#3dffffff"
+            radius: 26; color: "#f50b0b0b"
+            border.width: 1; border.color: "#14ffffff"
             MouseArea { anchors.fill: parent }   // clicks inside stay inside
 
             Row {
                 id: head; x: 20; y: 18; spacing: 12
-                Text { text: "NOTES"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 13; font.letterSpacing: 4; font.bold: true }
-                Text { text: "//"; color: "#454545"; font.family: Theme.font; font.pixelSize: 13 }
-                Text { text: "覚書"; color: "#7a7a7a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 13 }
+                Text { text: "notes"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
             }
             Text { anchors.right: parent.right; anchors.rightMargin: 20; y: 21
-                   text: root.notes.filter(n => !n.done).length + " OPEN"; color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 10; font.letterSpacing: 2 }
+                   text: root.notes.filter(n => !n.done).length + " open"; color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 11 }
             Rectangle { x: 1; y: 52; width: parent.width - 2; height: 1; color: "#26ffffff" }
 
             TextField {
@@ -72,8 +70,7 @@ Scope {
                 Connections { target: root; function onVisibleChanged() { if (root.visible) input.forceActiveFocus() } }
                 placeholderText: "new note…  (enter adds)"; placeholderTextColor: "#555555"
                 color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 13; leftPadding: 28
-                background: Rectangle { radius: 2; color: "#0cffffff"; border.width: 1; border.color: input.activeFocus ? "#77ffffff" : "#26ffffff"
-                                        Rectangle { width: 2; height: parent.height; color: "#ffffff" } }
+                background: Rectangle { radius: 14; color: "#161616"; border.width: 1; border.color: input.activeFocus ? "#40ffffff" : "transparent" }
                 Text { x: 11; anchors.verticalCenter: parent.verticalCenter; text: "+"; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 15 }
                 Keys.onReturnPressed: { root.add(text); text = "" }
                 Keys.onEnterPressed: { root.add(text); text = "" }
@@ -88,12 +85,12 @@ Scope {
                     id: row
                     required property var modelData
                     required property int index
-                    width: lv.width; height: Math.max(48, nt.implicitHeight + 28); radius: 2
+                    width: lv.width; height: Math.max(48, nt.implicitHeight + 28); radius: 12
                     color: rm.containsMouse ? "#0fffffff" : "transparent"
                     border.width: 1; border.color: "#1affffff"
                     Text { x: 10; y: 14; text: String(row.index + 1).padStart(2, "0"); color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 10 }
                     Rectangle {   // tick box
-                        x: 36; y: 13; width: 16; height: 16; radius: 1
+                        x: 36; y: 13; width: 16; height: 16; radius: 6
                         color: row.modelData.done ? Theme.on : "transparent"; border.width: 1; border.color: row.modelData.done ? Theme.on : "#66ffffff"
                         Text { font.family: Theme.font; anchors.centerIn: parent; visible: row.modelData.done; text: "✓"; color: Theme.onText; font.pixelSize: 11; font.bold: true }
                         MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: root.tick(row.index) }
@@ -123,16 +120,16 @@ Scope {
                 Rectangle {   // undo after a delete
                     visible: root.undo !== null
                     x: 16; anchors.verticalCenter: parent.verticalCenter
-                    width: ul.implicitWidth + 22; height: 26; radius: 2; color: Theme.on
-                    Text { id: ul; anchors.centerIn: parent; text: "DELETED · UNDO"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5; font.bold: true }
+                    width: ul.implicitWidth + 22; height: 26; radius: 12; color: Theme.on
+                    Text { id: ul; anchors.centerIn: parent; text: "deleted · undo"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 9; font.bold: true }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.restore() }
                 }
                 Rectangle {
                     visible: root.notes.some(n => n.done)
                     anchors.right: parent.right; anchors.rightMargin: 16; anchors.verticalCenter: parent.verticalCenter
-                    width: cl.implicitWidth + 22; height: 26; radius: 2
+                    width: cl.implicitWidth + 22; height: 26; radius: 12
                     color: cm.containsMouse ? "#14ffffff" : "transparent"; border.width: 1; border.color: "#33ffffff"
-                    Text { id: cl; anchors.centerIn: parent; text: "CLEAR DONE"; color: "#a0a0a0"; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5 }
+                    Text { id: cl; anchors.centerIn: parent; text: "clear done"; color: "#a0a0a0"; font.family: Theme.font; font.pixelSize: 9 }
                     MouseArea { id: cm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.clearDone() }
                 }
             }

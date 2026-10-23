@@ -1,5 +1,5 @@
-// One notification. Pop-ups use the hub style (sharp corners, brackets, `01 // APP` header, a countdown line,
-// slides in from the right); inside panels it's a soft rounded card. Made by Claude.
+// One notification: a soft rounded card. Pop-ups add the app name, a close button and a countdown line,
+// and slide in from the right. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -14,10 +14,10 @@ Rectangle {
     readonly property bool critical: notif && notif.urgency === NotificationUrgency.Critical
     width: parent ? parent.width : 340
     implicitHeight: col.implicitHeight + 24
-    radius: popup ? 2 : 14
-    color: popup ? Theme.mix(Qt.rgba(0.03, 0.03, 0.03, 0.93), Theme.tint, 0.08 * Theme.tintOn) : Theme.card
+    radius: 20
+    color: popup ? "#f20b0b0b" : "#161616"
     border.width: 1
-    border.color: critical ? Theme.red : (popup ? "#33ffffff" : Theme.stroke)
+    border.color: critical ? Theme.red : (popup ? "#14ffffff" : "transparent")
     readonly property date born: new Date()
     readonly property string num: card.notif ? String(card.notif.id % 100).padStart(2, "0") : "00"
 
@@ -30,15 +30,14 @@ Rectangle {
         NumberAnimation { target: slide; property: "x"; to: 0; duration: 340; easing.type: Easing.OutCubic }
         NumberAnimation { target: card; property: "opacity"; to: 1; duration: 260 }
     }
-    Rectangle { visible: card.popup; width: 2; height: parent.height; color: card.critical ? Theme.red : "#ffffff" }
     Rectangle {   // countdown: shrinks until the pop-up goes away
         id: countdown
         visible: card.popup && !card.critical
-        anchors.bottom: parent.bottom; anchors.bottomMargin: 1; x: 2; height: 1; color: "#88ffffff"
-        width: card.width - 4
+        anchors.bottom: parent.bottom; anchors.bottomMargin: 1; x: 18; height: 2; radius: 1; color: "#55ffffff"
+        width: card.width - 36
         NumberAnimation on width {
             running: card.popup && !card.critical; paused: hover.containsMouse
-            from: card.width - 4; to: 0; duration: Settings.cur("notif_timeout") * 1000
+            from: card.width - 36; to: 0; duration: Settings.cur("notif_timeout") * 1000
         }
     }
 
@@ -67,20 +66,17 @@ Rectangle {
     Column {
         id: col
         anchors.left: parent.left; anchors.right: parent.right; anchors.top: parent.top; anchors.margins: 12
-        anchors.leftMargin: card.popup ? 14 : 12
+        anchors.leftMargin: 14
         spacing: card.popup ? 8 : 6
-        RowLayout {   // pop-up header: 01 // APP ········ 17:52  ✕
+        RowLayout {   // pop-up header: app ········ 17:52  ✕
             visible: card.popup
             width: parent.width; spacing: 8
-            Text { text: card.num; color: card.critical ? Theme.red : "#7a7a7a"; font.family: Theme.font; font.pixelSize: 10 }
-            Text { text: "//"; color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 10 }
-            Text { Layout.fillWidth: true; elide: Text.ElideRight; text: (card.notif ? card.notif.appName : "").toUpperCase()
-                   color: card.critical ? Theme.red : "#e8e8e8"; font.family: Theme.font; font.pixelSize: 10; font.letterSpacing: 2; font.bold: true }
+            Text { Layout.fillWidth: true; elide: Text.ElideRight; text: (card.notif ? card.notif.appName : "").toLowerCase()
+                   color: card.critical ? Theme.red : "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10; font.bold: true }
             Text { text: Qt.formatTime(card.born, "HH:mm"); color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 10 }
             Text { text: "\u{f0156}"; color: hClose.containsMouse ? "#ffffff" : "#6a6a6a"; font.family: Theme.font; font.pixelSize: 12
                    MouseArea { id: hClose; anchors.fill: parent; anchors.margins: -6; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: card.close(true) } }
         }
-        Rectangle { visible: card.popup; width: parent.width; height: 1; color: "#1fffffff" }
         RowLayout {
             width: parent.width; spacing: 10
             Item {
@@ -112,7 +108,7 @@ Rectangle {
                 model: card.notif ? card.notif.actions : []
                 Rectangle {
                     required property var modelData
-                    width: aLabel.implicitWidth + 20; height: 26; radius: 2
+                    width: aLabel.implicitWidth + 20; height: 26; radius: 13
                     color: aMouse.containsMouse ? Theme.bgHover : Theme.bgAlt; border.width: 1; border.color: Theme.line
                     Label { id: aLabel; anchors.centerIn: parent; text: modelData.text; font.pixelSize: 11 }
                     MouseArea { id: aMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor

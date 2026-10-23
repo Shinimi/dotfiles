@@ -36,8 +36,8 @@ BarPopup {
     // ---------- weather ----------
     Rectangle {
         visible: Weather.ready
-        width: parent.width; height: wcol.implicitHeight + 28; radius: 12
-        color: "#0affffff"; border.width: 1; border.color: "#16ffffff"
+        width: parent.width; height: wcol.implicitHeight + 28; radius: 18
+        color: "#161616"
         Column {
             id: wcol
             x: 14; y: 14; width: parent.width - 28; spacing: 14

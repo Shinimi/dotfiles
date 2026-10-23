@@ -1,8 +1,6 @@
-// Control center (SUPER + A, or the sliders icon in the bar). One panel under the right end of the bar:
-//   hero    — big thin clock, date and today's line over your blurred wallpaper (the album art while music plays)
-//   toggles — a row of round switches
-//   mixer   — vertical faders for volume, mic and both screens, like a little mixing desk; output + EQ below
-//   then notifications, shortcuts and the tray. Esc or click outside closes. Made by Claude.
+// Control center (SUPER + A, or the sliders icon in the bar). One calm column under the right end of the bar:
+//   you · quick toggles · sound / mic / brightness · now playing · notifications · shortcuts
+// Solid dark surfaces, big touch-sized controls, white = on. Esc or click outside closes. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -19,13 +17,14 @@ Scope {
     required property var screen
     property bool visible: false
     property bool shown: false
+    property bool soundMore: false
     readonly property string qsDir: Quickshell.env("HOME") + "/.config/quickshell/bar"
     function toggle() { visible = !visible }
     onVisibleChanged: {
-        if (visible) { shown = true; PopupState.current = cc; SysState.refresh(); brGet.running = true }
+        if (visible) { shown = true; soundMore = false; PopupState.current = cc; SysState.refresh(); brGet.running = true }
         else hideLater.restart()
     }
-    Timer { id: hideLater; interval: 260; onTriggered: if (!cc.visible) cc.shown = false }
+    Timer { id: hideLater; interval: 240; onTriggered: if (!cc.visible) cc.shown = false }
     Connections { target: PopupState; function onCurrentChanged() { if (PopupState.current !== cc) cc.visible = false } }
     IpcHandler { target: "panel"; function toggle(): void { cc.toggle() } }
 
@@ -45,77 +44,98 @@ Scope {
     readonly property string brCmd: Qt.resolvedUrl("brightness.sh").toString().replace("file://", "")
     Process { id: brGet; command: [cc.brCmd, "get"]; stdout: StdioCollector { onStreamFinished: { try { cc.bright = JSON.parse(this.text) } catch (e) {} } } }
     Timer { id: brSet; interval: 250; onTriggered: { for (const k in cc.brPending) Quickshell.execDetached([cc.brCmd, "set", k, String(cc.brPending[k])]); cc.brPending = {} } }
-    function setBright(mon, v) { const b = Object.assign({}, bright); b[mon] = v; bright = b; const p = Object.assign({}, brPending); p[mon] = v; brPending = p; brSet.restart() }
+    function setBright(v) {   // one slider drives both screens
+        const b = Object.assign({}, bright), p = Object.assign({}, brPending)
+        for (const k of ["DP-1", "DP-2"]) { b[k] = v; p[k] = v }
+        bright = b; brPending = p; brSet.restart()
+    }
     function nice(n) { return (n ? (n.nickname || n.description || n.name || "") : "").replace(/ Analog Stereo| Digital Stereo \(HDMI\)| Stereo/g, "") }
     function go(cmd) { cc.visible = false; Quickshell.execDetached(cmd) }
     function qs(target, fn) { go(["qs", "ipc", "-p", qsDir, "call", target, fn || "toggle"]) }
-    SystemClock { id: clock; precision: SystemClock.Minutes }
+
+    // ---------- look ----------
+    readonly property color s0: "#f00b0b0b"     // panel
+    readonly property color s1: "#161616"       // raised surface
+    readonly property color s2: "#222222"       // hover / track
+    readonly property color hi: "#ececec"       // "on"
+    readonly property color ink: "#0b0b0b"      // text on white
+    readonly property color dim: "#8a8a8a"
 
     // ---------- building blocks ----------
-    component Caption: Text { color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 2 }
-    component Round: Column {   // round toggle with a tiny label
-        id: rt
-        property string icon; property string name; property bool on: false
-        signal hit()
-        spacing: 6
-        Rectangle {
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 50; height: 50; radius: 25
-            color: rt.on ? Theme.on : (rm.containsMouse ? "#1affffff" : "#0dffffff")
-            border.width: 1; border.color: rt.on ? Theme.on : "#22ffffff"
-            Behavior on color { ColorAnimation { duration: 150 } }
-            Text { anchors.centerIn: parent; text: rt.icon; color: rt.on ? Theme.onText : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 18 }
-            MouseArea { id: rm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: rt.hit() }
-        }
-        Text { anchors.horizontalCenter: parent.horizontalCenter; text: rt.name; color: rt.on ? "#ffffff" : "#8a8a8a"; font.family: Theme.font; font.pixelSize: 9 }
+    component Round: Rectangle {   // round icon button
+        property string icon; property int size: 38; signal hit()
+        width: size; height: size; radius: size / 2
+        color: rm.containsMouse ? cc.hi : cc.s1
+        Behavior on color { ColorAnimation { duration: 120 } }
+        Text { anchors.centerIn: parent; text: parent.icon; color: rm.containsMouse ? cc.ink : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 15 }
+        MouseArea { id: rm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.hit() }
     }
-    component Fader: Column {   // vertical slider: drag or scroll; click the icon to mute
-        id: fd
-        property string icon; property string name; property real value: 0; property bool muted: false; property bool canMute: false
+    component Tile: Rectangle {   // quick toggle
+        id: t
+        property string icon; property string name; property string info: ""; property bool on: false
+        signal hit()
+        Layout.fillWidth: true; Layout.preferredWidth: 1; height: 82; radius: 20
+        color: on ? cc.hi : (tm.containsMouse ? cc.s2 : cc.s1)
+        Behavior on color { ColorAnimation { duration: 160 } }
+        Rectangle {
+            x: 12; y: 12; width: 30; height: 30; radius: 15
+            color: t.on ? cc.ink : "#2a2a2a"
+            Behavior on color { ColorAnimation { duration: 160 } }
+            Text { anchors.centerIn: parent; text: t.icon; color: t.on ? "#ffffff" : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 14 }
+        }
+        Column {
+            x: 12; anchors.bottom: parent.bottom; anchors.bottomMargin: 11; width: parent.width - 24; spacing: 1
+            Text { width: parent.width; elide: Text.ElideRight; text: t.name; color: t.on ? cc.ink : "#f0f0f0"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
+            Text { width: parent.width; elide: Text.ElideRight; text: t.info || (t.on ? "on" : "off"); color: t.on ? "#80000000" : "#707070"; font.family: Theme.font; font.pixelSize: 10 }
+        }
+        MouseArea { id: tm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: t.hit() }
+    }
+    component Big: Rectangle {   // big pill slider: the white fill carries the icon, like a phone
+        id: bs
+        property string icon; property string label; property real value: 0; property bool muted: false; property bool canMute: false
         signal moved(real v)
         signal iconHit()
-        readonly property real shown: muted ? 0 : Math.max(0, Math.min(1, value))
-        spacing: 8
-        Rectangle {
-            id: track
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 60; height: 150; radius: 14
-            color: fm.containsMouse ? "#14ffffff" : "#0bffffff"; border.width: 1; border.color: "#1fffffff"
-            clip: true
-            Rectangle {   // the level, filling up from the bottom
-                anchors.bottom: parent.bottom; width: parent.width
-                height: Math.max(parent.radius * 2, parent.height * fd.shown); radius: parent.radius
-                color: fd.muted ? "#2affffff" : Theme.on
-                Behavior on height { enabled: !fm.pressed; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-            }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter; y: 10
-                text: fd.muted ? "off" : Math.round(fd.value * 100)
-                color: fd.shown > 0.86 ? Theme.onText : "#d8d8d8"; font.family: Theme.font; font.pixelSize: 12; font.bold: true
-            }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 12
-                text: fd.icon; color: fd.shown > 0.12 ? Theme.onText : "#d8d8d8"; font.family: Theme.font; font.pixelSize: 17
-            }
-            MouseArea {
-                id: fm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; preventStealing: true
-                property bool onIcon: false
-                function set(my) { fd.moved(Math.max(0, Math.min(1, 1 - my / track.height))) }
-                onPressed: m => { onIcon = fd.canMute && m.y > track.height - 40; if (!onIcon) set(m.y) }
-                onPositionChanged: m => { if (pressed && !onIcon) set(m.y) }
-                onClicked: { if (onIcon) fd.iconHit() }
-                onWheel: w => fd.moved(Math.max(0, Math.min(1, fd.value + (w.angleDelta.y > 0 ? 0.03 : -0.03))))
+        Layout.fillWidth: true; height: 48; radius: 24; color: cc.s1
+        readonly property real f: muted ? 0 : Math.max(0, Math.min(1, value))
+        readonly property real fillW: height + (width - height) * f
+        Text { x: 48; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 120; elide: Text.ElideRight
+               text: bs.label; color: "#e6e6e6"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
+        Item {   // white fill with dark copies of the text, so it reads on both sides of the edge
+            width: bs.fillW; height: parent.height; clip: true
+            Behavior on width { enabled: !bm.pressed; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+            Rectangle { width: bs.fillW; height: bs.height; radius: 24; color: bs.muted ? "#3a3a3a" : cc.hi }
+            Text { x: 17; anchors.verticalCenter: parent.verticalCenter; text: bs.icon; color: bs.muted ? "#bdbdbd" : cc.ink; font.family: Theme.font; font.pixelSize: 16 }
+            Text { x: 48; anchors.verticalCenter: parent.verticalCenter; width: bs.width - 120; elide: Text.ElideRight
+                   text: bs.label; color: cc.ink; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
+        }
+        Text { anchors.right: parent.right; anchors.rightMargin: 18; anchors.verticalCenter: parent.verticalCenter
+               text: bs.muted ? "muted" : Math.round(bs.value * 100) + "%"
+               color: bs.fillW > bs.width - 50 ? "#90000000" : cc.dim; font.family: Theme.font; font.pixelSize: 11 }
+        MouseArea {
+            id: bm; anchors.fill: parent; anchors.leftMargin: bs.canMute ? 46 : 0
+            cursorShape: Qt.PointingHandCursor; preventStealing: true
+            function set(mx) { bs.moved(Math.max(0, Math.min(1, (mx + anchors.leftMargin - bs.height / 2) / (bs.width - bs.height)))) }
+            onPressed: m => set(m.x); onPositionChanged: m => { if (pressed) set(m.x) }
+            onWheel: w => bs.moved(Math.max(0, Math.min(1, bs.value + (w.angleDelta.y > 0 ? 0.03 : -0.03))))
+        }
+        MouseArea { visible: bs.canMute; width: 46; height: parent.height; cursorShape: Qt.PointingHandCursor; onClicked: bs.iconHit() }
+    }
+    component Choice: Flow {   // a row of pills, one picked
+        id: ch
+        property var options: []; property var current; signal picked(var v)
+        Layout.fillWidth: true; spacing: 6
+        Repeater {
+            model: ch.options
+            Rectangle {
+                required property var modelData
+                readonly property bool on: ch.current === modelData[0]
+                width: cl.implicitWidth + 26; height: 32; radius: 16
+                color: on ? cc.hi : (cm.containsMouse ? cc.s2 : cc.s1)
+                Behavior on color { ColorAnimation { duration: 130 } }
+                Text { id: cl; anchors.centerIn: parent; text: modelData[1]; color: on ? cc.ink : "#bdbdbd"; font.family: Theme.font; font.pixelSize: 11; font.bold: on }
+                MouseArea { id: cm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: ch.picked(modelData[0]) }
             }
         }
-        Text { anchors.horizontalCenter: parent.horizontalCenter; text: fd.name; color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5 }
-    }
-    component IconBtn: Rectangle {
-        property string icon; signal hit()
-        width: 32; height: 32; radius: 16
-        color: ib.containsMouse ? Theme.on : "#26000000"; border.width: 1; border.color: ib.containsMouse ? Theme.on : "#26ffffff"
-        Behavior on color { ColorAnimation { duration: 110 } }
-        Text { anchors.centerIn: parent; text: parent.icon; color: ib.containsMouse ? Theme.onText : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 14 }
-        MouseArea { id: ib; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.hit() }
     }
 
     PanelWindow {
@@ -130,265 +150,214 @@ Scope {
 
         Rectangle {
             id: panel
-            width: 440
+            width: 420
             x: parent.width - width - 10; y: Theme.barHeight + 16
-            height: Math.min(parent.height - y - 12, body.implicitHeight + 28)
-            radius: 18; clip: true
-            color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.93), Theme.tint, 0.07 * Theme.tintOn)
-            border.width: 1; border.color: "#22ffffff"
+            height: body.implicitHeight + 36
+            radius: 28
+            color: cc.s0
+            border.width: 1; border.color: "#14ffffff"
             opacity: cc.visible ? 1 : 0
-            transform: Translate { y: cc.visible ? 0 : -12; Behavior on y { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } } }
+            transform: Translate { y: cc.visible ? 0 : -10; Behavior on y { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } } }
             Behavior on opacity { NumberAnimation { duration: 180 } }
             MouseArea { anchors.fill: parent }
             focus: cc.visible
             Keys.onEscapePressed: cc.visible = false
 
-            Flickable {
-                anchors.fill: parent; anchors.margins: 14
-                contentHeight: body.implicitHeight; clip: true; boundsBehavior: Flickable.StopAtBounds
-                Column {
-                    id: body
-                    width: parent.width; spacing: 16
+            ColumnLayout {
+                id: body
+                x: 18; y: 18; width: parent.width - 36; spacing: 10
 
-                    // ================= hero =================
+                // ---------- you ----------
+                RowLayout {
+                    Layout.fillWidth: true; Layout.bottomMargin: 6; spacing: 12
                     ClippingRectangle {
-                        id: hero
-                        width: parent.width; height: cc.player ? 268 : 210; radius: 12; color: "#0b0b0b"
-                        Behavior on height { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                        Image {   // the hero picture (assets/hero.jpg): dark sky on the left for the clock, the peak on the right
-                            anchors.fill: parent; asynchronous: true; fillMode: Image.PreserveAspectCrop; sourceSize.width: 1240
-                            source: Qt.resolvedUrl("assets/hero.jpg"); opacity: cc.player && cc.art ? 0 : 1
-                            Behavior on opacity { NumberAnimation { duration: 300 } }
-                        }
-                        Image { id: artImg; anchors.fill: parent; visible: false; asynchronous: true; fillMode: Image.PreserveAspectCrop; sourceSize.width: 600; source: cc.art }
-                        MultiEffect {   // while music plays: the album art, blurred
-                            anchors.fill: parent; source: artImg; blurEnabled: true; blur: 1.0; blurMax: 56; brightness: -0.45; saturation: -0.3
-                            opacity: cc.player && cc.art ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 300 } }
-                        }
-                        Rectangle { anchors.fill: parent; gradient: Gradient { orientation: Gradient.Horizontal
-                            GradientStop { position: 0.0; color: "#99000000" } GradientStop { position: 0.55; color: "#33000000" } GradientStop { position: 1.0; color: "#00000000" } } }
-                        Rectangle { anchors.fill: parent; gradient: Gradient {
-                            GradientStop { position: 0.0; color: "#59000000" } GradientStop { position: 0.35; color: "#00000000" } GradientStop { position: 1.0; color: cc.player ? "#cc000000" : "#40000000" } } }
-
-                        Row {   // you + quick buttons, top
-                            x: 14; y: 14; spacing: 10
-                            ClippingRectangle {
-                                width: 30; height: 30; radius: 15; color: "#222"
-                                Image { anchors.fill: parent; source: Settings.cur("avatar") ? "file://" + Settings.cur("avatar") : "file://" + Quickshell.env("HOME") + "/.face"
-                                        fillMode: Image.PreserveAspectCrop; sourceSize.width: 80; asynchronous: true }
-                            }
-                            Text { anchors.verticalCenter: parent.verticalCenter; text: (Settings.cur("user_name") || "yu"); color: "#e8e8e8"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
-                            Text { anchors.verticalCenter: parent.verticalCenter; text: "up " + Stats.d.uptime; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 10 }
-                        }
-                        Row {
-                            anchors.right: parent.right; anchors.rightMargin: 12; y: 13; spacing: 6
-                            IconBtn { icon: "\u{f0493}"; onHit: cc.qs("settings") }
-                            IconBtn { icon: "\u{f033e}"; onHit: cc.go(["qs", "ipc", "-p", cc.qsDir, "call", "curtain", "lock"]) }
-                            IconBtn { icon: "\u{f0425}"; onHit: cc.go(["qs", "ipc", "-p", cc.qsDir, "call", "bar", "power"]) }
-                        }
-                        Column {   // the clock
-                            x: 18; y: 54; spacing: 2
-                            Text { text: Qt.formatDateTime(clock.date, Settings.cur("clock_12h") ? "h:mm" : "HH:mm"); color: "#ffffff"; font.family: Theme.font; font.pixelSize: 58; font.weight: Font.Thin }
-                            Text { text: Qt.formatDateTime(clock.date, "dddd, d MMMM").toLowerCase(); color: "#d0d0d0"; font.family: Theme.font; font.pixelSize: 12 }
-                            Text { width: hero.width - 36; wrapMode: Text.WordWrap; maximumLineCount: 2; elide: Text.ElideRight; topPadding: 4
-                                   text: "“" + Journey.quote + "”"; color: "#b8b8b8"; font.family: Theme.font; font.pixelSize: 10; font.italic: true }
-                            Text { text: "— " + Journey.author.toLowerCase(); color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9 }
-                        }
-                        Item {   // now playing strip, bottom of the hero
-                            visible: !!cc.player
-                            x: 14; width: parent.width - 28; height: 46; anchors.bottom: parent.bottom; anchors.bottomMargin: 12
-                            ClippingRectangle {
-                                id: cov; width: 46; height: 46; radius: 8; color: "#1a1a1a"
-                                Image { anchors.fill: parent; source: cc.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 120 }
-                            }
-                            Column {
-                                anchors.left: cov.right; anchors.leftMargin: 12; anchors.right: ctrls.left; anchors.rightMargin: 10; anchors.verticalCenter: parent.verticalCenter; spacing: 2
-                                Text { width: parent.width; elide: Text.ElideRight; text: cc.player ? cc.player.trackTitle : ""; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
-                                Text { width: parent.width; elide: Text.ElideRight; text: cc.player ? (cc.player.trackArtist || cc.player.identity) : ""; color: "#a8a8a8"; font.family: Theme.font; font.pixelSize: 10 }
-                                Rectangle {
-                                    visible: !!(cc.player && cc.player.length > 0)
-                                    width: parent.width; height: 2; radius: 1; color: "#33ffffff"
-                                    Rectangle { height: 2; radius: 1; color: "#ffffff"; width: cc.player && cc.player.length > 0 ? parent.width * Math.min(1, cc.player.position / cc.player.length) : 0 }
-                                }
-                            }
-                            Row {
-                                id: ctrls; anchors.right: parent.right; anchors.verticalCenter: parent.verticalCenter; spacing: 2
-                                Repeater {
-                                    model: [["\u{f04ae}", "prev"], ["", "toggle"], ["\u{f04ad}", "next"]]
-                                    Rectangle {
-                                        required property var modelData
-                                        readonly property bool main: modelData[1] === "toggle"
-                                        width: main ? 38 : 30; height: width; radius: width / 2
-                                        anchors.verticalCenter: parent.verticalCenter
-                                        color: main ? (pm.containsMouse ? "#ffffff" : Theme.on) : (pm.containsMouse ? "#26ffffff" : "transparent")
-                                        Text { anchors.centerIn: parent; font.family: Theme.font; font.pixelSize: main ? 15 : 13; color: main ? Theme.onText : "#ffffff"
-                                               text: main ? (cc.player && cc.player.isPlaying ? "\u{f03e4}" : "\u{f040a}") : modelData[0] }
-                                        MouseArea { id: pm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                            onClicked: { const p = cc.player; if (!p) return; modelData[1] === "prev" ? p.previous() : modelData[1] === "next" ? p.next() : p.togglePlaying() } }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    // ================= toggles =================
-                    RowLayout {
-                        width: parent.width; spacing: 0
-                        Round { Layout.fillWidth: true; icon: "\u{f0594}"; name: "night"; on: SysState.night; onHit: SysState.toggleNight() }
-                        Round { Layout.fillWidth: true; icon: "\u{f009b}"; name: "silent"; on: Notifs.dnd; onHit: Notifs.dnd = !Notifs.dnd }
-                        Round { Layout.fillWidth: true; icon: "\u{f0176}"; name: "awake"; on: SysState.awake; onHit: SysState.toggleAwake() }
-                        Round { Layout.fillWidth: true; icon: "\u{f04c5}"; name: "boost"; on: SysState.perf; onHit: SysState.setProfile(SysState.perf ? "balanced" : "performance") }
-                        Round { Layout.fillWidth: true; icon: "\u{f036c}"; name: "clean mic"; on: !!SysState.fx.mic; onHit: SysState.fxToggle("mic") }
-                        Round { Layout.fillWidth: true; icon: "\u{f0eb5}"; name: "game"; on: SysState.gameMode
-                                onHit: { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", SysState.gameMode ? "off" : "on"]); SysState.gameMode = !SysState.gameMode } }
-                    }
-
-                    // ================= mixer =================
-                    Rectangle {
-                        width: parent.width; height: mix.implicitHeight + 28; radius: 12
-                        color: "#08ffffff"; border.width: 1; border.color: "#14ffffff"
-                        Column {
-                            id: mix
-                            x: 14; y: 14; width: parent.width - 28; spacing: 14
-                            RowLayout {
-                                width: parent.width; spacing: 0
-                                Fader {
-                                    Layout.fillWidth: true; icon: "\u{f057e}"; name: "VOLUME"; canMute: true
-                                    muted: !!(cc.sink && cc.sink.audio && cc.sink.audio.muted)
-                                    value: cc.sink && cc.sink.audio ? Math.min(1, cc.sink.audio.volume) : 0
-                                    onMoved: v => { if (cc.sink) { cc.sink.audio.muted = false; cc.sink.audio.volume = v } }
-                                    onIconHit: if (cc.sink) cc.sink.audio.muted = !cc.sink.audio.muted
-                                }
-                                Fader {
-                                    Layout.fillWidth: true; icon: muted ? "\u{f036d}" : "\u{f036c}"; name: "MIC"; canMute: true
-                                    muted: !!(cc.source && cc.source.audio && cc.source.audio.muted)
-                                    value: cc.source && cc.source.audio ? Math.min(1, cc.source.audio.volume) : 0
-                                    onMoved: v => { if (cc.source) { cc.source.audio.muted = false; cc.source.audio.volume = v } }
-                                    onIconHit: if (cc.source) cc.source.audio.muted = !cc.source.audio.muted
-                                }
-                                Fader { Layout.fillWidth: true; icon: "\u{f00df}"; name: "MAIN"; value: (cc.bright["DP-1"] || 0) / 100; onMoved: v => cc.setBright("DP-1", Math.round(v * 100)) }
-                                Fader { Layout.fillWidth: true; icon: "\u{f00df}"; name: "SIDE"; value: (cc.bright["DP-2"] || 0) / 100; onMoved: v => cc.setBright("DP-2", Math.round(v * 100)) }
-                            }
-                            Rectangle {   // output: headset / monitor
-                                visible: cc.sinks.length > 1
-                                width: parent.width; height: 32; radius: 16; color: "#0dffffff"
-                                Row {
-                                    anchors.fill: parent; anchors.margins: 3
-                                    Repeater {
-                                        model: cc.sinks
-                                        Rectangle {
-                                            required property var modelData
-                                            readonly property bool cur: cc.sink && (cc.sink.id === modelData.id || (cc.sink.name === "headset_eq" && (modelData.name || "").indexOf("Fuxi") >= 0))
-                                            width: parent.width / cc.sinks.length; height: parent.height; radius: height / 2
-                                            color: cur ? Theme.on : (om.containsMouse ? "#14ffffff" : "transparent")
-                                            Behavior on color { ColorAnimation { duration: 130 } }
-                                            Text { anchors.centerIn: parent; width: parent.width - 12; horizontalAlignment: Text.AlignHCenter; elide: Text.ElideRight
-                                                   text: (cur ? "\u{f02cb}  " : "") + cc.nice(modelData); color: cur ? Theme.onText : "#a0a0a0"; font.family: Theme.font; font.pixelSize: 10; font.bold: cur }
-                                            MouseArea { id: om; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                                onClicked: { if (cur) return; if (SysState.fx.eq) SysState.fxToggle("eq"); Pipewire.preferredDefaultAudioSink = modelData } }
-                                        }
-                                    }
-                                }
-                            }
-                            Rectangle {   // EQ presets
-                                width: parent.width; height: 30; radius: 15; color: "#0dffffff"
-                                Row {
-                                    anchors.fill: parent; anchors.margins: 3
-                                    Repeater {
-                                        model: [["off", "eq off"], ["music", "music"], ["vocal", "vocal"], ["games", "games"], ["bass", "bass"]]
-                                        Rectangle {
-                                            required property var modelData
-                                            readonly property bool cur: modelData[0] === "off" ? !SysState.fx.eq : (!!SysState.fx.eq && SysState.fx.preset === modelData[0])
-                                            width: parent.width / 5; height: parent.height; radius: height / 2
-                                            color: cur ? Theme.on : (eqm.containsMouse ? "#14ffffff" : "transparent")
-                                            Behavior on color { ColorAnimation { duration: 130 } }
-                                            Text { anchors.centerIn: parent; text: modelData[1]; color: cur ? Theme.onText : "#a0a0a0"; font.family: Theme.font; font.pixelSize: 10; font.bold: cur }
-                                            MouseArea { id: eqm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                                onClicked: { if (modelData[0] === "off") { if (SysState.fx.eq) SysState.fxToggle("eq"); return }
-                                                             if (!SysState.fx.eq) SysState.fxToggle("eq"); SysState.fxPreset(modelData[0]) } }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-
-                    // ================= notifications =================
-                    Item {
-                        width: parent.width; height: 14
-                        Caption { text: Notifs.count > 0 ? "NOTIFICATIONS  ·  " + Notifs.count : "NO NEW NOTIFICATIONS" }
-                        Text {
-                            visible: Notifs.count > 0; anchors.right: parent.right
-                            text: "clear"; color: clr.containsMouse ? "#ffffff" : "#7a7a7a"; font.family: Theme.font; font.pixelSize: 10
-                            MouseArea { id: clr; anchors.fill: parent; anchors.margins: -4; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Notifs.clearAll() }
-                        }
+                        width: 44; height: 44; radius: 22; color: cc.s1
+                        Image { anchors.fill: parent; fillMode: Image.PreserveAspectCrop; sourceSize.width: 96; asynchronous: true
+                                source: Settings.cur("avatar") ? "file://" + Settings.cur("avatar") : "file://" + Quickshell.env("HOME") + "/.face" }
                     }
                     Column {
-                        visible: Notifs.count > 0; width: parent.width; spacing: 6
-                        Repeater {
-                            model: Notifs.model
-                            NotifCard { required property var modelData; required property int index; visible: index < 3; notif: modelData; width: parent.width }
-                        }
+                        Layout.fillWidth: true; spacing: 3
+                        Text { text: Settings.cur("user_name") || "yu"; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 15; font.bold: true }
+                        Text { text: "up " + Stats.d.uptime; color: "#6e6e6e"; font.family: Theme.font; font.pixelSize: 11 }
                     }
+                    Round { icon: "\u{f0493}"; onHit: cc.qs("settings") }
+                    Round { icon: "\u{f033e}"; onHit: cc.go(["qs", "ipc", "-p", cc.qsDir, "call", "curtain", "lock"]) }
+                    Round { icon: "\u{f0425}"; onHit: cc.go(["qs", "ipc", "-p", cc.qsDir, "call", "bar", "power"]) }
+                }
 
-                    // ================= shortcuts + tray =================
-                    GridLayout {
-                        width: parent.width; columns: 4; rowSpacing: 6; columnSpacing: 6   // the four you actually use
+                // ---------- quick toggles ----------
+                GridLayout {
+                    Layout.fillWidth: true; columns: 3; rowSpacing: 10; columnSpacing: 10
+                    Tile { icon: "\u{f009b}"; name: "silent"; on: Notifs.dnd; info: on ? "silenced" : "off"; onHit: Notifs.dnd = !Notifs.dnd }
+                    Tile { icon: "\u{f0594}"; name: "night light"; on: SysState.night; info: on ? "warm" : "off"; onHit: SysState.toggleNight() }
+                    Tile { icon: "\u{f0176}"; name: "keep awake"; on: SysState.awake; info: on ? "no auto-lock" : "off"; onHit: SysState.toggleAwake() }
+                    Tile { icon: "\u{f04c5}"; name: "performance"; on: SysState.perf; info: on ? "max power" : "balanced"; onHit: SysState.setProfile(SysState.perf ? "balanced" : "performance") }
+                    Tile { icon: "\u{f036c}"; name: "clean mic"; on: !!SysState.fx.mic; info: on ? "noise removed" : "off"; onHit: SysState.fxToggle("mic") }
+                    Tile { icon: "\u{f0eb5}"; name: "game mode"; on: SysState.gameMode; info: on ? "on" : "auto"
+                           onHit: { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", SysState.gameMode ? "off" : "on"]); SysState.gameMode = !SysState.gameMode } }
+                }
+
+                // ---------- sliders ----------
+                RowLayout {
+                    Layout.fillWidth: true; Layout.topMargin: 4; spacing: 8
+                    Big {
+                        icon: muted ? "\u{f075f}" : "\u{f057e}"; label: cc.nice(cc.sink); canMute: true
+                        muted: !!(cc.sink && cc.sink.audio && cc.sink.audio.muted)
+                        value: cc.sink && cc.sink.audio ? Math.min(1, cc.sink.audio.volume) : 0
+                        onMoved: v => { if (cc.sink) { cc.sink.audio.muted = false; cc.sink.audio.volume = v } }
+                        onIconHit: if (cc.sink) cc.sink.audio.muted = !cc.sink.audio.muted
+                    }
+                    Rectangle {   // output + EQ
+                        width: 48; height: 48; radius: 24
+                        color: cc.soundMore ? cc.hi : (mm.containsMouse ? cc.s2 : cc.s1)
+                        Behavior on color { ColorAnimation { duration: 130 } }
+                        Text { anchors.centerIn: parent; text: cc.soundMore ? "\u{f0143}" : "\u{f0140}"; color: cc.soundMore ? cc.ink : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 16 }
+                        MouseArea { id: mm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: cc.soundMore = !cc.soundMore }
+                    }
+                }
+                ColumnLayout {
+                    visible: cc.soundMore
+                    Layout.fillWidth: true; Layout.leftMargin: 4; Layout.bottomMargin: 4; spacing: 8
+                    Text { visible: cc.sinks.length > 1; text: "output"; color: "#5e5e5e"; font.family: Theme.font; font.pixelSize: 10 }
+                    Choice {
+                        visible: cc.sinks.length > 1
+                        options: cc.sinks.map(n => [n.id, cc.nice(n)])
+                        current: { const s = cc.sinks.find(n => cc.sink && (n.id === cc.sink.id || (cc.sink.name === "headset_eq" && (n.name || "").indexOf("Fuxi") >= 0))); return s ? s.id : -1 }
+                        onPicked: v => { if (SysState.fx.eq) SysState.fxToggle("eq"); const n = cc.sinks.find(x => x.id === v); if (n) Pipewire.preferredDefaultAudioSink = n }
+                    }
+                    Text { text: "equalizer"; color: "#5e5e5e"; font.family: Theme.font; font.pixelSize: 10 }
+                    Choice {
+                        options: [["off", "flat"], ["music", "music"], ["vocal", "vocal"], ["games", "games"], ["bass", "bass"]]
+                        current: SysState.fx.eq ? SysState.fx.preset : "off"
+                        onPicked: v => { if (v === "off") { if (SysState.fx.eq) SysState.fxToggle("eq"); return }
+                                         if (!SysState.fx.eq) SysState.fxToggle("eq"); SysState.fxPreset(v) }
+                    }
+                }
+                Big {
+                    icon: muted ? "\u{f036d}" : "\u{f036c}"; label: "microphone"; canMute: true
+                    muted: !!(cc.source && cc.source.audio && cc.source.audio.muted)
+                    value: cc.source && cc.source.audio ? Math.min(1, cc.source.audio.volume) : 0
+                    onMoved: v => { if (cc.source) { cc.source.audio.muted = false; cc.source.audio.volume = v } }
+                    onIconHit: if (cc.source) cc.source.audio.muted = !cc.source.audio.muted
+                }
+                Big { icon: "\u{f00e0}"; label: "brightness"; value: (cc.bright["DP-1"] || 0) / 100; onMoved: v => cc.setBright(Math.round(v * 100)) }
+
+                // ---------- now playing ----------
+                Rectangle {
+                    visible: !!cc.player
+                    Layout.fillWidth: true; Layout.topMargin: 4; height: 96; radius: 22; color: cc.s1
+                    ClippingRectangle {
+                        x: 12; y: 12; width: 72; height: 72; radius: 14; color: cc.s2
+                        Image { anchors.fill: parent; source: cc.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 160 }
+                    }
+                    Column {
+                        x: 98; y: 16; width: parent.width - 98 - 14; spacing: 3
+                        Text { width: parent.width; elide: Text.ElideRight; text: cc.player ? cc.player.trackTitle : ""; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 13; font.bold: true }
+                        Text { width: parent.width; elide: Text.ElideRight; text: cc.player ? (cc.player.trackArtist || cc.player.identity) : ""; color: cc.dim; font.family: Theme.font; font.pixelSize: 11 }
+                    }
+                    Item {   // progress
+                        visible: !!(cc.player && cc.player.length > 0)
+                        x: 98; y: 66; width: parent.width - 98 - 132; height: 12
+                        Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width; height: 4; radius: 2; color: "#2c2c2c" }
+                        Rectangle { anchors.verticalCenter: parent.verticalCenter; height: 4; radius: 2; color: "#e6e6e6"
+                                    width: cc.player && cc.player.length > 0 ? parent.width * Math.min(1, cc.player.position / cc.player.length) : 0 }
+                        MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor
+                                    onClicked: m => { if (cc.player && cc.player.canSeek) cc.player.position = (m.x / width) * cc.player.length } }
+                    }
+                    Row {
+                        anchors.right: parent.right; anchors.rightMargin: 12; y: 56; spacing: 2
                         Repeater {
-                            model: [["\u{f0100}", "screenshot", () => cc.go(["sh", "-c", "sleep 0.3; ~/.config/hypr/scripts/screenshot.sh region"])],
-                                    ["\u{f014c}", "clipboard", () => cc.qs("clipboard")],
-                                    ["\u{f02e9}", "wallpaper", () => cc.qs("wallpaper")],
-                                    ["\u{f082e}", "notes", () => cc.qs("notes")]]
+                            model: [["\u{f04ae}", "prev"], ["", "toggle"], ["\u{f04ad}", "next"]]
                             Rectangle {
                                 required property var modelData
-                                Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 12
-                                color: sh.containsMouse ? Theme.on : "#0affffff"; border.width: 1; border.color: sh.containsMouse ? Theme.on : "#14ffffff"
-                                Behavior on color { ColorAnimation { duration: 130 } }
-                                Column {
-                                    anchors.centerIn: parent; spacing: 5
-                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[0]; color: sh.containsMouse ? Theme.onText : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 17 }
-                                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[1]; color: sh.containsMouse ? "#99000000" : "#7a7a7a"; font.family: Theme.font; font.pixelSize: 9 }
-                                }
-                                MouseArea { id: sh; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData[2]() }
+                                readonly property bool main: modelData[1] === "toggle"
+                                width: main ? 40 : 32; height: 32; radius: 16
+                                color: main ? cc.hi : (pm.containsMouse ? cc.s2 : "transparent")
+                                Text { anchors.centerIn: parent; font.family: Theme.font; font.pixelSize: 14; color: main ? cc.ink : "#e6e6e6"
+                                       text: main ? (cc.player && cc.player.isPlaying ? "\u{f03e4}" : "\u{f040a}") : modelData[0] }
+                                MouseArea { id: pm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                    onClicked: { const p = cc.player; if (!p) return; modelData[1] === "prev" ? p.previous() : modelData[1] === "next" ? p.next() : p.togglePlaying() } }
                             }
                         }
                     }
-                    Rectangle {
-                        width: parent.width; height: 40; radius: 12; color: "#06ffffff"; border.width: 1; border.color: "#10ffffff"
-                        visible: SystemTray.items.values.length > 0 || Updates.total > 0
-                        RowLayout {
-                            anchors.fill: parent; anchors.leftMargin: 14; anchors.rightMargin: 6; spacing: 14
-                            Repeater {
-                                model: SystemTray.items
-                                Item {
-                                    required property var modelData
-                                    width: 16; height: 16
-                                    IconImage { id: trIcon; anchors.fill: parent; source: modelData.icon; visible: false }
-                                    MultiEffect { anchors.fill: trIcon; source: trIcon; saturation: -1.0; opacity: trM.containsMouse ? 1 : 0.6 }
-                                    MouseArea {
-                                        id: trM; anchors.fill: parent; anchors.margins: -4; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                        acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                        onClicked: m => {
-                                            if (m.button === Qt.RightButton || modelData.onlyMenu) {
-                                                const win = parent.QsWindow.window
-                                                const p = mapToItem(win.contentItem, 0, height + 6)
-                                                modelData.display(win, p.x, p.y)
-                                            } else modelData.activate()
-                                        }
-                                    }
+                }
+
+                // ---------- notifications ----------
+                RowLayout {
+                    Layout.fillWidth: true; Layout.topMargin: 6
+                    Text { text: "notifications"; color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
+                    Text { text: Notifs.count > 0 ? String(Notifs.count) : ""; color: "#5e5e5e"; font.family: Theme.font; font.pixelSize: 11; Layout.fillWidth: true }
+                    Text {
+                        visible: Notifs.count > 0; text: "clear all"; color: clm.containsMouse ? "#ffffff" : "#6e6e6e"; font.family: Theme.font; font.pixelSize: 11
+                        MouseArea { id: clm; anchors.fill: parent; anchors.margins: -6; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Notifs.clearAll() }
+                    }
+                }
+                Rectangle {
+                    visible: Notifs.count === 0
+                    Layout.fillWidth: true; height: 52; radius: 18; color: "transparent"; border.width: 1; border.color: "#1affffff"
+                    Text { anchors.centerIn: parent; text: "nothing new"; color: "#5e5e5e"; font.family: Theme.font; font.pixelSize: 11 }
+                }
+                Repeater {
+                    model: Notifs.model
+                    NotifCard { required property var modelData; required property int index; visible: index < 3; notif: modelData; Layout.fillWidth: true }
+                }
+
+                // ---------- shortcuts ----------
+                RowLayout {
+                    Layout.fillWidth: true; Layout.topMargin: 8; spacing: 8
+                    Repeater {
+                        model: [["\u{f0100}", "screenshot", () => cc.go(["sh", "-c", "sleep 0.3; ~/.config/hypr/scripts/screenshot.sh region"])],
+                                ["\u{f014c}", "clipboard", () => cc.qs("clipboard")],
+                                ["\u{f02e9}", "wallpaper", () => cc.qs("wallpaper")],
+                                ["\u{f082e}", "notes", () => cc.qs("notes")]]
+                        Rectangle {
+                            required property var modelData
+                            Layout.fillWidth: true; Layout.preferredWidth: 1; height: 62; radius: 18
+                            color: scm.containsMouse ? cc.hi : cc.s1
+                            Behavior on color { ColorAnimation { duration: 120 } }
+                            Column {
+                                anchors.centerIn: parent; spacing: 6
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[0]; color: scm.containsMouse ? cc.ink : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 17 }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[1]; color: scm.containsMouse ? cc.ink : cc.dim; font.family: Theme.font; font.pixelSize: 10 }
+                            }
+                            MouseArea { id: scm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData[2]() }
+                        }
+                    }
+                }
+
+                // ---------- tray + updates ----------
+                RowLayout {
+                    visible: SystemTray.items.values.length > 0 || Updates.total > 0
+                    Layout.fillWidth: true; Layout.topMargin: 2; spacing: 14
+                    Item { width: 4 }
+                    Repeater {
+                        model: SystemTray.items
+                        Item {
+                            required property var modelData
+                            width: 16; height: 16
+                            IconImage { id: trIcon; anchors.fill: parent; source: modelData.icon; visible: false }
+                            MultiEffect { anchors.fill: trIcon; source: trIcon; saturation: -1.0; opacity: trM.containsMouse ? 1 : 0.5 }
+                            MouseArea {
+                                id: trM; anchors.fill: parent; anchors.margins: -5; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                onClicked: m => {
+                                    if (m.button === Qt.RightButton || modelData.onlyMenu) {
+                                        const win = parent.QsWindow.window
+                                        const p = mapToItem(win.contentItem, 0, height + 6)
+                                        modelData.display(win, p.x, p.y)
+                                    } else modelData.activate()
                                 }
                             }
-                            Item { Layout.fillWidth: true }
-                            Rectangle {
-                                visible: Updates.total > 0
-                                width: upl.implicitWidth + 24; height: 28; radius: 14
-                                color: um.containsMouse ? "#ffffff" : Theme.on
-                                Text { id: upl; anchors.centerIn: parent; text: "\u{f06b0}  " + Updates.total + " updates"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 10; font.bold: true }
-                                MouseArea { id: um; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                    onClicked: cc.go(["kitty", "--class", "updater", "-e", "bash", "-c", Quickshell.env("HOME") + "/.local/bin/safe-update.sh"]) }
-                            }
                         }
+                    }
+                    Item { Layout.fillWidth: true }
+                    Rectangle {
+                        visible: Updates.total > 0
+                        width: upl.implicitWidth + 28; height: 32; radius: 16
+                        color: um.containsMouse ? cc.hi : cc.s1
+                        Text { id: upl; anchors.centerIn: parent; text: "\u{f06b0}  " + Updates.total + " updates"; color: um.containsMouse ? cc.ink : "#e6e6e6"; font.family: Theme.font; font.pixelSize: 11 }
+                        MouseArea { id: um; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: cc.go(["kitty", "--class", "updater", "-e", "bash", "-c", Quickshell.env("HOME") + "/.local/bin/safe-update.sh"]) }
                     }
                 }
             }

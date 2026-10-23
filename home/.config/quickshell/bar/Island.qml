@@ -1,6 +1,6 @@
 // The bar (main screen): one see-through glass strip with rounded corners.
 //   left:   launcher · workspaces
-//   middle: time · date · weather
+//   middle: time (click: date, weather, month)
 //   right:  control center · power
 // When the song changes, a small card drops out under the main screen's bar for a moment. Volume changes show
 // nothing on purpose. Made by Claude.
@@ -42,9 +42,9 @@ PanelWindow {
         x: 10; y: 8
         width: parent.width - 20
         height: Theme.barHeight
-        radius: 10
-        color: Theme.mix(Qt.rgba(0.04, 0.04, 0.04, 0.45), Theme.tint, 0.10 * Theme.tintOn)   // see-through glass
-        border.width: 1; border.color: "#1cffffff"
+        radius: 14
+        color: Qt.rgba(0.043, 0.043, 0.043, 0.82)   // same dark surface as the panels, a touch see-through
+        border.width: 1; border.color: "#14ffffff"
 
         Row {   // left: launcher + workspaces
             anchors.left: parent.left; anchors.leftMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
@@ -53,7 +53,7 @@ PanelWindow {
             Workspaces { anchors.verticalCenter: parent.verticalCenter }
         }
 
-        ClockPill { id: clockPill; anchors.centerIn: parent }   // middle: time · date · weather
+        ClockPill { id: clockPill; anchors.centerIn: parent }   // middle: the time
 
         Row {   // right: control center + power, nothing else
             anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
@@ -68,11 +68,11 @@ PanelWindow {
         id: drop
         visible: win.isMain && opacity > 0.01
         anchors.horizontalCenter: parent.horizontalCenter
-        width: mediaPeek.implicitWidth + 28; height: 50; radius: 10
+        width: mediaPeek.implicitWidth + 28; height: 54; radius: 18
         y: win.peek !== "" ? bar.y + bar.height + 6 : bar.y + 4
         opacity: win.peek !== "" ? 1 : 0
         scale: win.peek !== "" ? 1 : 0.9
-        color: Theme.mix(Qt.rgba(0.04, 0.04, 0.04, 0.85), Theme.tint, 0.10 * Theme.tintOn); border.width: 1; border.color: "#1cffffff"
+        color: "#f00b0b0b"; border.width: 1; border.color: "#14ffffff"
         Behavior on y { NumberAnimation { duration: 340; easing.type: Easing.OutCubic } }
         Behavior on opacity { NumberAnimation { duration: 200 } }
         Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }

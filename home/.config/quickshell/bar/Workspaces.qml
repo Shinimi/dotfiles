@@ -104,7 +104,7 @@ Pill {
                     anchors.centerIn: parent
                     opacity: isActive ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 160 } }
                     text: Theme.wsName(wsId); color: "#0c0c0c"; font.bold: true
-                    font.family: Settings.cur("ws_kanji") ? "Noto Sans CJK JP" : Theme.font; font.pixelSize: Settings.cur("ws_kanji") ? 11 : 10
+                    font.family: Theme.font; font.pixelSize: 10
                 }
             }
             MouseArea {

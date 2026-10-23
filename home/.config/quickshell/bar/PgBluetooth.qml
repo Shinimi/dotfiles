@@ -9,7 +9,7 @@ Column {
     readonly property var adapter: Bluetooth.defaultAdapter
     Rectangle {
         visible: !pg.adapter
-        width: parent.width; height: 170; radius: 2; color: Theme.card; border.width: 1; border.color: "#14eaeaea"
+        width: parent.width; height: 170; radius: 22; color: "#131313"
         Column {
             anchors.centerIn: parent; spacing: 8
             Label { anchors.horizontalCenter: parent.horizontalCenter; text: "\u{f00b2}"; color: Theme.line; font.pixelSize: 40 }
@@ -29,7 +29,7 @@ Column {
             Rectangle {
                 id: bd
                 required property var modelData
-                width: parent.width; height: 48; radius: 2; color: "#33111111"
+                width: parent.width; height: 48; radius: 14; color: "#1a1a1a"
                 Row {
                     x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                     Label { text: bd.modelData.connected ? "\u{f00b1}" : "\u{f00af}"; color: bd.modelData.connected ? Theme.blue : Theme.muted; font.pixelSize: 16 }

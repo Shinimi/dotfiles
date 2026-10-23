@@ -11,6 +11,7 @@ Scope {
     default property alias content: body.data
     property int padding: 16
     property int contentWidth: 300
+    property int spacing: 12
     property bool visible: false
     // the bar only lives on the main screen; look it up directly (robust across live reloads)
     readonly property var barScreen: Quickshell.screens.find(s => s.name === "DP-1") || Quickshell.screens[0]
@@ -60,10 +61,10 @@ Scope {
         Rectangle {
             id: frame
             anchors.fill: parent
-            radius: 14
-            color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn)
+            radius: 24
+            color: "#f00b0b0b"
             border.width: 1
-            border.color: "#3dffffff"
+            border.color: "#14ffffff"
             opacity: root.visible ? 1 : 0
             Behavior on opacity { NumberAnimation { duration: 140 } }
             focus: true

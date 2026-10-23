@@ -100,25 +100,23 @@ Scope {
         implicitWidth: 620; implicitHeight: 680
 
         Rectangle {
-            anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.95), Theme.tint, 0.07 * Theme.tintOn)
-            border.width: 1; border.color: "#3dffffff"
+            anchors.fill: parent; radius: 26; color: "#f50b0b0b"
+            border.width: 1; border.color: "#14ffffff"
 
             Row {
                 id: head; x: 20; y: 16; spacing: 12
-                Text { text: "CLIPBOARD"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 13; font.letterSpacing: 4; font.bold: true }
-                Text { text: "//"; color: "#454545"; font.family: Theme.font; font.pixelSize: 13 }
-                Text { text: "履歴"; color: "#7a7a7a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 13 }
+                Text { text: "clipboard"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
             }
             Row {
                 anchors.right: parent.right; anchors.rightMargin: 16; y: 12; spacing: 4
                 Repeater {
-                    model: [["all", "ALL"], ["text", "TEXT"], ["img", "IMAGES"]]
+                    model: [["all", "all"], ["text", "text"], ["img", "images"]]
                     Rectangle {
                         required property var modelData
                         readonly property bool on: root.kind === modelData[0]
-                        width: kl.implicitWidth + 18; height: 24; radius: 2
+                        width: kl.implicitWidth + 18; height: 24; radius: 12
                         color: on ? Theme.on : (km.containsMouse ? "#14ffffff" : "transparent"); border.width: 1; border.color: on ? Theme.on : "#33ffffff"
-                        Text { id: kl; anchors.centerIn: parent; text: modelData[1]; color: on ? Theme.onText : "#a0a0a0"; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5; font.bold: on }
+                        Text { id: kl; anchors.centerIn: parent; text: modelData[1]; color: on ? Theme.onText : "#a0a0a0"; font.family: Theme.font; font.pixelSize: 9; font.bold: on }
                         MouseArea { id: km; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.kind = modelData[0] }
                     }
                 }
@@ -133,8 +131,7 @@ Scope {
                 onTextChanged: root.query = text
                 placeholderText: "search clipboard…"; placeholderTextColor: "#555555"
                 color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 13; leftPadding: 28
-                background: Rectangle { radius: 2; color: "#0cffffff"; border.width: 1; border.color: search.activeFocus ? "#77ffffff" : "#26ffffff"
-                                        Rectangle { width: 2; height: parent.height; color: "#ffffff" } }
+                background: Rectangle { radius: 14; color: "#161616"; border.width: 1; border.color: search.activeFocus ? "#40ffffff" : "transparent" }
                 Text { x: 11; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 15 }
                 Keys.onEscapePressed: root.visible = false
                 Keys.onReturnPressed: root.paste(root.shown[root.sel])
@@ -159,16 +156,16 @@ Scope {
                     readonly property bool current: index === root.sel
                     width: list.width
                     height: modelData.img ? 112 : Math.min(78, txt.implicitHeight + 26)
-                    radius: 2
+                    radius: 12
                     color: current ? "#1cffffff" : (rowMouse.containsMouse ? "#0affffff" : "transparent")
                     border.width: 1; border.color: current ? "#66ffffff" : "#1affffff"
-                    Rectangle { visible: row.current; width: 2; height: parent.height; color: "#ffffff" }
+                    
                     MouseArea {
                         id: rowMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onContainsMouseChanged: if (containsMouse) root.sel = row.index
                         onClicked: root.paste(row.modelData)
                     }
-                    Text { x: 10; y: 12; text: row.modelData.pinned ? "\u{f0403}" : String(row.index + 1).padStart(2, "0")
+                    Text { x: 10; y: 12; text: row.modelData.pinned ? "\u{f0403}" : ""
                            color: row.modelData.pinned ? "#ffffff" : "#4a4a4a"; font.family: Theme.font; font.pixelSize: row.modelData.pinned ? 12 : 10 }
                     Text {
                         id: txt
@@ -181,7 +178,7 @@ Scope {
                     Rectangle {
                         visible: row.modelData.img
                         anchors { left: parent.left; top: parent.top; bottom: parent.bottom; leftMargin: 38; topMargin: 8; bottomMargin: 8 }
-                        width: 170; radius: 1; color: "#0cffffff"; clip: true; border.width: 1; border.color: "#1affffff"
+                        width: 170; radius: 6; color: "#0cffffff"; clip: true; border.width: 1; border.color: "#1affffff"
                         Image {
                             anchors.fill: parent; anchors.margins: 2
                             source: row.modelData.img ? "file://" + row.modelData.path : ""
@@ -192,7 +189,7 @@ Scope {
                     Text {
                         visible: row.modelData.img
                         anchors { left: parent.left; leftMargin: 222; verticalCenter: parent.verticalCenter }
-                        text: "IMAGE\n" + row.modelData.text
+                        text: "image\n" + row.modelData.text
                         color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10; lineHeight: 1.4
                     }
                     Row {
@@ -201,13 +198,13 @@ Scope {
                         spacing: 2
                         opacity: rowMouse.containsMouse || row.current || pinM.containsMouse || delM.containsMouse ? 1 : 0
                         Rectangle {
-                            width: 28; height: 28; radius: 2; color: pinM.containsMouse ? "#1fffffff" : "transparent"
+                            width: 28; height: 28; radius: 12; color: pinM.containsMouse ? "#1fffffff" : "transparent"
                             Text { anchors.centerIn: parent; text: row.modelData.pinned ? "\u{f0404}" : "\u{f0403}"; color: pinM.containsMouse || row.modelData.pinned ? "#ffffff" : "#7a7a7a"
                                    font.family: Theme.font; font.pixelSize: 14 }
                             MouseArea { id: pinM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.togglePin(row.modelData) }
                         }
                         Rectangle {
-                            width: 28; height: 28; radius: 2; color: delM.containsMouse ? "#1fffffff" : "transparent"
+                            width: 28; height: 28; radius: 12; color: delM.containsMouse ? "#1fffffff" : "transparent"
                             Text { anchors.centerIn: parent; text: "\u{f0156}"; color: delM.containsMouse ? "#ffffff" : "#7a7a7a"; font.family: Theme.font; font.pixelSize: 14 }
                             MouseArea { id: delM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.remove(row.modelData) }
                         }
@@ -227,8 +224,8 @@ Scope {
                 Rectangle {
                     visible: root.pendingDelete !== null
                     x: 16; anchors.verticalCenter: parent.verticalCenter
-                    width: ul.implicitWidth + 22; height: 26; radius: 2; color: Theme.on
-                    Text { id: ul; anchors.centerIn: parent; text: "DELETED · UNDO"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5; font.bold: true }
+                    width: ul.implicitWidth + 22; height: 26; radius: 12; color: Theme.on
+                    Text { id: ul; anchors.centerIn: parent; text: "deleted · undo"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 9; font.bold: true }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { undoTimer.stop(); root.pendingDelete = null } }
                 }
                 Text {
@@ -240,10 +237,10 @@ Scope {
                 Rectangle {
                     visible: root.items.length > 0
                     anchors.right: parent.right; anchors.rightMargin: 16; anchors.verticalCenter: parent.verticalCenter
-                    width: wl.implicitWidth + 22; height: 26; radius: 2
+                    width: wl.implicitWidth + 22; height: 26; radius: 12
                     color: wm.containsMouse ? "#14ffffff" : "transparent"; border.width: 1; border.color: "#33ffffff"
-                    Text { id: wl; anchors.centerIn: parent; text: wm.armed ? "CLICK AGAIN" : "CLEAR HISTORY"; color: wm.armed ? "#ffffff" : "#a0a0a0"
-                           font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5 }
+                    Text { id: wl; anchors.centerIn: parent; text: wm.armed ? "click again" : "clear history"; color: wm.armed ? "#ffffff" : "#a0a0a0"
+                           font.family: Theme.font; font.pixelSize: 9 }
                     MouseArea {
                         id: wm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         property bool armed: false

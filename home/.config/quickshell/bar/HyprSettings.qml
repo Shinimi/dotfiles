@@ -6,7 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
-import "."   // our own Label (Geist Mono) wins over the Qt Controls one
+import "."   // our own Label wins over the Qt Controls one
 
 Scope {
     id: root
@@ -188,8 +188,8 @@ Scope {
 
         Rectangle {
             id: frame
-            anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn)
-            border.width: 1; border.color: "#3dffffff"
+            anchors.fill: parent; radius: 30; color: "#f70b0b0b"
+            border.width: 1; border.color: "#14ffffff"
             focus: true
             Keys.onEscapePressed: root.visible = false
             Keys.onPressed: e => { if ((e.modifiers & Qt.ControlModifier) && e.key === Qt.Key_S) { Settings.apply(); e.accepted = true } }
@@ -199,37 +199,34 @@ Scope {
             // ================= sidebar =================
             Rectangle {
                 id: side
-                x: 1; y: 1; width: 260; height: parent.height - 2
-                radius: 0; color: "#26000000"
-                Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: "#1fffffff" }
+                x: 0; y: 0; width: 268; height: parent.height
+                color: "transparent"
 
                 Column {
                     id: sideTop
                     x: 16; y: 20; width: parent.width - 32; spacing: 14
                     Rectangle {   // you
-                        width: parent.width; height: 62; radius: 2
-                        color: root.page === "account" ? "#1fffffff" : (um.containsMouse ? "#12ffffff" : "transparent")
-                        border.width: 1; border.color: root.page === "account" ? "#66ffffff" : "#26ffffff"
+                        width: parent.width; height: 66; radius: 20
+                        color: root.page === "account" ? "#222222" : (um.containsMouse ? "#1c1c1c" : "#151515")
                         Row {
                             x: 10; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                             Avatar { size: 42; radius: 21; pick: Settings.get("avatar") }
                             Column {
                                 anchors.verticalCenter: parent.verticalCenter
                                 Label { text: Settings.get("user_name") || Quickshell.env("USER"); font.pixelSize: 15; font.weight: Font.Bold }
-                                Label { text: "Account · picture & name"; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal }
+                                Label { text: "picture and name"; color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
                             }
                         }
                         MouseArea { id: um; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = "account" }
                     }
                     TextField {
                         id: find
-                        width: parent.width; height: 36
-                        placeholderText: "Search settings…"; placeholderTextColor: Theme.muted
+                        width: parent.width; height: 40
+                        placeholderText: "search settings"; placeholderTextColor: Theme.muted
                         onTextEdited: { root.search = text; if (root.shownPages.length) root.page = root.shownPages[0][0] }
                         Keys.onEscapePressed: { text = ""; root.search = "" }
                         color: Theme.fg; font.family: Theme.font; font.pixelSize: 12; leftPadding: 34
-                        background: Rectangle { radius: 2; color: "#0cffffff"; border.width: 1; border.color: find.activeFocus ? "#99ffffff" : "#26ffffff"
-                                                Rectangle { visible: find.activeFocus; width: 2; height: parent.height; color: "#ffffff" } }
+                        background: Rectangle { radius: 14; color: "#151515"; border.width: 1; border.color: find.activeFocus ? "#40ffffff" : "transparent" }
                         Label { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 14 }
                     }
                 }
@@ -243,18 +240,18 @@ Scope {
                     section.delegate: Item {
                         required property string section
                         width: nav.width; height: 30
-                        Label { x: 6; anchors.bottom: parent.bottom; anchors.bottomMargin: 6; text: "// " + parent.section.toUpperCase(); color: "#5a5a5a"; font.pixelSize: 9; font.letterSpacing: 1.8 }
+                        Label { x: 6; anchors.bottom: parent.bottom; anchors.bottomMargin: 6; text: parent.section.toLowerCase(); color: "#555555"; font.pixelSize: 10 }
                     }
                     delegate: Rectangle {
                         required property var modelData
                         readonly property bool cur: root.page === modelData[0]
-                        width: nav.width; height: 34; radius: 2
-                        color: cur ? Theme.on : (nm.containsMouse ? "#12ffffff" : "transparent")
+                        width: nav.width; height: 38; radius: 14
+                        color: cur ? "#ececec" : (nm.containsMouse ? "#181818" : "transparent")
                         Behavior on color { ColorAnimation { duration: 120 } }
                         Row {
                             x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
-                            Label { width: 18; text: modelData[1]; color: cur ? Theme.onText : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
-                            Label { text: modelData[2].toUpperCase(); color: cur ? Theme.onText : "#b8b8b8"; font.pixelSize: 10; font.letterSpacing: 1.5
+                            Label { width: 18; text: modelData[1]; color: cur ? "#0b0b0b" : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
+                            Label { text: modelData[2]; color: cur ? "#0b0b0b" : "#c4c4c4"; font.pixelSize: 12
                                     font.bold: cur; anchors.verticalCenter: parent.verticalCenter }
                         }
                         Rectangle { visible: root.pageDirty(modelData[0]); anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
@@ -274,18 +271,17 @@ Scope {
             Rectangle {
                 id: applyBar
                 visible: !Settings.cur("instant_apply")
-                anchors { left: side.right; right: parent.right; bottom: parent.bottom; margins: 14 }
-                height: 56; radius: 2
-                color: Settings.dirty ? "#14ffffff" : "transparent"
-                border.width: 1; border.color: Settings.dirty ? "#99ffffff" : "#26ffffff"
+                anchors { left: side.right; right: parent.right; bottom: parent.bottom; margins: 16; leftMargin: 4 }
+                height: 60; radius: 22
+                color: Settings.dirty ? "#1c1c1c" : "#131313"
                 Behavior on color { ColorAnimation { duration: 160 } }
                 RowLayout {
-                    anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 10; spacing: 10
-                    Rectangle { width: 9; height: 9; radius: 5; color: Settings.dirty ? Theme.yellow : Theme.green }
+                    anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 12; spacing: 10
+                    Rectangle { width: 8; height: 8; radius: 4; color: Settings.dirty ? "#ffffff" : "#3a3a3a" }
                     Column {
                         Layout.fillWidth: true
                         Label { text: Settings.dirty ? Settings.changedKeys.length + (Settings.changedKeys.length === 1 ? " change" : " changes") + " waiting" : "Everything is applied"; font.pixelSize: 13 }
-                        Label { text: Settings.dirty ? "Press Apply (or Ctrl+S) to use them · Discard to undo" : "Change anything, then press Apply"; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal }
+                        Label { text: Settings.dirty ? "Apply (Ctrl+S) to use them, Discard to undo" : "change anything, then press Apply"; color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
                     }
                     SetButton { visible: Settings.dirty; icon: "\u{f0156}"; text: "Discard"; accent: Theme.red; onClicked: { Settings.discard(); root.lastGoodMonitors = null } }
                     SetButton {
@@ -298,7 +294,7 @@ Scope {
             // ================= page =================
             Flickable {
                 id: flick
-                anchors { left: side.right; right: parent.right; top: parent.top; bottom: applyBar.visible ? applyBar.top : parent.bottom; margins: 24; bottomMargin: 10 }
+                anchors { left: side.right; right: parent.right; top: parent.top; bottom: applyBar.visible ? applyBar.top : parent.bottom; margins: 26; leftMargin: 8; bottomMargin: 10 }
                 contentHeight: pageCol.implicitHeight; clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 Connections { target: root; function onPageChanged() { flick.contentY = 0; fadeIn.restart() } }
@@ -311,20 +307,9 @@ Scope {
 
                     Column {
                         spacing: 4; bottomPadding: 6
-                        Row {
-                            spacing: 12
-                            Text { anchors.baseline: ttl.baseline; text: String(root.pages.findIndex(p => p[0] === root.page) + 1).padStart(2, "0")
-                                   color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 13 }
-                            Text { anchors.baseline: ttl.baseline; text: "//"; color: "#454545"; font.family: Theme.font; font.pixelSize: 13 }
-                            Text { id: ttl; text: root.pageInfo[2].toUpperCase(); color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 20; font.letterSpacing: 3; font.bold: true }
-                            Text { anchors.baseline: ttl.baseline; text: ({ account: "利用者", appearance: "外観", effects: "効果", theme: "主題", glass: "硝子", wallpaper: "壁紙",
-                                     bar: "通知", comfort: "快適", extras: "追加", shortcuts: "近道", defaults: "既定", autostart: "起動", games: "遊戯", display: "表示", sound: "音響",
-                                     input: "入力", network: "通信", bluetooth: "無線", storage: "記憶", power: "電力", datetime: "日時", about: "情報" })[root.page] || ""
-                                   color: "#7a7a7a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 14 }
-                        }
-                        Rectangle { width: pageCol.width; height: 1; color: "#1affffff" }
+                        Text { id: ttl; text: root.pageInfo[2]; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 24; font.bold: true }
                         Label {
-                            color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal
+                            color: "#6e6e6e"; font.pixelSize: 12; font.weight: Font.Normal
                             text: ({ comfort: "Little things that make the desktop nicer to live with", account: "Your picture and name", appearance: "Colours, borders, gaps and window layout",
                                      effects: "Glow, shadows, dimming and animations", theme: "Icons, folders, cursor and fonts",
                                      glass: "How see-through windows and panels are", wallpaper: "Pick a picture for each screen",
@@ -365,8 +350,8 @@ Scope {
                                         readonly property bool cur: Settings.get("accent") === modelData[0]
                                         spacing: 6
                                         Rectangle {
-                                            width: 76; height: 50; radius: 2
-                                            border.width: sw.cur ? 2 : 0; border.color: Theme.fg
+                                            width: 76; height: 50; radius: 16
+                                            border.width: sw.cur ? 2 : 0; border.color: "#ffffff"
                                             gradient: Gradient { orientation: Gradient.Horizontal
                                                 GradientStop { position: 0; color: sw.modelData[2][0] }
                                                 GradientStop { position: 0.5; color: sw.modelData[2][1] }
@@ -469,7 +454,7 @@ Scope {
                                             id: fc
                                             required property string modelData
                                             readonly property bool cur: Settings.get("folder_color") === modelData
-                                            width: 57; height: 70; radius: 2
+                                            width: 57; height: 70; radius: 12
                                             color: cur ? Qt.rgba(0.88, 0.88, 0.88, 0.16) : (fcm.containsMouse ? "#1eeaeaea" : "transparent")
                                             border.width: cur ? 1 : 0; border.color: Theme.blue
                                             Image { x: 10; y: 6; width: 36; height: 36; sourceSize.width: 72; source: "file:///usr/share/icons/Papirus/48x48/places/folder-" + fc.modelData + ".svg" }
@@ -506,7 +491,7 @@ Scope {
                                             id: fo
                                             required property string modelData
                                             readonly property bool cur: Settings.get("ui_font") === modelData
-                                            width: parent.width; height: 34; radius: 2
+                                            width: parent.width; height: 34; radius: 12
                                             color: cur ? Qt.rgba(0.88, 0.88, 0.88, 0.16) : (fom.containsMouse ? "#1eeaeaea" : "#33111111")
                                             border.width: cur ? 1 : 0; border.color: Theme.blue
                                             Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: fo.modelData + " — The quick brown fox"; font.family: fo.modelData; font.pixelSize: 13; color: fo.cur ? Theme.fg : Theme.fgDim }
@@ -623,12 +608,11 @@ Scope {
                             SetToggle { label: "Hot corner"; desc: "push the mouse into the top-left corner for the overview"; key: "hot_corner" }
                             SetToggle { label: "Pause music when locking"; desc: "Spotify & co. stop when the screen locks"; key: "pause_on_lock" }
                             SetToggle { label: "Song card"; desc: "a small card drops under the bar when the song changes"; key: "island_peeks" }
-                            SetToggle { label: "Games get their own workspace"; desc: "a game opens on 五 (5); when it closes you're back where you were"; key: "game_workspace" }
+                            SetToggle { label: "Games get their own workspace"; desc: "a game opens on workspace 5; when it closes you're back where you were"; key: "game_workspace" }
                             SetToggle { label: "ASCII living wallpaper"; desc: "your wallpaper drawn in glowing characters, slowly moving"; key: "ascii_wall" }
                             SetToggle { label: "Wallpaper tint"; desc: "the glass picks up a little of your wallpaper's colour"; key: "wall_tint" }
                             SetToggle { label: "Login hand-off"; desc: "after logging in, the ASCII dunes dissolve into your desktop"; key: "login_handoff" }
                             SetToggle { label: "Workspace previews"; desc: "hover a workspace in the bar to see its windows"; key: "ws_preview" }
-                            SetToggle { label: "Kanji workspaces"; desc: "一 二 三 四 instead of 1 2 3 4"; key: "ws_kanji" }
                             SetToggle { label: "Screensaver"; desc: "your wallpaper in glowing characters, halfway to the auto-lock"; key: "screensaver" }
                             SetChoice {
                                 label: "Wallpaper shuffle"; desc: "a different monochrome wallpaper now and then"
@@ -713,7 +697,7 @@ Scope {
 
                         Rectangle {   // "keep these settings?" after a screen change
                             visible: root.undoMonitors !== null
-                            width: parent.width; height: 58; radius: 2
+                            width: parent.width; height: 58; radius: 12
                             color: Qt.rgba(0.84, 0.84, 0.84, 0.14); border.width: 1; border.color: Theme.yellow
                             RowLayout {
                                 anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 12; spacing: 10
@@ -736,7 +720,7 @@ Scope {
                                     id: monCard
                                     required property var modelData
                                     readonly property bool sel: root.selMon === modelData.name
-                                    width: (parent.width - 14) / 2; height: 112; radius: 2
+                                    width: (parent.width - 14) / 2; height: 112; radius: 12
                                     color: sel ? Qt.rgba(0.88, 0.88, 0.88, 0.12) : (mcm.containsMouse ? "#1eeaeaea" : Theme.card)
                                     border.width: 1; border.color: sel ? Theme.blue : "#14eaeaea"
                                     Behavior on color { ColorAnimation { duration: 120 } }
@@ -877,7 +861,7 @@ Scope {
                     Column {
                         visible: root.page === "about"; width: parent.width; spacing: 14
                         Rectangle {
-                            width: parent.width; height: 120; radius: 2; color: Theme.card; border.width: 1; border.color: "#14eaeaea"
+                            width: parent.width; height: 120; radius: 22; color: "#131313"
                             Row {
                                 x: 22; anchors.verticalCenter: parent.verticalCenter; spacing: 20
                                 Label { text: "\u{f08c7}"; font.pixelSize: 64; color: Theme.blue; anchors.verticalCenter: parent.verticalCenter }
@@ -897,7 +881,7 @@ Scope {
                                         ["\u{f03d6}", "Packages", root.info.pkgs, Theme.blue], ["\u{f0aaa}", "Updates", Updates.total > 0 ? Updates.total + " waiting" : "up to date", Updates.total > 0 ? Theme.yellow : Theme.green]]
                                 Rectangle {
                                     required property var modelData
-                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 2; color: Theme.card
+                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 18; color: "#131313"
                                     Row {
                                         x: 14; anchors.verticalCenter: parent.verticalCenter; spacing: 12
                                         Label { text: modelData[0]; color: modelData[3]; font.pixelSize: 18; anchors.verticalCenter: parent.verticalCenter }

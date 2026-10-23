@@ -28,9 +28,9 @@ Column {
             id: row
             required property var modelData
             readonly property var p: pg.prof(modelData.id)
-            width: pg.width; height: 118; radius: 2; color: Theme.card; border.width: 1; border.color: "#14eaeaea"
+            width: pg.width; height: 118; radius: 22; color: "#131313"
             ClippingRectangle {
-                x: 12; y: 12; width: 64; height: 94; radius: 2; color: Theme.bgAlt
+                x: 12; y: 12; width: 64; height: 94; radius: 12; color: Theme.bgAlt
                 Image { anchors.fill: parent; source: Theme.fileUrl(row.modelData.cover); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 128 }
             }
             Column {
@@ -55,7 +55,7 @@ Column {
                                         id: chip
                                         required property var modelData
                                         readonly property bool cur: row.p[grp.modelData[0]] === modelData[0]
-                                        width: cl.implicitWidth + 16; height: 24; radius: 2
+                                        width: cl.implicitWidth + 16; height: 24; radius: 12
                                         color: cur ? Theme.purple : (cm.containsMouse ? Theme.bgHover : Theme.bgAlt)
                                         Label { id: cl; anchors.centerIn: parent; text: chip.modelData[1]; color: chip.cur ? Theme.bg : Theme.fgDim; font.pixelSize: 10 }
                                         MouseArea { id: cm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: pg.setProf(row.modelData.id, grp.modelData[0], chip.modelData[0]) }

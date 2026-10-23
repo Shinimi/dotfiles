@@ -53,11 +53,9 @@ Scope {
             Row {
                 id: head
                 spacing: 12
-                Text { text: "SHORTCUTS"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 18; font.letterSpacing: 4; font.bold: true }
-                Text { anchors.baseline: parent.children[0].baseline; text: "//"; color: "#454545"; font.family: Theme.font; font.pixelSize: 14 }
-                Text { anchors.baseline: parent.children[0].baseline; text: "近道"; color: "#7a7a7a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 15 }
-                Text { anchors.baseline: parent.children[0].baseline; leftPadding: 18; text: root.shown.length + " / " + root.all.length + " KEYS"
-                       color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 10; font.letterSpacing: 2 }
+                Text { text: "shortcuts"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 18; font.bold: true }
+                Text { anchors.baseline: parent.children[0].baseline; leftPadding: 6; text: root.shown.length + " of " + root.all.length
+                       color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 11 }
             }
             TextField {
                 id: find
@@ -67,8 +65,7 @@ Scope {
                 onTextChanged: root.q = text
                 placeholderText: "filter…"; placeholderTextColor: "#555555"
                 color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 13; leftPadding: 28
-                background: Rectangle { radius: 2; color: "#0cffffff"; border.width: 1; border.color: find.activeFocus ? "#77ffffff" : "#26ffffff"
-                                        Rectangle { width: 2; height: parent.height; color: "#ffffff" } }
+                background: Rectangle { radius: 14; color: "#161616"; border.width: 1; border.color: find.activeFocus ? "#40ffffff" : "transparent" }
                 Text { x: 11; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 15 }
                 Keys.onEscapePressed: root.visible = false
             }
@@ -99,7 +96,7 @@ Scope {
                                     model: modelData.k.split(/\s*\+\s*/)
                                     Rectangle {
                                         required property string modelData
-                                        width: kt.implicitWidth + 14; height: 22; radius: 2
+                                        width: kt.implicitWidth + 14; height: 22; radius: 12
                                         color: "transparent"; border.width: 1; border.color: "#40ffffff"
                                         Text { id: kt; anchors.centerIn: parent; text: modelData; color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 10; font.bold: true }
                                     }

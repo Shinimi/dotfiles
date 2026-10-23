@@ -30,12 +30,12 @@ Scope {
         target: "curtain"
         function lock(): void {
             // through hypridle when it runs (it pauses music too); straight to hyprlock when "keep awake" stopped it
-            root.play("LOCK", "施錠", () => Quickshell.execDetached(["sh", "-c",
+            root.play("LOCK", "see you soon", () => Quickshell.execDetached(["sh", "-c",
                 "if pgrep -x hypridle >/dev/null; then loginctl lock-session; else " +
                 (Settings.cur("pause_on_lock") ? "playerctl -a pause; " : "") + "pidof hyprlock || hyprlock; fi"]), 900)
         }
         function wall(target: string, path: string): void {
-            root.play("WALLPAPER", "壁紙", () => Quickshell.execDetached([Quickshell.env("HOME") + "/.config/quickshell/bar/setwall.sh", target, path]), 420)
+            root.play("WALLPAPER", "new wallpaper", () => Quickshell.execDetached([Quickshell.env("HOME") + "/.config/quickshell/bar/setwall.sh", target, path]), 420)
         }
     }
 
@@ -84,7 +84,7 @@ Scope {
                     width: lbl.implicitWidth + 30; height: 28; color: "#ffffff"
                     Text { id: lbl; anchors.centerIn: parent; text: root.label; color: "#050505"; font.family: Theme.font; font.pixelSize: 12; font.letterSpacing: 4; font.bold: true }
                 }
-                Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.sub; color: "#9a9a9a"; font.family: "Noto Sans CJK JP"; font.pixelSize: 13 }
+                Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.sub; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 13 }
             }
         }
     }

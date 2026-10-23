@@ -32,7 +32,7 @@ Column {
         placeholderText: "Search shortcuts…  (e.g. screenshot, workspace, lock)"; placeholderTextColor: Theme.muted
         onTextEdited: pg.q = text
         color: Theme.fg; font.family: Theme.font; font.pixelSize: 13; leftPadding: 12
-        background: Rectangle { radius: 2; color: Theme.bgAlt; border.width: f.activeFocus ? 2 : 1; border.color: f.activeFocus ? Theme.blue : Theme.line }
+        background: Rectangle { radius: 14; color: "#1c1c1c"; border.width: 1; border.color: f.activeFocus ? "#55ffffff" : "transparent" }
     }
     Grid {
         width: parent.width; columns: 2; columnSpacing: 10; rowSpacing: 6
@@ -40,7 +40,7 @@ Column {
             model: pg.shown
             Rectangle {
                 required property var modelData
-                width: (pg.width - 10) / 2; height: 38; radius: 2; color: "#33111111"
+                width: (pg.width - 10) / 2; height: 38; radius: 14; color: "#1a1a1a"
                 Rectangle {
                     x: 8; anchors.verticalCenter: parent.verticalCenter; height: 26; radius: 7; width: Math.min(kl.implicitWidth + 16, parent.width * 0.55)
                     color: Qt.rgba(0.88, 0.88, 0.88, 0.16); clip: true

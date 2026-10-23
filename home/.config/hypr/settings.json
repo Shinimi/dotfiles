@@ -95,7 +95,7 @@
   "avatar": "/home/yu/Pictures/PFP/Black/Leon Kennedy.jpg",
   "cc_logo": "avatar",
   "wall_main": "/home/yu/Pictures/wallpaper/mono-ink.jpg",
-  "wall_side": "/home/yu/Pictures/wallpaper/mono-ring.jpg",
+  "wall_side": "/home/yu/Pictures/wallpaper/wallhaven-1qq37g_3840x2160.png",
   "default_apps": {
     "files": "org.kde.dolphin.desktop",
     "images": "org.kde.gwenview.desktop",
@@ -121,7 +121,7 @@
   "pause_on_lock": true,
   "island_peeks": true,
   "screensaver": true,
-  "ws_kanji": true,
+  "ws_kanji": false,
   "game_workspace": true,
   "wall_tint": true,
   "ascii_wall": false,

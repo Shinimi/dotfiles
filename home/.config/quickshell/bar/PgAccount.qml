@@ -20,7 +20,7 @@ Column {
     }
 
     Rectangle {
-        width: parent.width; height: 150; radius: 2; color: Theme.card; border.width: 1; border.color: "#14eaeaea"
+        width: parent.width; height: 150; radius: 22; color: "#131313"
         Row {
             x: 24; anchors.verticalCenter: parent.verticalCenter; spacing: 22
             Avatar { size: 104; pick: Settings.get("avatar"); radius: 52 }
@@ -62,9 +62,9 @@ Column {
                     id: pc
                     required property string modelData
                     readonly property bool cur: Settings.get("avatar") === modelData
-                    width: 64; height: 64; radius: 2; color: Theme.bgAlt
+                    width: 64; height: 64; radius: 12; color: Theme.bgAlt
                     border.width: cur ? 3 : (pm.containsMouse ? 1 : 0); border.color: cur ? Theme.blue : Theme.line
-                    Avatar { anchors.centerIn: parent; size: 58; pick: pc.modelData; radius: 2 }
+                    Avatar { anchors.centerIn: parent; size: 58; pick: pc.modelData; radius: 12 }
                     MouseArea { id: pm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Settings.set("avatar", pc.modelData) }
                 }
             }

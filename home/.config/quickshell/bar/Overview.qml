@@ -67,7 +67,7 @@ Scope {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter; y: 70
-            text: "WORKSPACES  //  作業場"; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 15
+            text: "workspaces"; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 15
         }
 
         Flow {

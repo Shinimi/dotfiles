@@ -1,17 +1,17 @@
-// The square switch used by settings rows: white when on. Made by Claude.
+// The switch used by settings rows: a white pill with a dark knob when on. Made by Claude.
 import QtQuick
 
 Rectangle {
     id: sw
     property bool on: false
-    width: 40; height: 20; radius: 2
-    color: on ? Theme.on : "transparent"
-    border.width: 1; border.color: on ? Theme.on : "#55ffffff"
-    Behavior on color { ColorAnimation { duration: 140 } }
+    width: 42; height: 24; radius: 12
+    color: on ? "#ececec" : "#2a2a2a"
+    Behavior on color { ColorAnimation { duration: 160 } }
     Rectangle {
-        width: 12; height: 12; radius: 1; y: 4
-        x: sw.on ? sw.width - width - 4 : 4
-        color: sw.on ? Theme.onText : "#9a9a9a"
-        Behavior on x { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+        width: 18; height: 18; radius: 9; y: 3
+        x: sw.on ? sw.width - width - 3 : 3
+        color: sw.on ? "#0b0b0b" : "#8a8a8a"
+        Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+        Behavior on color { ColorAnimation { duration: 160 } }
     }
 }

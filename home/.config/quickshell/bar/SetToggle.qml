@@ -6,13 +6,13 @@ Item {
     id: r
     property string label; property string desc: ""; property string key
     readonly property bool on: !!Settings.get(key)
-    width: parent ? parent.width : 300; height: 40
+    width: parent ? parent.width : 300; height: 42
     RowLayout {
         anchors.fill: parent
         Column {
             Layout.fillWidth: true; Layout.rightMargin: 8; spacing: 1
-            Label { width: parent.width; elide: Text.ElideRight; text: r.label; color: "#e0e0e0"; font.pixelSize: 12 }
-            Label { width: parent.width; elide: Text.ElideRight; visible: r.desc !== ""; text: r.desc; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal }
+            Label { width: parent.width; elide: Text.ElideRight; text: r.label; color: "#e6e6e6"; font.pixelSize: 12 }
+            Label { width: parent.width; elide: Text.ElideRight; visible: r.desc !== ""; text: r.desc; color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
         }
         SetSwitchBox { on: r.on }
     }
