@@ -21,6 +21,8 @@ home_paths=(
   .config/starship.toml .config/fastfetch .config/btop .config/fish/config.fish .zshrc .p10k.zsh
   .local/share/mono-chrome .local/share/mono-newtab .config/heroic/themes .config/helium-browser-flags.conf .config/environment.d .local/state/settings-snapshots
   .config/systemd/user/fixfuxi-volume.service .config/systemd/user/fixfuxi-volume.timer fixfuxi
+  .config/OpenRGB .config/mimeapps.list .config/swaync .config/user-dirs.dirs
+  Games/OptiScaler-Endfield-backup-2026-10-24/OptiScaler.ini
   Downloads/Optiv10/OptiScaler.ini Downloads/Optiv10/README-Optiv10.txt Downloads/Optiv10/install-optiv10.sh
 )
 system_paths=(
@@ -43,6 +45,8 @@ done
 # Waterfox theme (profile folder name differs per install)
 wf=$(ls -d "$H"/.waterfox/*.default-release 2>/dev/null | head -1)
 if [ -n "$wf" ]; then mkdir -p "$R/extras/waterfox"; rsync -a --delete "$wf/chrome" "$R/extras/waterfox/"; cp -a "$wf/user.js" "$R/extras/waterfox/" 2>/dev/null; fi
+# package lists for a reinstall
+mkdir -p "$R/packages"; pacman -Qqen > "$R/packages/native.txt"; pacman -Qqem > "$R/packages/aur.txt"
 cd "$R"
 git add -A
 if git diff --cached --quiet; then echo "nothing changed"; exit 0; fi

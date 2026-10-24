@@ -1,0 +1,5 @@
+google-chrome
+megabasterd-bin
+millennium
+spicetify-cli
+zapret2

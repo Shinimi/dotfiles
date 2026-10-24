@@ -1,0 +1,9 @@
+/* SwayNC – Tokyo Night. Made by Claude. */
+* { font-family: "JetBrainsMono Nerd Font"; }
+.notification-row { outline: none; }
+.notification, .control-center { background: #1a1b26; color: #c0caf5; border: 1px solid #414868; border-radius: 10px; }
+.notification-content .summary { color: #7aa2f7; font-weight: bold; }
+.notification-content .body { color: #a9b1d6; }
+.control-center .widget-title > label { color: #7aa2f7; }
+.control-center button { background: #292e42; color: #c0caf5; border-radius: 8px; border: none; }
+.control-center button:hover { background: #414868; }
