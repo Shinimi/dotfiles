@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Clean mic (RNNoise) + Headset EQ presets. Made by Claude.
+# Clean mic (RNNoise) + Headset EQ presets. Switching the mic also moves apps that are recording (calls). Made by Claude.
 #   audio-fx.sh mic on|off       audio-fx.sh eq on|off       audio-fx.sh preset flat|music|games|vocal|bass
 #   audio-fx.sh status (JSON)    audio-fx.sh restore (re-apply saved state, used at login)
 ST="$HOME/.local/state/audio-fx.json"
@@ -22,7 +22,14 @@ apply_preset() {
   pw-cli s "$id" Props "{ params = [ \"low:Gain\" ${g[0]} \"lowmid:Gain\" ${g[1]} \"mid:Gain\" ${g[2]} \"upmid:Gain\" ${g[3]} \"pres:Gain\" ${g[4]} \"high:Gain\" ${g[5]} \"pre:Mult\" ${g[6]} ] }" >/dev/null
 }
 case "$1" in
-  mic)    [ "$2" = on ] && pactl set-default-source clean_mic || pactl set-default-source "$HEADSET_IN"; put mic $([ "$2" = on ] && echo true || echo false) ;;
+  mic)    to=$([ "$2" = on ] && echo clean_mic || echo "$HEADSET_IN")
+          pactl set-default-source "$to"
+          # move everything that's recording right now (Discord mid-call too), except the filter's own input
+          pactl -f json list source-outputs 2>/dev/null | python3 -I -c "
+import json,sys
+for o in json.load(sys.stdin):
+    if o.get('properties',{}).get('node.name','') != 'effect_input.clean_mic': print(o['index'])" | while read -r id; do pactl move-source-output "$id" "$to" 2>/dev/null; done
+          put mic $([ "$2" = on ] && echo true || echo false) ;;
   eq)     [ "$2" = on ] && pactl set-default-sink headset_eq || pactl set-default-sink "$HEADSET_OUT"; put eq $([ "$2" = on ] && echo true || echo false) ;;
   preset) apply_preset "$2" && put preset "$2" ;;
   status) cat "$ST" ;;

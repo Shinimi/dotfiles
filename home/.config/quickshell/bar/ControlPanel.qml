@@ -114,6 +114,17 @@ Scope {
         Quickshell.execDetached(["pkexec", "systemctl", cc.dcSvc === "active" ? "disable" : "enable", "--now", "zapret2.service"])
         dcLater.restart()
     }
+    // Sound page: mic check (record 3 s, how loud, play it back)
+    property string micStep: ""         // "" | rec | play | done
+    property real micPeak: -1
+    Process {
+        id: micProc
+        command: [cc.qsDir + "/mic-check.sh"]
+        stdout: SplitParser { onRead: l => { if (l.startsWith("level=")) cc.micPeak = parseFloat(l.slice(6)); else cc.micStep = l } }
+    }
+    function micCheck() { if (micProc.running) return; micPeak = -1; micStep = "rec"; micProc.running = true }
+    readonly property string micVerdict: micPeak < 0 ? "" : micPeak < 0.02 ? "Almost silent: check the mic isn't muted, or pick it in Sound settings"
+                                       : micPeak < 0.12 ? "Quiet: people may have to turn you up" : micPeak > 0.97 ? "Too loud: it clips, turn the mic down a bit" : "Loud and clear"
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
     readonly property var sinks: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio && !(n.name || "").startsWith("effect_") && n.name !== "headset_eq")
@@ -621,6 +632,33 @@ Scope {
                                             current: SysState.fx.eq ? SysState.fx.preset : "off"
                                             onPicked: v => { if (v === "off") { if (SysState.fx.eq) SysState.fxToggle("eq"); return }
                                                              if (!SysState.fx.eq) SysState.fxToggle("eq"); SysState.fxPreset(v) }
+                                        }
+                                    }
+                                    Card {   // mic check: record yourself for 3 s and hear it back
+                                        title: "Mic check"; icon: "\u{f036c}"; note: SysState.fx.mic ? "through Clean mic" : "raw mic"
+                                        RowLayout {
+                                            width: parent.width; spacing: 10
+                                            Rectangle {
+                                                width: 40; height: 40; radius: 20
+                                                color: cc.micStep === "rec" ? "#cf6b6b" : mcb.containsMouse ? "#ffffff" : cc.hi
+                                                Behavior on color { ColorAnimation { duration: 150 } }
+                                                SequentialAnimation on scale { running: cc.micStep === "rec"; loops: Animation.Infinite
+                                                    NumberAnimation { to: 1.08; duration: 400 } NumberAnimation { to: 1; duration: 400 }
+                                                    onRunningChanged: if (!running) parent.scale = 1 }
+                                                Text { anchors.centerIn: parent; text: cc.micStep === "play" ? "\u{f057e}" : "\u{f036c}"; color: cc.micStep === "rec" ? "#ffffff" : cc.ink; font.family: Theme.font; font.pixelSize: 17 }
+                                                MouseArea { id: mcb; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: cc.micCheck() }
+                                            }
+                                            Column {
+                                                Layout.fillWidth: true; spacing: 3
+                                                Text { width: parent.width; elide: Text.ElideRight; color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 12; font.bold: true
+                                                       text: cc.micStep === "rec" ? "Recording… say something" : cc.micStep === "play" ? "Playing it back" : cc.micPeak >= 0 ? cc.micVerdict : "Hear how you sound" }
+                                                Rectangle {   // how loud you were (peak)
+                                                    visible: cc.micPeak >= 0
+                                                    width: parent.width; height: 5; radius: 3; color: "#1affffff"
+                                                    Rectangle { height: 5; radius: 3; width: parent.width * Math.min(1, Math.max(0.02, cc.micPeak)); color: cc.micPeak > 0.97 ? "#cf6b6b" : cc.hi }
+                                                }
+                                                Text { visible: cc.micPeak < 0 && cc.micStep === ""; width: parent.width; elide: Text.ElideRight; text: "Records 3 s, then plays it back"; color: cc.dim; font.family: Theme.font; font.pixelSize: 10 }
+                                            }
                                         }
                                     }
                                     Card {   // every app that's making sound, with its own volume

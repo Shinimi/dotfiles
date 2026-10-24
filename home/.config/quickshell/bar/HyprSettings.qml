@@ -58,7 +58,7 @@ Scope {
         clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", sounds: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
         sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", scroll_mode: "input", middle_paste: "input", focus_on_activate: "input",
         repeat_rate: "input", repeat_delay: "input", kb_layout: "input", numlock: "input", hide_cursor_typing: "input", cursor_hide_after: "input", ws_back_forth: "input", swallow: "input",
-        night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", mono_mode: "display", monitors: "display", auto_pause: "comfort", sort_downloads: "comfort", screen_time: "comfort", music_stats: "comfort", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power"
+        night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", mono_mode: "display", monitors: "display", auto_pause: "comfort", sort_downloads: "comfort", screen_time: "comfort", music_stats: "comfort", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power", game_bg_share: "power"
 ,
         user_name: "account", avatar: "account", cc_logo: "account", wall_main: "wallpaper", wall_side: "wallpaper",
         default_apps: "defaults", autostart: "autostart", game_profiles: "games"
@@ -1058,6 +1058,7 @@ Scope {
                         SetSection {
                             width: parent.width
                             SetToggle { label: "Automatic game mode"; desc: "Performance and Do not disturb while a game is open"; key: "game_mode" }
+                            SetToggle { label: "Background apps step back"; desc: "while you play, apps you opened get a smaller CPU share (never paused, so videos keep playing). Discord, Spotify and Steam are left alone"; key: "game_bg_share" }
                         }
                         SetHeading { text: "When you step away"; icon: "\u{f033e}" }
                         Rectangle {   // a timeline: screensaver, lock, screens off

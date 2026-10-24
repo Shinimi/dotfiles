@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # gamemode.sh on <window-class> [window-address] | off – runs when a game opens / the last game closes.
 #  on : the game gets its own workspace (5, if on in Settings → Extras), Do not disturb, the game's
-#       profile (Settings → Games): power profile, FPS cap, overlay
+#       profile (Settings → Games): power profile, FPS cap, overlay; background apps get a smaller CPU/disk share
 #  off: puts everything back, takes you to where you were and sums up what you missed. Made by Claude.
 S="$XDG_RUNTIME_DIR/gamemode.state"; Q="$HOME/.config/quickshell/bar"; M="$HOME/.config/MangoHud"
 J="$HOME/.config/hypr/settings.json"
@@ -28,6 +28,12 @@ case "$1" in
     printf 'profile=%s\n' "$(powerprofilesctl get)" > "$S"
     powerprofilesctl set "$power" 2>/dev/null
     qs ipc -p "$Q" call bar dnd true >/dev/null 2>&1
+    # background apps step back (a smaller CPU/disk share, never paused: YouTube keeps playing). Not Discord, Spotify or Steam.
+    if ! grep -q '"game_bg_share": false' "$J"; then
+      systemctl --user list-units --type=scope --state=running --no-legend --plain 2>/dev/null | awk '{print $1}' \
+        | grep '^app-' | grep -viE 'vesktop|discord|spotify|steam' > "$XDG_RUNTIME_DIR/gamemode.bg"
+      while read -r s; do systemctl --user set-property --runtime "$s" CPUWeight=25 IOWeight=25 2>/dev/null; done < "$XDG_RUNTIME_DIR/gamemode.bg"
+    fi
     "$HOME/.config/hypr/scripts/screen-shader.sh"   # colours back for the game if monochrome mode is on
     # MangoHud watches its config and reloads it live
     { grep -vE '^(no_display|fps_limit|preset)' "$M/base.conf"
@@ -44,6 +50,10 @@ case "$1" in
     . "$S"; rm -f "$S"
     powerprofilesctl set "${profile:-balanced}" 2>/dev/null
     qs ipc -p "$Q" call bar dnd false >/dev/null 2>&1
+    if [ -e "$XDG_RUNTIME_DIR/gamemode.bg" ]; then   # background apps get their normal share back
+      while read -r s; do systemctl --user set-property --runtime "$s" CPUWeight= IOWeight= 2>/dev/null; done < "$XDG_RUNTIME_DIR/gamemode.bg"
+      rm -f "$XDG_RUNTIME_DIR/gamemode.bg"
+    fi
     "$HOME/.config/hypr/scripts/screen-shader.sh"
     qs ipc -p "$Q" call bar gameSummary >/dev/null 2>&1
     cp "$M/base.conf" "$M/MangoHud.conf"
