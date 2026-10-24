@@ -1,7 +1,7 @@
-// The bar (main screen): one see-through glass strip with rounded corners.
-//   left:   launcher · workspaces
-//   middle: time (click: date, weather, month)
-//   right:  control center · power
+// The bar (main screen): one flat strip along the top edge.
+//   left:   launcher · workspaces (numbers, white underline = current, scroll to switch)
+//   middle: time (hover: date and weather, click: calendar)
+//   right:  small icons for what's on right now (click to turn off) · control center · power
 // When the song changes, a small card drops out under the main screen's bar for a moment. Volume changes show
 // the pop-up in Osd.qml. Made by Claude.
 import QtQuick
@@ -18,7 +18,7 @@ PanelWindow {
     anchors { top: true; left: true; right: true }
     implicitHeight: 110                      // room for the song card; clicks only land on the bar (mask)
     visible: !PopupState.focusMode           // focus mode hides the bar and gives its space back
-    exclusiveZone: PopupState.focusMode ? 0 : Theme.barHeight + 6
+    exclusiveZone: PopupState.focusMode ? 0 : Theme.barHeight
     color: "transparent"
     mask: Region { item: bar }
 
@@ -36,53 +36,49 @@ PanelWindow {
     function ipc(target, fn) { Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", target, fn]) }
     function panel() { ipc("panel", "toggle") }
 
-    // ---------- the bar ----------
+    // ---------- the bar: one flat strip along the top edge ----------
     Rectangle {
         id: bar
-        x: 10; y: 8
-        width: parent.width - 20
+        x: 0; y: 0
+        width: parent.width
         height: Theme.barHeight
-        color: "transparent"   // three floating glass islands instead of one strip
+        color: Qt.rgba(0.05, 0.05, 0.05, 0.9)
+        Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: "#1cffffff" }   // the fine bottom line
 
-        Glass {   // left: launcher + workspaces
-            anchors.left: parent.left
-            width: leftRow.implicitWidth + 12
-            Row {
-                id: leftRow
-                anchors.centerIn: parent; spacing: 4
-                Launcher { anchors.verticalCenter: parent.verticalCenter }
-                Sep {}
-                Workspaces { anchors.verticalCenter: parent.verticalCenter }
+        Row {   // left: launcher + workspaces
+            anchors.left: parent.left; anchors.leftMargin: 8; anchors.verticalCenter: parent.verticalCenter; spacing: 6
+            Launcher { anchors.verticalCenter: parent.verticalCenter }
+            Sep {}
+            Workspaces { anchors.verticalCenter: parent.verticalCenter }
+        }
+
+        ClockPill { id: clockPill; anchors.centerIn: parent }   // middle: the time (hover: date and weather)
+
+        Row {   // right: what's on right now (only while it's on), then control center + power
+            anchors.right: parent.right; anchors.rightMargin: 8; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+            Repeater {   // click one to turn it off
+                model: [[Notifs.dnd, "\u{f009b}", "Do not disturb", () => { Notifs.dnd = false }],
+                        [SysState.gameMode, "\u{f0eb5}", "Game mode", () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", "off"]); SysState.gameMode = false }],
+                        [SysState.awake, "\u{f0176}", "Keep awake", () => SysState.toggleAwake()],
+                        [!!Settings.cur("mono_mode"), "\u{f0197}", "Monochrome", () => Settings.setNow("mono_mode", false)],
+                        [SysState.night, "\u{f0594}", "Night light", () => SysState.toggleNight()]].filter(x => x[0])
+                Pill {
+                    required property var modelData
+                    implicitWidth: 28; anchors.verticalCenter: parent.verticalCenter
+                    Label { text: modelData[1]; color: "#cfcfcf"; font.pixelSize: 13 }
+                    onClicked: modelData[3]()
+                }
             }
-        }
-
-        Glass {   // middle: the time
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: clockPill.implicitWidth + 12
-            ClockPill { id: clockPill; anchors.centerIn: parent; player: win.player }
-        }
-
-        Glass {   // right: status + power
-        anchors.right: parent.right
-        width: rightRow.implicitWidth + 12
-        Row {
-            id: rightRow
-            anchors.centerIn: parent; spacing: 4
             PrivacyPill { anchors.verticalCenter: parent.verticalCenter }
             Pill {   // only when the mouse needs charging
                 visible: Battery.low; anchors.verticalCenter: parent.verticalCenter
                 Label { text: Battery.icon + " " + Battery.percent + "%"; color: "#ffffff"; font.pixelSize: 12 }
                 onClicked: win.panel()
             }
+            Sep {}
             StatusPill { anchors.verticalCenter: parent.verticalCenter }
             PowerButton { id: powerPill; anchors.verticalCenter: parent.verticalCenter }
         }
-        }
-    }
-    component Glass: Rectangle {   // one island of the bar
-        height: parent ? parent.height : 34; radius: 14
-        color: Qt.rgba(0.043, 0.043, 0.043, 0.82); border.width: 1; border.color: "#14ffffff"
-        Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
     }
     component Sep: Rectangle { anchors.verticalCenter: parent ? parent.verticalCenter : undefined; width: 1; height: 14; color: "#1fffffff" }
 

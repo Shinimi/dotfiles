@@ -1,5 +1,6 @@
 // Main-screen workspaces: 1-4 always, plus any higher one that is active or has windows.
-// Each is a rounded square: its number, or the icon of the app on it; the one you're on is a white chip. Hover one you're not on and a small live
+// Numbers: white with a white underline = current, a short grey mark = has windows, a pulsing line = a window
+// there wants attention. Scroll over them to switch. Hover one you're not on and a small live
 // preview of its windows drops down (Settings → Extras). Made by Claude.
 import QtQuick
 import QtQuick.Effects
@@ -12,6 +13,8 @@ import Quickshell.Wayland
 Pill {
     id: wsPill
     padding: 4
+    color: "transparent"
+    onScrolled: d => Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = \"e" + (d > 0 ? "-1" : "+1") + "\" })"])   // scroll to switch
     // ---- hover preview ----
     property int pendingWs: 0
     property Item pendingItem: null
@@ -29,21 +32,34 @@ Pill {
               stdout: StdioCollector { onStreamFinished: { try { wsPill.clients = JSON.parse(this.text).filter(c => c.mapped !== false) } catch (e) {} } } }
     // which app is on each workspace (from Hyprland's own window list, refreshed on window events)
     property var wsApp: ({})
+    property var wsOfAddr: ({})       // window address -> workspace (for "this window wants attention")
+    property var urgentWs: ({})
     Process {
         id: appsProc
         command: ["hyprctl", "clients", "-j"]
         stdout: StdioCollector { onStreamFinished: {
             try {
-                const m = {}
-                for (const c of JSON.parse(this.text)) if (c.mapped !== false && c.workspace && !(c.workspace.id in m) && c.class) m[c.workspace.id] = c.class
-                wsPill.wsApp = m
+                const m = {}, a = {}
+                for (const c of JSON.parse(this.text)) {
+                    if (c.workspace) a[String(c.address).replace(/^0x/, "")] = c.workspace.id
+                    if (c.mapped !== false && c.workspace && !(c.workspace.id in m) && c.class) m[c.workspace.id] = c.class
+                }
+                wsPill.wsApp = m; wsPill.wsOfAddr = a
             } catch (e) {}
         } }
     }
     Timer { id: appsLater; interval: 250; onTriggered: if (!appsProc.running) appsProc.running = true }
     Connections {
         target: Hyprland
-        function onRawEvent(e) { if (/^(openwindow|closewindow|movewindow|windowtitle|workspace|activewindow)/.test(e.name)) appsLater.restart() }
+        function onRawEvent(e) {
+            if (e.name === "urgent") {   // data = window address
+                const ws = wsPill.wsOfAddr[String(e.data).replace(/^0x/, "")]
+                if (ws) { const u = Object.assign({}, wsPill.urgentWs); u[ws] = true; wsPill.urgentWs = u }
+            } else if (e.name === "workspace" || e.name === "workspacev2") {   // going there clears it
+                const id = parseInt(String(e.data).split(",")[0]); if (wsPill.urgentWs[id]) { const u = Object.assign({}, wsPill.urgentWs); delete u[id]; wsPill.urgentWs = u }
+            }
+            if (/^(openwindow|closewindow|movewindow|windowtitle|workspace|activewindow)/.test(e.name)) appsLater.restart()
+        }
     }
     Component.onCompleted: appsLater.restart()
     function toplevelFor(addr) {
@@ -117,23 +133,27 @@ Pill {
                 const e = DesktopEntries.heuristicLookup(app)
                 return Quickshell.iconPath(e && e.icon ? e.icon : app.toLowerCase(), true) || ""
             }
-            readonly property bool showIcon: hasWindows && ico !== ""
-            // a rounded square per workspace: its number, or the icon of the app on it; the current one is white
-            width: isActive ? (showIcon ? 48 : 30) : 26; height: 26; radius: 8
-            color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#26ffffff" : hasWindows ? "#14ffffff" : "transparent"
-            Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-            Behavior on color { ColorAnimation { duration: 160 } }
-            Row {
-                anchors.centerIn: parent; spacing: 5
-                Item {
-                    visible: chip.showIcon; width: 15; height: 15; anchors.verticalCenter: parent.verticalCenter
-                    IconImage { id: wsIco; anchors.fill: parent; source: chip.ico; visible: false }
-                    MultiEffect { anchors.fill: wsIco; source: wsIco; saturation: -1.0; brightness: chip.isActive ? -0.15 : 0; opacity: chip.isActive || wsMouse.containsMouse ? 1 : 0.8 }
-                }
-                Text {
-                    visible: chip.isActive || !chip.showIcon; anchors.verticalCenter: parent.verticalCenter
-                    text: Theme.wsName(chip.wsId); font.family: Theme.font; font.pixelSize: 11; font.bold: chip.isActive
-                    color: chip.isActive ? "#0c0c0c" : wsMouse.containsMouse ? "#ffffff" : chip.hasWindows ? "#bdbdbd" : "#5a5a5a"
+            readonly property bool urgent: !!wsPill.urgentWs[wsId] && !isActive
+            // a number; white with a white underline = you're here, a short grey mark under it = it has windows
+            width: 24; height: 26; radius: 6
+            color: wsMouse.containsMouse ? "#1cffffff" : "transparent"
+            Behavior on color { ColorAnimation { duration: 140 } }
+            Text {
+                anchors.centerIn: parent; anchors.verticalCenterOffset: -1
+                text: Theme.wsName(chip.wsId); font.family: Theme.font; font.pixelSize: 12; font.bold: chip.isActive
+                color: chip.isActive || chip.urgent ? "#ffffff" : wsMouse.containsMouse ? "#e0e0e0" : chip.hasWindows ? "#a8a8a8" : "#505050"
+                Behavior on color { ColorAnimation { duration: 160 } }
+            }
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 1
+                height: 2; radius: 1
+                width: chip.isActive ? 14 : chip.urgent ? 14 : chip.hasWindows ? 4 : 0
+                color: chip.isActive || chip.urgent ? "#ffffff" : "#6a6a6a"
+                Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                SequentialAnimation on opacity {   // a window there wants you
+                    running: chip.urgent; loops: Animation.Infinite
+                    NumberAnimation { from: 1; to: 0.2; duration: 500 } NumberAnimation { from: 0.2; to: 1; duration: 500 }
+                    onRunningChanged: if (!running) parent.opacity = 1
                 }
             }
             MouseArea {

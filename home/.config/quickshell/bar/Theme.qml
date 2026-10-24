@@ -50,7 +50,7 @@ Singleton {
     function fileUrl(p) { return p ? "file://" + p.split("/").map(encodeURIComponent).join("/") : "" }
     readonly property string font:   "JetBrainsMono Nerd Font"
     readonly property int fontSize:  12
-    readonly property int barHeight: 34
+    readonly property int barHeight: 32
     readonly property int pillHeight: 26
     readonly property int radius:    9
 }
