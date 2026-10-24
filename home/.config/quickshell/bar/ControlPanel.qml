@@ -10,6 +10,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
+import Quickshell.Bluetooth
 import Quickshell.Services.Pipewire
 import Quickshell.Services.SystemTray
 
@@ -60,6 +61,15 @@ Scope {
         if (!past && dayW.uv >= 6) s += "  ·  UV " + dayW.uv + ", wear sunscreen"
         return s
     }
+    readonly property var bt: Bluetooth.defaultAdapter
+    readonly property var btDev: bt ? bt.devices.values.find(d => d.connected) || null : null
+    property var busy: null            // the app using the most CPU right now: { name, cpu, mem }
+    Process {
+        id: busyProc
+        command: [cc.qsDir + "/busiest.sh"]
+        stdout: StdioCollector { onStreamFinished: { const f = this.text.trim().split(/\s+/); cc.busy = f.length >= 3 ? { name: f[0], cpu: parseFloat(f[1]), mem: parseInt(f[2]) / 1048576 } : null } }
+    }
+    Timer { running: cc.visible; interval: 3000; repeat: true; triggeredOnStart: true; onTriggered: if (!busyProc.running) busyProc.running = true }
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
     readonly property var sinks: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio && !(n.name || "").startsWith("effect_") && n.name !== "headset_eq")
@@ -217,6 +227,8 @@ Scope {
                         ClippingRectangle {
                             width: 76; height: 76; radius: 8; color: cc.cardHi
                             Image { anchors.fill: parent; source: cc.art; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 160 }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor   // the cover opens the player
+                                        onClicked: { if (cc.player && cc.player.canRaise) { cc.visible = false; cc.player.raise() } } }
                         }
                         Column {
                             Layout.fillWidth: true; spacing: 3
@@ -240,6 +252,20 @@ Scope {
                         }
                         Row {
                             spacing: 6
+                            Repeater {   // shuffle / repeat (dim when off), only if the player supports them
+                                model: cc.player ? [["shuffle", cc.player.shuffleSupported], ["loop", cc.player.loopSupported]].filter(x => x[1]) : []
+                                Rectangle {
+                                    required property var modelData
+                                    readonly property bool on: modelData[0] === "shuffle" ? !!cc.player.shuffle : cc.player.loopState !== MprisLoopState.None
+                                    width: 28; height: 28; radius: 14; anchors.verticalCenter: parent.verticalCenter
+                                    color: xm.containsMouse ? "#26ffffff" : "transparent"
+                                    Text { anchors.centerIn: parent; font.family: Theme.font; font.pixelSize: 13; color: parent.on ? "#ffffff" : "#5e5e5e"
+                                           text: modelData[0] === "shuffle" ? "\u{f049d}" : cc.player.loopState === MprisLoopState.Track ? "\u{f0458}" : "\u{f0456}" }
+                                    MouseArea { id: xm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                        onClicked: { const p = cc.player; if (modelData[0] === "shuffle") p.shuffle = !p.shuffle
+                                                     else p.loopState = p.loopState === MprisLoopState.None ? MprisLoopState.Playlist : p.loopState === MprisLoopState.Playlist ? MprisLoopState.Track : MprisLoopState.None } }
+                                }
+                            }
                             Repeater {
                                 model: [["\u{f04ae}", "prev"], ["", "toggle"], ["\u{f04ad}", "next"]]
                                 Rectangle {
@@ -263,13 +289,17 @@ Scope {
                     Repeater {
                         model: [
                             ["\u{f0594}", "Night light", SysState.night ? "Warm screen" : "Off", SysState.night, () => SysState.toggleNight()],
-                            ["\u{f009b}", "Silent", Notifs.dnd ? "No pop-ups" : "Off", Notifs.dnd, () => { Notifs.dnd = !Notifs.dnd }],
+                            ["\u{f009b}", "Silent", Notifs.dnd ? (Notifs.dndUntil > 0 ? "Until " + Qt.formatTime(new Date(Notifs.dndUntil), "HH:mm") : "No pop-ups") : "Off", Notifs.dnd, () => { Notifs.dnd = !Notifs.dnd }],
                             ["\u{f0176}", "Keep awake", SysState.awake ? "No auto-lock" : "Off", SysState.awake, () => SysState.toggleAwake()],
                             ["\u{f04c5}", "Performance", SysState.perf ? "Max power" : "Balanced", SysState.perf, () => SysState.setProfile(SysState.perf ? "balanced" : "performance")],
                             ["\u{f0197}", "Monochrome", Settings.cur("mono_mode") ? (SysState.gameMode ? "Paused for game" : "Black & white") : "Off", !!Settings.cur("mono_mode"), () => Settings.setNow("mono_mode", !Settings.cur("mono_mode"))],
                             ["\u{f036c}", "Clean mic", SysState.fx.mic ? "Noise removed" : "Off", !!SysState.fx.mic, () => SysState.fxToggle("mic")],
                             ["\u{f0eb5}", "Game mode", SysState.gameMode ? "On" : "Auto", SysState.gameMode,
-                             () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", SysState.gameMode ? "off" : "on"]); SysState.gameMode = !SysState.gameMode }]
+                             () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", SysState.gameMode ? "off" : "on"]); SysState.gameMode = !SysState.gameMode }],
+                            ["\u{f00af}", "Bluetooth", cc.bt ? (cc.bt.enabled ? (cc.btDev ? cc.btDev.name : "On") : "Off") : "No adapter", !!(cc.bt && cc.bt.enabled),
+                             () => { if (cc.bt) cc.bt.enabled = !cc.bt.enabled }],
+                            ["\u{f0583}", "Breaks", Breaks.enabled ? "Next in " + Math.ceil(Breaks.left / 60) + "m" : "Off", Breaks.enabled,
+                             () => Settings.setNow("break_reminder", !Breaks.enabled)]
                         ]
                         Rectangle {
                             id: tile
@@ -277,7 +307,6 @@ Scope {
                             required property int index
                             readonly property bool on: modelData[3]
                             Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 10
-                            Layout.columnSpan: index === 6 ? 3 : 1   // the odd one out spans the row
                             color: on ? (tm.containsMouse ? "#ffffff" : cc.hi) : (tm.containsMouse ? cc.cardHi : cc.card)
                             border.width: 1; border.color: on ? "transparent" : cc.line
                             Behavior on color { ColorAnimation { duration: 150 } }
@@ -390,6 +419,13 @@ Scope {
                                 MiniStat { title: "RAM"; usage: Stats.d.ram; extra: Stats.d.ramUsed.toFixed(1) + " / " + Stats.d.ramTotal.toFixed(0) + " GB" }
                                 MiniStat { title: "VRAM"; usage: Stats.d.vramTotal > 0 ? Math.round(100 * Stats.d.vramUsed / Stats.d.vramTotal) : 0
                                            extra: Stats.d.vramUsed.toFixed(1) + " / " + Stats.d.vramTotal.toFixed(0) + " GB" }
+                            }
+                            RowLayout {   // who's busy right now, and a way to look closer
+                                visible: !!cc.busy
+                                width: parent.width; spacing: 8
+                                Text { Layout.fillWidth: true; elide: Text.ElideRight; textFormat: Text.StyledText; font.family: Theme.font; font.pixelSize: 10; color: "#7a7a7a"
+                                       text: cc.busy ? "Busiest  <font color='#e0e0e0'>" + cc.busy.name + "</font>  " + Math.round(cc.busy.cpu) + "% CPU · " + (cc.busy.mem >= 1 ? cc.busy.mem.toFixed(1) + " GB" : Math.round(cc.busy.mem * 1024) + " MB") : "" }
+                                Btn { text: "Tasks"; onHit: cc.go(["kitty", "--class", "btop", "-e", "btop"]) }
                             }
                         }
 
@@ -513,7 +549,17 @@ Scope {
                         model: Notifs.model
                         delegate: NotifCard { required property var modelData; notif: modelData; width: ListView.view ? ListView.view.width : 300 }
                     }
-                    Btn { visible: Notifs.count > 0; text: "Clear all"; onHit: Notifs.clearAll() }
+                    RowLayout {   // silence for a while, it turns itself back on
+                        width: parent.width; spacing: 6
+                        Btn { visible: Notifs.count > 0; text: "Clear all"; onHit: Notifs.clearAll() }
+                        Text { Layout.fillWidth: true; color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 11
+                               text: Notifs.dnd ? (Notifs.dndUntil > 0 ? "\u{f009b}  Silent until " + Qt.formatTime(new Date(Notifs.dndUntil), "HH:mm") : "\u{f009b}  Silent") : Notifs.count > 0 ? "" : "Silence for" }
+                        Repeater {
+                            model: Notifs.dnd ? [["Turn on", () => { Notifs.dnd = false }]]
+                                              : [["30m", () => Notifs.silenceFor(30)], ["1h", () => Notifs.silenceFor(60)], ["3h", () => Notifs.silenceFor(180)], ["Until 8:00", () => Notifs.silenceUntilMorning()]]
+                            Btn { required property var modelData; text: modelData[0]; onHit: modelData[1]() }
+                        }
+                    }
                 }
 
                 // ================= shortcuts =================

@@ -10,7 +10,11 @@ Singleton {
     id: root
     property bool dnd: false
     property var missed: []          // app names of notifications that arrived while silent (for the game summary)
-    onDndChanged: if (dnd) missed = []
+    onDndChanged: { if (dnd) missed = []; else dndUntil = 0 }
+    property double dndUntil: 0      // timed silence (control center → Notifications): ms timestamp, 0 = until turned off
+    function silenceFor(min) { dnd = true; dndUntil = Date.now() + min * 60000 }
+    function silenceUntilMorning() { const d = new Date(); if (d.getHours() >= 8) d.setDate(d.getDate() + 1); d.setHours(8, 0, 0, 0); dnd = true; dndUntil = d.getTime() }
+    Timer { interval: 15000; running: root.dndUntil > 0; repeat: true; onTriggered: if (Date.now() >= root.dndUntil) root.dnd = false }
     function summary() {             // one line after a game: "4 notifications while you played"
         if (!missed.length) return
         const by = {}; for (const a of missed) by[a] = (by[a] || 0) + 1
