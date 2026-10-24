@@ -1,5 +1,5 @@
 // Main-screen workspaces: 1-4 always, plus any higher one that is active or has windows.
-// Each shows the icon of the app on it (empty ones are a faint dot); the one you're on is a white chip with its number. Hover one you're not on and a small live
+// Each is a rounded square: its number, or the icon of the app on it; the one you're on is a white chip. Hover one you're not on and a small live
 // preview of its windows drops down (Settings → Extras). Made by Claude.
 import QtQuick
 import QtQuick.Effects
@@ -118,25 +118,22 @@ Pill {
                 return Quickshell.iconPath(e && e.icon ? e.icon : app.toLowerCase(), true) || ""
             }
             readonly property bool showIcon: hasWindows && ico !== ""
-            width: isActive ? (showIcon ? 52 : 34) : (showIcon ? 30 : 18); height: 26; radius: 9
-            color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#24ffffff" : "transparent"
+            // a rounded square per workspace: its number, or the icon of the app on it; the current one is white
+            width: isActive ? (showIcon ? 48 : 30) : 26; height: 26; radius: 8
+            color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#26ffffff" : hasWindows ? "#14ffffff" : "transparent"
             Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
             Behavior on color { ColorAnimation { duration: 160 } }
             Row {
                 anchors.centerIn: parent; spacing: 5
                 Item {
-                    visible: chip.showIcon; width: 16; height: 16; anchors.verticalCenter: parent.verticalCenter
+                    visible: chip.showIcon; width: 15; height: 15; anchors.verticalCenter: parent.verticalCenter
                     IconImage { id: wsIco; anchors.fill: parent; source: chip.ico; visible: false }
-                    MultiEffect { anchors.fill: wsIco; source: wsIco; saturation: -1.0; opacity: chip.isActive ? 1 : 0.75 }
+                    MultiEffect { anchors.fill: wsIco; source: wsIco; saturation: -1.0; brightness: chip.isActive ? -0.15 : 0; opacity: chip.isActive || wsMouse.containsMouse ? 1 : 0.8 }
                 }
                 Text {
-                    visible: chip.isActive; anchors.verticalCenter: parent.verticalCenter
-                    text: Theme.wsName(chip.wsId); color: "#0c0c0c"; font.bold: true; font.family: Theme.font; font.pixelSize: 11
-                }
-                Rectangle {   // no icon: a dot (grey = has windows, faint = empty)
-                    visible: !chip.isActive && !chip.showIcon; anchors.verticalCenter: parent.verticalCenter
-                    width: wsMouse.containsMouse ? 8 : 6; height: width; radius: width / 2
-                    color: chip.hasWindows ? "#9a9a9a" : "#3e3e3e"
+                    visible: chip.isActive || !chip.showIcon; anchors.verticalCenter: parent.verticalCenter
+                    text: Theme.wsName(chip.wsId); font.family: Theme.font; font.pixelSize: 11; font.bold: chip.isActive
+                    color: chip.isActive ? "#0c0c0c" : wsMouse.containsMouse ? "#ffffff" : chip.hasWindows ? "#bdbdbd" : "#5a5a5a"
                 }
             }
             MouseArea {
