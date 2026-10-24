@@ -1,6 +1,6 @@
 // Monochrome login screen (SDDM, Qt 6), island style to match the lock screen: torii at night, slow zoom,
 // the picture drawn in glowing ASCII characters,
-// drifting dust, a black glass pill at the top, thin clock, today's line, avatar + pill password. Made by Claude.
+// drifting dust, thin clock and today's line in the sky, a dark glass login card on the beach. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -24,7 +24,7 @@ Item {
     readonly property color purple:  "#b0b0b0"
     readonly property color yellow:  "#d6d6d6"
     readonly property color red:     "#cf6b6b"
-    readonly property string font:   "GeistMono Nerd Font"
+    readonly property string font:   "JetBrainsMono Nerd Font"
     readonly property string jp:     "Noto Serif CJK JP"
 
     // the big screen gets the login card; other screens just the wallpaper + clock
@@ -189,21 +189,6 @@ Item {
         color: "#bbeaeaea"; font.family: root.font; font.pixelSize: 96; font.weight: Font.Light
     }
 
-    // ---------- the island (top centre) ----------
-    Rectangle {
-        visible: root.isMain
-        anchors.horizontalCenter: parent.horizontalCenter; y: 6
-        width: islandRow.implicitWidth + 40; height: 34; radius: 17
-        color: "#e6050505"; border.width: 1; border.color: "#16ffffff"
-        Row {
-            id: islandRow; anchors.centerIn: parent; spacing: 14
-            Text { text: "\u{f033e}"; color: root.fg; font.family: root.font; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
-            Text { text: Qt.formatTime(root.now, "HH:mm"); color: "#ffffff"; font.family: root.font; font.pixelSize: 13; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
-            Text { text: "·"; color: "#4a4a4a"; font.family: root.font; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
-            Text { text: Qt.formatDate(root.now, "ddd d MMM"); color: root.fgDim; font.family: root.font; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
-        }
-    }
-
     // ---------- clock, date, today's line (in the sky) ----------
     Column {
         visible: root.isMain
@@ -231,84 +216,102 @@ Item {
         }
     }
 
-    // ---------- you + password (on the dark beach) ----------
-    Column {
+    // ---------- you + password: one dark glass card on the beach ----------
+    Rectangle {
         id: col
         visible: root.isMain
         anchors.horizontalCenter: parent.horizontalCenter
-        y: root.height / 2 + 385 - 37
-        spacing: 16
+        y: root.height * 0.60
+        width: 380; height: cardCol.implicitHeight + 56
+        radius: 28
+        color: "#0c0c0c"; border.width: 1; border.color: "#24ffffff"
         opacity: 0
         NumberAnimation on opacity { from: 0; to: 1; duration: 1600; easing.type: Easing.OutCubic }
-        Rectangle {   // avatar
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 74; height: 74; radius: 37; color: "#1c1c1c"; border.width: 1; border.color: "#26ffffff"
-            Image {
-                id: av; anchors.fill: parent; anchors.margins: 1; source: root.avatar; fillMode: Image.PreserveAspectCrop
-                visible: false; sourceSize.width: 148; sourceSize.height: 148
+        Column {
+            id: cardCol
+            anchors.horizontalCenter: parent.horizontalCenter; y: 28
+            spacing: 14
+            Rectangle {   // avatar
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 88; height: 88; radius: 44; color: "#1c1c1c"; border.width: 2; border.color: "#33ffffff"
+                Image {
+                    id: av; anchors.fill: parent; anchors.margins: 2; source: root.avatar; fillMode: Image.PreserveAspectCrop
+                    visible: false; sourceSize.width: 176; sourceSize.height: 176
+                }
+                Rectangle { id: avMask; anchors.fill: av; radius: width / 2; visible: false; layer.enabled: true }
+                MultiEffect { anchors.fill: av; source: av; maskEnabled: true; maskSource: avMask; visible: root.avatar !== "" }
+                Text { anchors.centerIn: parent; visible: root.avatar === ""; text: "\u{f0004}"; color: root.muted; font.family: root.font; font.pixelSize: 34 }
             }
-            Rectangle { id: avMask; anchors.fill: av; radius: width / 2; visible: false; layer.enabled: true }
-            MultiEffect { anchors.fill: av; source: av; maskEnabled: true; maskSource: avMask; visible: root.avatar !== "" }
-        }
-        Item {
-            id: cardWrap
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: 300; height: 44
-            SequentialAnimation {
-                id: shake
-                NumberAnimation { target: card; property: "x"; to: -14; duration: 45 }
-                NumberAnimation { target: card; property: "x"; to: 12; duration: 45 }
-                NumberAnimation { target: card; property: "x"; to: -8; duration: 45 }
-                NumberAnimation { target: card; property: "x"; to: 5; duration: 45 }
-                NumberAnimation { target: card; property: "x"; to: 0; duration: 45 }
+            Column {
+                anchors.horizontalCenter: parent.horizontalCenter; spacing: 3
+                Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.realName || root.userName
+                       color: "#ffffff"; font.family: root.font; font.pixelSize: 19; font.bold: true }
+                Text { anchors.horizontalCenter: parent.horizontalCenter; text: "welcome back"
+                       color: root.muted; font.family: root.font; font.pixelSize: 12 }
             }
+            Item { width: 1; height: 4 }
             Item {
-                id: card
-                width: parent.width; height: parent.height
-                TextField {
-                    id: password
-                    anchors.fill: parent
-                    echoMode: TextInput.Password
-                    passwordCharacter: "●"
-                    placeholderText: "password"
-                    placeholderTextColor: "#6a6a6a"
-                    horizontalAlignment: TextInput.AlignHCenter
-                    color: root.fg
-                    font.family: root.font; font.pixelSize: 15
-                    leftPadding: 44; rightPadding: 44
-                    selectByMouse: true
-                    focus: root.isMain
-                    enabled: !root.busy
-                    onAccepted: root.doLogin()
-                    onTextChanged: if (text.length) root.errorText = ""
-                    background: Rectangle {
-                        radius: height / 2
-                        color: "#e6050505"
-                        border.width: 1
-                        border.color: root.errorText ? root.red : (password.activeFocus ? "#40ffffff" : "#16ffffff")
-                        Behavior on border.color { ColorAnimation { duration: 150 } }
-                    }
-                    Rectangle {   // go
-                        anchors.right: parent.right; anchors.rightMargin: 5; anchors.verticalCenter: parent.verticalCenter
-                        width: 34; height: 34; radius: 17
-                        visible: password.text.length > 0 || root.busy
-                        color: root.busy ? root.line : (goMouse.containsMouse ? "#ffffff" : "#ededed")
-                        Text {
-                            anchors.centerIn: parent
-                            text: root.busy ? "\u{f0450}" : "\u{f0054}"
-                            color: "#0b0b0b"; font.family: "JetBrainsMono Nerd Font"; font.pixelSize: 16
-                            RotationAnimation on rotation { running: root.busy; from: 0; to: 360; duration: 900; loops: Animation.Infinite }
+                id: cardWrap
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 300; height: 48
+                SequentialAnimation {
+                    id: shake
+                    NumberAnimation { target: card; property: "x"; to: -14; duration: 45 }
+                    NumberAnimation { target: card; property: "x"; to: 12; duration: 45 }
+                    NumberAnimation { target: card; property: "x"; to: -8; duration: 45 }
+                    NumberAnimation { target: card; property: "x"; to: 5; duration: 45 }
+                    NumberAnimation { target: card; property: "x"; to: 0; duration: 45 }
+                }
+                Item {
+                    id: card
+                    width: parent.width; height: parent.height
+                    TextField {
+                        id: password
+                        anchors.fill: parent
+                        echoMode: TextInput.Password
+                        passwordCharacter: "●"
+                        placeholderText: "password"
+                        placeholderTextColor: "#6a6a6a"
+                        horizontalAlignment: TextInput.AlignHCenter
+                        color: root.fg
+                        font.family: root.font; font.pixelSize: 15
+                        leftPadding: 48; rightPadding: 48
+                        selectByMouse: true
+                        focus: root.isMain
+                        enabled: !root.busy
+                        onAccepted: root.doLogin()
+                        onTextChanged: if (text.length) root.errorText = ""
+                        background: Rectangle {
+                            radius: height / 2
+                            color: "#161616"
+                            border.width: 1
+                            border.color: root.errorText ? root.red : (password.activeFocus ? "#55ffffff" : "#1affffff")
+                            Behavior on border.color { ColorAnimation { duration: 150 } }
                         }
-                        MouseArea { id: goMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.doLogin() }
+                        Text { x: 18; anchors.verticalCenter: parent.verticalCenter; text: "\u{f033e}"; color: root.muted; font.family: root.font; font.pixelSize: 15 }
+                        Rectangle {   // go
+                            anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter
+                            width: 36; height: 36; radius: 18
+                            color: root.busy ? root.line : (password.text.length ? (goMouse.containsMouse ? "#ffffff" : "#ededed") : "#262626")
+                            Behavior on color { ColorAnimation { duration: 150 } }
+                            Text {
+                                anchors.centerIn: parent
+                                text: root.busy ? "\u{f0450}" : "\u{f0054}"
+                                color: password.text.length || root.busy ? "#0b0b0b" : "#7a7a7a"; font.family: root.font; font.pixelSize: 16
+                                RotationAnimation on rotation { running: root.busy; from: 0; to: 360; duration: 900; loops: Animation.Infinite }
+                            }
+                            MouseArea { id: goMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.doLogin() }
+                        }
                     }
                 }
             }
-        }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: root.errorText ? root.errorText : (keyboard.capsLock ? "caps lock is on" : (root.realName || root.userName))
-            color: root.errorText ? root.red : (keyboard.capsLock ? root.yellow : root.muted)
-            font.family: root.font; font.pixelSize: 13
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                height: 16
+                text: root.errorText ? root.errorText : (keyboard.capsLock ? "\u{f0632}  caps lock is on" : "press enter to sign in")
+                color: root.errorText ? root.red : (keyboard.capsLock ? "#ffffff" : "#555555")
+                font.family: root.font; font.pixelSize: 12
+            }
         }
     }
 
