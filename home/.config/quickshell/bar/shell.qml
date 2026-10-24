@@ -27,6 +27,7 @@ ShellRoot {
         HomeScreen { required property var modelData; screen: modelData }
     }
     Screensaver {}
+    Osd {}
     AutoPause {}
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")

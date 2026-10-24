@@ -1,8 +1,10 @@
 // Main-screen workspaces: 1-4 always, plus any higher one that is active or has windows.
-// Dots: faint = empty, grey = has windows; the one you're on is a white pill with its kanji. Hover one you're not on and a small live
+// Each shows the icon of the app on it (empty ones are a faint dot); the one you're on is a white chip with its number. Hover one you're not on and a small live
 // preview of its windows drops down (Settings → Extras). Made by Claude.
 import QtQuick
+import QtQuick.Effects
 import Quickshell
+import Quickshell.Widgets
 import Quickshell.Hyprland
 import Quickshell.Io
 import Quickshell.Wayland
@@ -42,19 +44,19 @@ Pill {
         readonly property var wins: wsPill.clients.filter(c => c.workspace.id === wsPill.previewWs && c.monitor === 0)
         readonly property real k: 336 / 2560
         Rectangle {
-            anchors.fill: parent; anchors.margins: 4; radius: 2
-            color: Theme.mix(Qt.rgba(0.03, 0.03, 0.03, 0.95), Theme.tint, 0.07 * Theme.tintOn); border.width: 1; border.color: "#3dffffff"
+            anchors.fill: parent; anchors.margins: 4; radius: 16
+            color: "#f50b0b0b"; border.width: 1; border.color: "#1fffffff"
             Row {
                 x: 12; y: 9; spacing: 8
                 Text { text: String(wsPill.previewWs).padStart(2, "0"); color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 10 }
                 Text { text: "//"; color: "#454545"; font.family: Theme.font; font.pixelSize: 10 }
-                Text { text: Theme.wsName(wsPill.previewWs); color: "#f0f0f0"; font.family: "Noto Sans CJK JP"; font.pixelSize: 11 }
-                Text { text: prev.wins.length + (prev.wins.length === 1 ? " WINDOW" : " WINDOWS"); color: "#7a7a7a"
+                Text { text: Theme.wsName(wsPill.previewWs); color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 11 }
+                Text { text: prev.wins.length + (prev.wins.length === 1 ? " window" : " windows"); color: "#7a7a7a"
                        font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.5; anchors.verticalCenter: parent.verticalCenter }
             }
             Rectangle {   // the screen in miniature
                 id: mini
-                x: 12; y: 30; width: 336 - 8; height: 1440 * prev.k - 4; color: "#0a0a0a"; clip: true
+                x: 12; y: 30; width: 336 - 8; height: 1440 * prev.k - 4; color: "#0a0a0a"; clip: true; radius: 8
                 border.width: 1; border.color: "#1affffff"
                 Repeater {
                     model: prev.wins
@@ -66,7 +68,7 @@ Pill {
                         ScreencopyView { anchors.fill: parent; anchors.margins: 1; captureSource: wsPill.previewWs > 0 ? wsPill.toplevelFor(modelData.address) : null; live: false }
                     }
                 }
-                Text { anchors.centerIn: parent; visible: prev.wins.length === 0; text: "empty"; color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 11 }
+                Text { anchors.centerIn: parent; visible: prev.wins.length === 0; text: "Empty"; color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 11 }
             }
         }
     }
@@ -81,38 +83,53 @@ Pill {
     Repeater {
         model: ids
         Rectangle {
+            id: chip
             required property var modelData
             readonly property int wsId: modelData
             readonly property var ws: Hyprland.workspaces.values.find(w => w.id === wsId)
             readonly property bool isActive: !!(Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId)
                                              || !!(ws && ws.monitor && ws.monitor.name === "DP-1" && ws.monitor.activeWorkspace === ws)
             readonly property bool hasWindows: !!(ws && ws.toplevels && ws.toplevels.values.length > 0)
-            // dots: faint = empty, grey = has windows, a white pill with its kanji = the one you're on
-            width: isActive ? 36 : 18; height: 26
-            color: "transparent"
+            // the app on it: its icon stands for the workspace (games show Steam's)
+            readonly property string app: {
+                if (!hasWindows) return ""
+                for (const t of ws.toplevels.values) if (t.wayland && t.wayland.appId) return t.wayland.appId
+                return ""
+            }
+            readonly property string ico: {
+                if (!app) return ""
+                if (/^steam_app_\d+$|^gamescope$/.test(app)) return Quickshell.iconPath("steam", true)
+                const e = DesktopEntries.heuristicLookup(app)
+                return Quickshell.iconPath(e && e.icon ? e.icon : app.toLowerCase(), true) || ""
+            }
+            readonly property bool showIcon: hasWindows && ico !== ""
+            width: isActive ? (showIcon ? 52 : 34) : (showIcon ? 30 : 18); height: 26; radius: 9
+            color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#24ffffff" : "transparent"
             Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-            Rectangle {
-                id: dot
-                anchors.centerIn: parent
-                width: isActive ? 30 : (wsMouse.containsMouse ? 10 : 8); height: isActive ? 18 : width; radius: height / 2
-                color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#d0d0d0" : (hasWindows ? "#8a8a8a" : "#3a3a3a")
-                Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-                Behavior on height { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
-                Behavior on color { ColorAnimation { duration: 160 } }
+            Behavior on color { ColorAnimation { duration: 160 } }
+            Row {
+                anchors.centerIn: parent; spacing: 5
+                Item {
+                    visible: chip.showIcon; width: 16; height: 16; anchors.verticalCenter: parent.verticalCenter
+                    IconImage { id: wsIco; anchors.fill: parent; source: chip.ico; visible: false }
+                    MultiEffect { anchors.fill: wsIco; source: wsIco; saturation: -1.0; opacity: chip.isActive ? 1 : 0.75 }
+                }
                 Text {
-                    id: wsLabel
-                    anchors.centerIn: parent
-                    opacity: isActive ? 1 : 0; Behavior on opacity { NumberAnimation { duration: 160 } }
-                    text: Theme.wsName(wsId); color: "#0c0c0c"; font.bold: true
-                    font.family: Theme.font; font.pixelSize: 11
+                    visible: chip.isActive; anchors.verticalCenter: parent.verticalCenter
+                    text: Theme.wsName(chip.wsId); color: "#0c0c0c"; font.bold: true; font.family: Theme.font; font.pixelSize: 11
+                }
+                Rectangle {   // no icon: a dot (grey = has windows, faint = empty)
+                    visible: !chip.isActive && !chip.showIcon; anchors.verticalCenter: parent.verticalCenter
+                    width: wsMouse.containsMouse ? 8 : 6; height: width; radius: width / 2
+                    color: chip.hasWindows ? "#9a9a9a" : "#3e3e3e"
                 }
             }
             MouseArea {
                 id: wsMouse
                 anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                onEntered: wsPill.hoverWs(wsId, parent, isActive)
+                onEntered: wsPill.hoverWs(chip.wsId, parent, chip.isActive)
                 onExited: wsPill.leaveWs()
-                onClicked: { wsPill.leaveWs(); Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = " + wsId + " })"]) }
+                onClicked: { wsPill.leaveWs(); Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = " + chip.wsId + " })"]) }
             }
         }
     }

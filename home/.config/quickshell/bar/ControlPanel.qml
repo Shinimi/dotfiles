@@ -35,7 +35,7 @@ Scope {
     // ---------- pages ----------
     property int page: 0
     readonly property var pages: [["\u{f02dc}", "Home"], ["\u{f057e}", "Sound & screens"], ["\u{f0599}", "Weather"],
-                                  ["\u{f051f}", "Screen time"], ["\u{f04bc}", "System"], ["\u{f009a}", "Notifications"]]
+                                  ["\u{f051f}", "Screen time"], ["\u{f04bc}", "System"], ["\u{f009a}", "Notifications"], ["\u{f01da}", "Downloads"]]
 
     // ---------- data ----------
     property date now: new Date()
@@ -84,6 +84,36 @@ Scope {
                           .map(f => ({ name: f[0], cpu: parseFloat(f[1]), mem: parseInt(f[2]) / 1048576 })) } }
     }
     Timer { running: cc.visible && (cc.page === 0 || cc.page === 4); interval: 3000; repeat: true; triggeredOnStart: true; onTriggered: if (!busyProc.running) busyProc.running = true }
+    // downloads page: the newest files in ~/Downloads (they're sorted into sub-folders)
+    property var downloads: []
+    Process {
+        id: dlProc
+        command: ["sh", "-c", "find \"$HOME/Downloads\" -type f -not -path '*/.*' -printf '%T@\\t%s\\t%p\\n' 2>/dev/null | sort -nr | head -10"]
+        stdout: StdioCollector { onStreamFinished: cc.downloads = this.text.trim().split("\n").filter(l => l).map(l => { const f = l.split("\t"); return { t: parseFloat(f[0]), size: parseInt(f[1]), path: f[2] } }) }
+    }
+    onPageChanged: if (page === 6) dlProc.running = true
+    function fileIcon(p) {
+        const e = (p.split(".").pop() || "").toLowerCase()
+        return /^(png|jpe?g|webp|gif|bmp|svg|avif)$/.test(e) ? "\u{f021f}" : /^(mp4|mkv|webm|mov|avi)$/.test(e) ? "\u{f022b}" : /^(mp3|flac|ogg|wav|m4a|opus)$/.test(e) ? "\u{f0223}"
+             : e === "pdf" ? "\u{f0226}" : /^(zip|rar|7z|tar|gz|xz|zst)$/.test(e) ? "\u{f05c4}" : /^(exe|msi|appimage|deb|rpm|pkg)$/.test(e) ? "\u{f03d7}"
+             : /^(txt|md|docx?|odt|ini|json|csv)$/.test(e) ? "\u{f0219}" : "\u{f0214}"
+    }
+    function bytes(b) { return b >= 1e9 ? (b / 1e9).toFixed(1) + " GB" : b >= 1e6 ? (b / 1e6).toFixed(1) + " MB" : b >= 1e3 ? Math.round(b / 1e3) + " KB" : b + " B" }
+    function since(ts) { const m = Math.floor((Date.now() / 1000 - ts) / 60); return m < 1 ? "just now" : m < 60 ? m + " min ago" : m < 1440 ? Math.floor(m / 60) + " h ago" : Math.floor(m / 1440) + " d ago" }
+    // System page: the Discord fix (zapret2) and whether Discord gets through right now
+    property string dcSvc: ""
+    property string dcNet: ""
+    Process {
+        id: dcProc
+        command: [cc.qsDir + "/discord-status.sh"]
+        stdout: StdioCollector { onStreamFinished: { const m = this.text.match(/svc=(\S+) net=(\S+)/); if (m) { cc.dcSvc = m[1]; cc.dcNet = m[2] } } }
+    }
+    Timer { running: cc.visible && cc.page === 4; interval: 20000; repeat: true; triggeredOnStart: true; onTriggered: if (!dcProc.running) dcProc.running = true }
+    Timer { id: dcLater; interval: 3500; onTriggered: dcProc.running = true }
+    function dcToggle() {
+        Quickshell.execDetached(["pkexec", "systemctl", cc.dcSvc === "active" ? "disable" : "enable", "--now", "zapret2.service"])
+        dcLater.restart()
+    }
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
     readonly property var sinks: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio && !(n.name || "").startsWith("effect_") && n.name !== "headset_eq")
@@ -239,7 +269,7 @@ Scope {
             MouseArea { anchors.fill: parent }
             focus: cc.visible
             Keys.onEscapePressed: cc.visible = false
-            Keys.onPressed: e => { if (e.key >= Qt.Key_1 && e.key <= Qt.Key_6) { cc.page = e.key - Qt.Key_1; e.accepted = true } }
+            Keys.onPressed: e => { if (e.key >= Qt.Key_1 && e.key <= Qt.Key_7) { cc.page = e.key - Qt.Key_1; e.accepted = true } }
 
             RowLayout {
                 id: main
@@ -793,11 +823,37 @@ Scope {
                                                    extra: Stats.d.vramUsed.toFixed(1) + " / " + Stats.d.vramTotal.toFixed(0) + " GB" }
                                     }
                                 }
+                                Rectangle {   // the Discord fix: status, and a switch
+                                    Layout.fillWidth: true; height: 64; radius: 14; color: cc.card; border.width: 1; border.color: cc.line
+                                    Rectangle {
+                                        x: 14; anchors.verticalCenter: parent.verticalCenter; width: 38; height: 38; radius: 12
+                                        color: cc.dcSvc === "active" ? cc.hi : "#1f1f1f"
+                                        Text { anchors.centerIn: parent; text: "\u{f066f}"; color: cc.dcSvc === "active" ? cc.ink : "#cfcfcf"; font.family: Theme.font; font.pixelSize: 18 }
+                                    }
+                                    Column {
+                                        x: 64; anchors.verticalCenter: parent.verticalCenter; spacing: 3
+                                        Text { text: "Discord fix"; color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
+                                        Row {
+                                            spacing: 6
+                                            Rectangle { width: 7; height: 7; radius: 4; anchors.verticalCenter: parent.verticalCenter
+                                                        color: cc.dcNet === "ok" ? "#ececec" : cc.dcNet === "blocked" ? "#cf6b6b" : "#4a4a4a" }
+                                            Text { color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10
+                                                   text: (cc.dcSvc === "active" ? "On" : cc.dcSvc ? "Off" : "Checking…") + (cc.dcNet ? "  ·  Discord " + (cc.dcNet === "ok" ? "connects" : "is blocked right now") : "") }
+                                        }
+                                    }
+                                    Rectangle {   // the switch (asks for your password: it's a system service)
+                                        anchors.right: parent.right; anchors.rightMargin: 16; anchors.verticalCenter: parent.verticalCenter
+                                        width: 40; height: 22; radius: 11; color: cc.dcSvc === "active" ? cc.hi : "#262626"
+                                        Rectangle { width: 16; height: 16; radius: 8; y: 3; x: cc.dcSvc === "active" ? 21 : 3; color: cc.dcSvc === "active" ? cc.ink : "#8a8a8a"
+                                                    Behavior on x { NumberAnimation { duration: 160 } } }
+                                        MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: cc.dcToggle() }
+                                    }
+                                }
                                 Card {
                                     Layout.fillHeight: true
                                     title: "Busiest right now"; icon: "\u{f0a69}"; note: "up " + Stats.d.uptime
                                     Repeater {
-                                        model: cc.busy
+                                        model: cc.busy.slice(0, 3)
                                         RowLayout {
                                             id: bz
                                             required property var modelData
@@ -848,6 +904,52 @@ Scope {
                                         Btn { required property var modelData; text: modelData[0]; onHit: modelData[1]() }
                                     }
                                 }
+                            }
+                        }
+
+                        // ---------- 6 · Downloads: the newest files, open or show in folder ----------
+                        Page {
+                            n: 6
+                            Card {
+                                anchors.fill: parent
+                                title: "Downloads"; icon: "\u{f01da}"; note: "sorted into folders"
+                                Repeater {
+                                    model: cc.downloads.slice(0, 6)
+                                    Rectangle {
+                                        id: dl
+                                        required property var modelData
+                                        readonly property string name: modelData.path.split("/").pop()
+                                        readonly property string folder: modelData.path.split("/").slice(-2, -1)[0]
+                                        width: parent.width; height: 40; radius: 10; color: dlm.containsMouse ? "#1c1c1c" : "transparent"
+                                        MouseArea { id: dlm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: cc.go(["xdg-open", dl.modelData.path]) }
+                                        Rectangle {
+                                            x: 6; anchors.verticalCenter: parent.verticalCenter; width: 30; height: 30; radius: 9; color: "#1f1f1f"
+                                            Text { anchors.centerIn: parent; text: cc.fileIcon(dl.name); color: "#d0d0d0"; font.family: Theme.font; font.pixelSize: 15 }
+                                        }
+                                        Column {
+                                            x: 46; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 46 - 96; spacing: 1
+                                            Text { width: parent.width; elide: Text.ElideMiddle; text: dl.name; color: "#e6e6e6"; font.family: Theme.font; font.pixelSize: 11 }
+                                            Text { text: cc.bytes(dl.modelData.size) + "  ·  " + dl.folder + "  ·  " + cc.since(dl.modelData.t); color: "#6e6e6e"; font.family: Theme.font; font.pixelSize: 9 }
+                                        }
+                                        Row {
+                                            anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+                                            Repeater {
+                                                model: [["\u{f0311}", () => cc.go(["xdg-open", dl.modelData.path])],
+                                                        ["\u{f0770}", () => cc.go(["dbus-send", "--session", "--dest=org.freedesktop.FileManager1", "--type=method_call", "/org/freedesktop/FileManager1",
+                                                                                   "org.freedesktop.FileManager1.ShowItems", "array:string:file://" + dl.modelData.path, "string:"])]]
+                                                Rectangle {
+                                                    required property var modelData
+                                                    required property int index
+                                                    width: 30; height: 30; radius: 15; color: hm2.containsMouse ? cc.hi : "#262626"
+                                                    Text { anchors.centerIn: parent; text: modelData[0]; color: hm2.containsMouse ? cc.ink : "#d0d0d0"; font.family: Theme.font; font.pixelSize: 13 }
+                                                    MouseArea { id: hm2; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData[1]() }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                Text { visible: cc.downloads.length === 0; text: "Nothing downloaded yet"; color: cc.dim; font.family: Theme.font; font.pixelSize: 11 }
+                                Btn { text: "Open the Downloads folder"; onHit: cc.go(["xdg-open", Quickshell.env("HOME") + "/Downloads"]) }
                             }
                         }
                     }

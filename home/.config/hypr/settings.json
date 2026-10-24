@@ -58,13 +58,13 @@
   "vibrance": 100,
   "monitors": {
     "DP-1": {
-      "mode": "2560x1440@144.00",
+      "mode": "2560x1440@120.00",
       "cm": "srgb",
       "bitdepth": 8,
       "vrr": 2
     },
     "DP-2": {
-      "mode": "1920x1080@165.01",
+      "mode": "1920x1080@60.00",
       "cm": "srgb",
       "bitdepth": 8,
       "vrr": 0
@@ -121,7 +121,6 @@
   "pause_on_lock": true,
   "island_peeks": true,
   "screensaver": true,
-  "ws_kanji": false,
   "auto_pause": true,
   "sort_downloads": true,
   "screen_time": true,
@@ -132,6 +131,7 @@
   "login_handoff": true,
   "mono_mode": false,
   "music_stats": true,
+  "ws_kanji": false,
   "bar_weather": true,
   "ws_flash": true
 }

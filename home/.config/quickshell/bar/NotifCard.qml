@@ -121,7 +121,7 @@ Rectangle {
                     Behavior on color { ColorAnimation { duration: 110 } }
                     Text { id: aLabel; anchors.centerIn: parent; text: modelData.text; color: aMouse.containsMouse ? "#0b0b0b" : "#dcdcdc"; font.family: Theme.font; font.pixelSize: 11; font.bold: true }
                     MouseArea { id: aMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                        onClicked: { if (card.notif) modelData.invoke(); card.close(false) } }
+                        onClicked: { const act = modelData, has = !!card.notif; card.close(false); if (has) act.invoke() } }   // close first: invoking can remove the card
                 }
             }
         }

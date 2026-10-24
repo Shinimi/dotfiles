@@ -3,7 +3,7 @@
 //   middle: time (click: date, weather, month)
 //   right:  control center · power
 // When the song changes, a small card drops out under the main screen's bar for a moment. Volume changes show
-// nothing on purpose. Made by Claude.
+// the pop-up in Osd.qml. Made by Claude.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -42,21 +42,32 @@ PanelWindow {
         x: 10; y: 8
         width: parent.width - 20
         height: Theme.barHeight
-        radius: 14
-        color: Qt.rgba(0.043, 0.043, 0.043, 0.82)   // same dark surface as the panels, a touch see-through
-        border.width: 1; border.color: "#14ffffff"
+        color: "transparent"   // three floating glass islands instead of one strip
 
-        Row {   // left: launcher + workspaces
-            anchors.left: parent.left; anchors.leftMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
-            Launcher { anchors.verticalCenter: parent.verticalCenter }
-            Sep {}
-            Workspaces { anchors.verticalCenter: parent.verticalCenter }
+        Glass {   // left: launcher + workspaces
+            anchors.left: parent.left
+            width: leftRow.implicitWidth + 12
+            Row {
+                id: leftRow
+                anchors.centerIn: parent; spacing: 4
+                Launcher { anchors.verticalCenter: parent.verticalCenter }
+                Sep {}
+                Workspaces { anchors.verticalCenter: parent.verticalCenter }
+            }
         }
 
-        ClockPill { id: clockPill; anchors.centerIn: parent }   // middle: the time
+        Glass {   // middle: the time, the date and what's playing
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: clockPill.implicitWidth + 12
+            ClockPill { id: clockPill; anchors.centerIn: parent; player: win.player }
+        }
 
-        Row {   // right: control center + power, nothing else
-            anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+        Glass {   // right: status + power
+        anchors.right: parent.right
+        width: rightRow.implicitWidth + 12
+        Row {
+            id: rightRow
+            anchors.centerIn: parent; spacing: 4
             PrivacyPill { anchors.verticalCenter: parent.verticalCenter }
             Pill {   // only when the mouse needs charging
                 visible: Battery.low; anchors.verticalCenter: parent.verticalCenter
@@ -66,6 +77,12 @@ PanelWindow {
             StatusPill { anchors.verticalCenter: parent.verticalCenter }
             PowerButton { id: powerPill; anchors.verticalCenter: parent.verticalCenter }
         }
+        }
+    }
+    component Glass: Rectangle {   // one island of the bar
+        height: parent ? parent.height : 34; radius: 14
+        color: Qt.rgba(0.043, 0.043, 0.043, 0.82); border.width: 1; border.color: "#14ffffff"
+        Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
     }
     component Sep: Rectangle { anchors.verticalCenter: parent ? parent.verticalCenter : undefined; width: 1; height: 14; color: "#1fffffff" }
 
