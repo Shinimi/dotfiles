@@ -1,4 +1,4 @@
-// The bar (main screen): one flat strip along the top edge.
+// The bar (main screen): a tile in your window grid: same gap, rounding, glass and border as the windows.
 //   left:   launcher · workspaces (numbers, white underline = current, scroll to switch)
 //   middle: time (hover: date and weather, click: calendar)
 //   right:  small icons for what's on right now (click to turn off) · control center · power
@@ -18,7 +18,7 @@ PanelWindow {
     anchors { top: true; left: true; right: true }
     implicitHeight: 110                      // room for the song card; clicks only land on the bar (mask)
     visible: !PopupState.focusMode           // focus mode hides the bar and gives its space back
-    exclusiveZone: PopupState.focusMode ? 0 : Theme.barHeight
+    exclusiveZone: PopupState.focusMode ? 0 : Theme.barBottom
     color: "transparent"
     mask: Region { item: bar }
 
@@ -36,17 +36,19 @@ PanelWindow {
     function ipc(target, fn) { Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", target, fn]) }
     function panel() { ipc("panel", "toggle") }
 
-    // ---------- the bar: one flat strip along the top edge ----------
+    // ---------- the bar ----------
     Rectangle {
         id: bar
-        x: 0; y: 0
-        width: parent.width
+        // lined up with your windows: same outer gap, same rounding, same glass and border
+        x: Settings.cur("gaps_out"); y: Theme.barTop
+        width: parent.width - 2 * Settings.cur("gaps_out")
         height: Theme.barHeight
-        color: Qt.rgba(0.05, 0.05, 0.05, 0.9)
-        Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: "#1cffffff" }   // the fine bottom line
+        radius: Settings.cur("rounding")
+        color: Qt.rgba(0.06, 0.06, 0.06, 0.88)
+        border.width: 1; border.color: "#2effffff"
 
         Row {   // left: launcher + workspaces
-            anchors.left: parent.left; anchors.leftMargin: 8; anchors.verticalCenter: parent.verticalCenter; spacing: 6
+            anchors.left: parent.left; anchors.leftMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 6
             Launcher { anchors.verticalCenter: parent.verticalCenter }
             Sep {}
             Workspaces { anchors.verticalCenter: parent.verticalCenter }
@@ -55,7 +57,7 @@ PanelWindow {
         ClockPill { id: clockPill; anchors.centerIn: parent }   // middle: the time (hover: date and weather)
 
         Row {   // right: what's on right now (only while it's on), then control center + power
-            anchors.right: parent.right; anchors.rightMargin: 8; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+            anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
             Repeater {   // click one to turn it off
                 model: [[Notifs.dnd, "\u{f009b}", "Do not disturb", () => { Notifs.dnd = false }],
                         [SysState.gameMode, "\u{f0eb5}", "Game mode", () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", "off"]); SysState.gameMode = false }],

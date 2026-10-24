@@ -6,7 +6,7 @@ hl.config({
     dwindle = { smart_split = false },
     decoration = {
         rounding = 8,
-        active_opacity = 0.80, inactive_opacity = 0.72,
+        active_opacity = 0.96, inactive_opacity = 0.88,
         dim_inactive = false, dim_strength = 0.12,
         blur = { enabled = true, size = 6, passes = 3, vibrancy = 0.15,
                  brightness = 0.62, noise = 0.010, xray = false, popups = true },

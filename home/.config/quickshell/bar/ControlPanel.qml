@@ -258,7 +258,7 @@ Scope {
         Rectangle {
             id: panel
             width: 724
-            x: parent.width - width - 10; y: Theme.barHeight + 16
+            x: parent.width - width - 10; y: Theme.barBottom + 10
             height: main.implicitHeight + 36
             radius: 18
             color: "#f20c0c0c"

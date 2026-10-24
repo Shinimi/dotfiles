@@ -28,7 +28,7 @@ Scope {
         visible: root.visible
         screen: root.barScreen
         anchors { top: true; bottom: true; left: true; right: true }
-        margins.top: Theme.barHeight + 6
+        margins.top: Theme.barBottom + 4
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.namespace: "qsbar-dismiss"
@@ -55,7 +55,7 @@ Scope {
             const p = root.anchorItem.mapToItem(null, root.anchorItem.width / 2, 0)
             return p.x
         }
-        margins.top: Theme.barHeight + 10
+        margins.top: Theme.barBottom + 8
         margins.left: Math.max(8, Math.min((screen ? screen.width : 2560) - implicitWidth - 8, anchorX - implicitWidth / 2))
 
         Rectangle {

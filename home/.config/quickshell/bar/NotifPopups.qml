@@ -9,7 +9,7 @@ PanelWindow {
     visible: Notifs.popups.count > 0
     readonly property bool center: Settings.cur("notif_center")
     anchors { top: true; right: !center }
-    margins.top: Theme.barHeight + 10
+    margins.top: Theme.barBottom + 10
     margins.right: center ? 0 : 10
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay

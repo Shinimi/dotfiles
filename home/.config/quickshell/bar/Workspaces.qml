@@ -1,6 +1,6 @@
 // Main-screen workspaces: 1-4 always, plus any higher one that is active or has windows.
-// Numbers: white with a white underline = current, a short grey mark = has windows, a pulsing line = a window
-// there wants attention. Scroll over them to switch. Hover one you're not on and a small live
+// Small tiles like tiny windows: white = current, outlined = has windows, plain number = empty, a pulsing
+// outline = a window there wants attention. Scroll over them to switch. Hover one you're not on and a small live
 // preview of its windows drops down (Settings → Extras). Made by Claude.
 import QtQuick
 import QtQuick.Effects
@@ -134,27 +134,22 @@ Pill {
                 return Quickshell.iconPath(e && e.icon ? e.icon : app.toLowerCase(), true) || ""
             }
             readonly property bool urgent: !!wsPill.urgentWs[wsId] && !isActive
-            // a number; white with a white underline = you're here, a short grey mark under it = it has windows
-            width: 24; height: 26; radius: 6
-            color: wsMouse.containsMouse ? "#1cffffff" : "transparent"
-            Behavior on color { ColorAnimation { duration: 140 } }
-            Text {
-                anchors.centerIn: parent; anchors.verticalCenterOffset: -1
-                text: Theme.wsName(chip.wsId); font.family: Theme.font; font.pixelSize: 12; font.bold: chip.isActive
-                color: chip.isActive || chip.urgent ? "#ffffff" : wsMouse.containsMouse ? "#e0e0e0" : chip.hasWindows ? "#a8a8a8" : "#505050"
-                Behavior on color { ColorAnimation { duration: 160 } }
+            // a small tile per workspace, like a tiny window: white = you're here, outlined = has windows,
+            // just the number = empty, a pulsing outline = a window there wants you
+            width: 24; height: 22; radius: Math.max(4, Settings.cur("rounding") - 2)
+            color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#22ffffff" : "transparent"
+            border.width: isActive ? 0 : (hasWindows || urgent) ? 1 : 0
+            border.color: urgent ? "#ffffff" : "#4a4a4a"
+            Behavior on color { ColorAnimation { duration: 150 } }
+            SequentialAnimation on border.color {
+                running: chip.urgent; loops: Animation.Infinite
+                ColorAnimation { to: "#ffffff"; duration: 500 } ColorAnimation { to: "#3a3a3a"; duration: 500 }
             }
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 1
-                height: 2; radius: 1
-                width: chip.isActive ? 14 : chip.urgent ? 14 : chip.hasWindows ? 4 : 0
-                color: chip.isActive || chip.urgent ? "#ffffff" : "#6a6a6a"
-                Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
-                SequentialAnimation on opacity {   // a window there wants you
-                    running: chip.urgent; loops: Animation.Infinite
-                    NumberAnimation { from: 1; to: 0.2; duration: 500 } NumberAnimation { from: 0.2; to: 1; duration: 500 }
-                    onRunningChanged: if (!running) parent.opacity = 1
-                }
+            Text {
+                anchors.centerIn: parent
+                text: Theme.wsName(chip.wsId); font.family: Theme.font; font.pixelSize: 11; font.bold: chip.isActive || chip.hasWindows
+                color: chip.isActive ? "#0c0c0c" : wsMouse.containsMouse || chip.urgent ? "#ffffff" : chip.hasWindows ? "#cfcfcf" : "#4e4e4e"
+                Behavior on color { ColorAnimation { duration: 150 } }
             }
             MouseArea {
                 id: wsMouse
