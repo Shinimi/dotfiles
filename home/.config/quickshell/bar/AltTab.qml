@@ -100,12 +100,12 @@ Scope {
         WlrLayershell.keyboardFocus: root.visible ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
         color: "transparent"
         readonly property int perRow: Math.min(5, Math.max(1, root.shown.length))
-        implicitWidth: Math.max(520, perRow * 300 + (perRow - 1) * 14 + 48)
-        implicitHeight: grid.implicitHeight + (root.sticky ? 112 : 48)
+        implicitWidth: Math.max(560, perRow * 320 + (perRow - 1) * 14 + 48)
+        implicitHeight: grid.implicitHeight + (root.sticky ? 124 : 48)
 
         Rectangle {
             id: frame
-            anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn); border.width: 1; border.color: "#3dffffff"
+            anchors.fill: parent; radius: 28; color: "#f20b0b0b"; border.width: 1; border.color: "#1fffffff"
             focus: true
             Keys.onPressed: e => {
                 if (e.key === Qt.Key_Tab || e.key === Qt.Key_Right) { root.move(1); e.accepted = true }
@@ -122,11 +122,11 @@ Scope {
             TextField {   // Super+Tab: type to filter
                 id: search
                 visible: root.sticky
-                x: 24; y: 20; width: parent.width - 48; height: 40
+                x: 24; y: 20; width: parent.width - 48; height: 46
                 text: root.query; onTextEdited: root.query = text
                 placeholderText: "Type to find a window…"; placeholderTextColor: Theme.muted
                 color: Theme.fg; font.family: Theme.font; font.pixelSize: 13; leftPadding: 38
-                background: Rectangle { radius: 2; color: Theme.bgAlt; border.width: search.activeFocus ? 2 : 1; border.color: search.activeFocus ? Theme.blue : Theme.line }
+                background: Rectangle { radius: 16; color: "#161616"; border.width: 1; border.color: search.activeFocus ? "#40ffffff" : "#1f1f1f" }
                 Label { x: 14; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 14 }
                 Keys.onReturnPressed: root.confirm()
                 Keys.onEscapePressed: root.cancel()
@@ -135,7 +135,7 @@ Scope {
 
             Grid {
                 id: grid
-                x: 24; y: root.sticky ? 76 : 24
+                x: 24; y: root.sticky ? 84 : 24
                 columns: win.perRow; spacing: 14
                 Repeater {
                     model: root.visible ? root.shown.slice(0, 15) : []
@@ -144,13 +144,15 @@ Scope {
                         required property var modelData
                         required property int index
                         readonly property bool selected: index === root.sel
-                        width: 300; height: 220; radius: 2
-                        color: selected ? Qt.rgba(0.88, 0.88, 0.88, 0.16) : (cm.containsMouse ? "#1eeaeaea" : Theme.card)
-                        border.width: selected ? 2 : 1; border.color: selected ? Theme.blue : "#14eaeaea"
+                        width: 320; height: 236; radius: 20
+                        color: selected ? "#ececec" : (cm.containsMouse ? "#1c1c1c" : "#141414")
+                        border.width: 1; border.color: selected ? "#ececec" : "#222222"
+                        scale: selected ? 1 : 0.97
+                        Behavior on scale { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
                         Behavior on color { ColorAnimation { duration: 90 } }
 
                         ClippingRectangle {   // live preview of the window
-                            x: 10; y: 10; width: parent.width - 20; height: 160; radius: 2; color: Theme.bgAlt
+                            x: 8; y: 8; width: parent.width - 16; height: 178; radius: 14; color: "#0b0b0b"
                             ScreencopyView {
                                 id: shot
                                 anchors.centerIn: parent
@@ -164,20 +166,20 @@ Scope {
                             }
                         }
                         Row {
-                            x: 12; y: 182; spacing: 10; width: parent.width - 24
+                            x: 14; y: 196; spacing: 10; width: parent.width - 28
                             IconImage { id: ic; implicitSize: 24; source: root.iconFor(card.modelData.cls); anchors.verticalCenter: parent.verticalCenter }
                             Label {
                                 width: parent.width - ic.width - wsTag.width - 20; anchors.verticalCenter: parent.verticalCenter
                                 text: card.modelData.title; elide: Text.ElideRight
-                                color: card.selected ? Theme.fg : Theme.fgDim; font.pixelSize: 12
+                                color: card.selected ? "#0b0b0b" : "#c8c8c8"; font.pixelSize: 12; font.bold: card.selected
                             }
                             Rectangle {
                                 id: wsTag
                                 anchors.verticalCenter: parent.verticalCenter
-                                width: wsl.implicitWidth + 14; height: 20; radius: 2
-                                color: card.selected ? Theme.blue : Theme.bgAlt
-                                Label { id: wsl; anchors.centerIn: parent; text: card.modelData.wsName === "side" ? "side" : String(card.modelData.ws)
-                                        color: card.selected ? Theme.bg : Theme.muted; font.pixelSize: 10 }
+                                width: wsl.implicitWidth + 16; height: 22; radius: 11
+                                color: card.selected ? "#0b0b0b" : "#1f1f1f"
+                                Label { id: wsl; anchors.centerIn: parent; text: card.modelData.wsName === "side" ? "Side" : String(card.modelData.ws)
+                                        color: card.selected ? "#ececec" : "#8a8a8a"; font.pixelSize: 10 }
                             }
                         }
                         MouseArea {
@@ -190,7 +192,7 @@ Scope {
             Label {
                 anchors.bottom: parent.bottom; anchors.bottomMargin: 12; anchors.horizontalCenter: parent.horizontalCenter
                 visible: root.sticky
-                text: "←→↑↓ choose · Enter switch · Esc close"; color: Theme.muted; font.pixelSize: 10
+                text: "← → ↑ ↓ choose  ·  Enter switch  ·  Esc close"; color: "#5a5a5a"; font.pixelSize: 10
             }
         }
     }

@@ -947,7 +947,7 @@ Scope {
                                         background: Rectangle { radius: 10; color: "#0e0e0e"; border.width: 1; border.color: kbTry.activeFocus ? "#55ffffff" : "#262626" }
                                     }
                                 }
-                                SetButton { icon: "\u{f030c}"; text: "Show all shortcuts"; onClicked: root.exec([Quickshell.env("HOME") + "/.config/hypr/scripts/keybinds.sh"]) }
+                                SetButton { icon: "\u{f030c}"; text: "Show all shortcuts"; onClicked: root.exec(["qs", "ipc", "-p", root.qsDir, "call", "keys", "toggle"]) }
                             }
                         }
                         Row {

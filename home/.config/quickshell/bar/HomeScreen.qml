@@ -66,7 +66,7 @@ Scope {
             anchors.horizontalCenter: parent.horizontalCenter; y: parent.height * 0.13; spacing: 8
             Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatTime(root.now, Settings.cur("clock_12h") ? "h:mm" : "HH:mm")
                    color: "#f5f5f5"; font.family: Theme.font; font.pixelSize: 170; font.weight: Font.Thin }
-            Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(root.now, "dddd, d MMMM").toLowerCase()
+            Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(root.now, "dddd, d MMMM")
                    color: "#b8b8b8"; font.family: Theme.font; font.pixelSize: 20; font.letterSpacing: 1 }
             Text { anchors.horizontalCenter: parent.horizontalCenter; text: Journey.today()
                    color: "#a0a0a0"; font.family: Theme.font; font.pixelSize: 14; font.italic: true }
@@ -95,7 +95,7 @@ Scope {
                         }
                         Column {
                             anchors.verticalCenter: parent.verticalCenter; spacing: 4; width: 200
-                            Text { width: parent.width; elide: Text.ElideRight; text: root.player ? root.player.trackTitle : "nothing playing"
+                            Text { width: parent.width; elide: Text.ElideRight; text: root.player ? root.player.trackTitle : "Nothing playing"
                                    color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 16; font.bold: true }
                             Text { width: parent.width; elide: Text.ElideRight; text: root.player ? root.player.trackArtist : ""
                                    color: Theme.muted; font.family: Theme.font; font.pixelSize: 12 }
@@ -131,9 +131,49 @@ Scope {
                 }
             }
 
+            // weather: today, then the week
+            Card {
+                id: wcard
+                title: "weather · " + (Weather.place || "")
+                Layout.preferredWidth: 380; Layout.fillHeight: true
+                MouseArea { anchors.fill: parent }
+                readonly property var today: Weather.week[Qt.formatDate(root.now, "yyyy-MM-dd")] || null
+                Column {
+                    anchors.fill: parent; spacing: 12
+                    Row {
+                        spacing: 14
+                        Text { text: Weather.icon; color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 44; anchors.verticalCenter: parent.verticalCenter }
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter; spacing: 2
+                            Text { text: Weather.ready ? Weather.temp + "°" : "–"; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 34; font.bold: true }
+                            Text { text: Weather.desc + " · feels " + Weather.feels + "°"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 11 }
+                        }
+                    }
+                    Row {   // the next 7 days
+                        width: parent.width
+                        Repeater {
+                            model: 7
+                            Column {
+                                required property int index
+                                readonly property date d: { const x = new Date(root.now); x.setDate(x.getDate() + index); return x }
+                                readonly property var w: Weather.week[Qt.formatDate(d, "yyyy-MM-dd")] || null
+                                width: parent.width / 7; spacing: 4
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: index === 0 ? "Today" : Qt.formatDate(parent.d, "ddd")
+                                       color: index === 0 ? "#ffffff" : Theme.muted; font.family: Theme.font; font.pixelSize: 9; font.bold: index === 0 }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: parent.w ? Weather.wmoIcon(parent.w.code, false) : ""; color: "#d8d8d8"; font.family: Theme.font; font.pixelSize: 16 }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: parent.w ? parent.w.max + "°" : ""; color: "#e8e8e8"; font.family: Theme.font; font.pixelSize: 11; font.bold: true }
+                                Text { anchors.horizontalCenter: parent.horizontalCenter; text: parent.w ? parent.w.min + "°" : ""; color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 10 }
+                            }
+                        }
+                    }
+                    Text { width: parent.width; wrapMode: Text.WordWrap; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 10
+                           text: wcard.today ? (wcard.today.rain >= 50 ? "Rain likely today (" + wcard.today.rain + "%)" : "Dry today") + "  ·  sunset " + wcard.today.sunset : "" }
+                }
+            }
+
             // calendar
             Card {
-                title: Qt.formatDate(root.month, "MMMM yyyy").toLowerCase()
+                title: Qt.formatDate(root.month, "MMMM yyyy")
                 Layout.preferredWidth: 320; Layout.fillHeight: true
                 MouseArea { anchors.fill: parent }
                 Row {
@@ -153,7 +193,7 @@ Scope {
                     anchors.horizontalCenter: parent.horizontalCenter
                     columns: 7; columnSpacing: 4; rowSpacing: 4
                     Repeater {
-                        model: ["m", "t", "w", "t", "f", "s", "s"]
+                        model: ["M", "T", "W", "T", "F", "S", "S"]
                         Text { required property string modelData; width: 36; height: 22; horizontalAlignment: Text.AlignHCenter
                                text: modelData; color: Theme.muted; font.family: Theme.font; font.pixelSize: 10 }
                     }
@@ -246,12 +286,12 @@ Scope {
                             }
                         }
                     }
-                    Text { visible: ScreenTime.total(ScreenTime.today) === 0; text: "nothing yet today"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 11 }
+                    Text { visible: ScreenTime.total(ScreenTime.today) === 0; text: "Nothing yet today"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 11 }
                 }
                 Text {
                     visible: !stCard.music
                     anchors.bottom: parent.bottom; anchors.bottomMargin: -2
-                    text: "last 7 days  " + ScreenTime.fmt(ScreenTime.total(ScreenTime.weekAll))
+                    text: "Last 7 days  " + ScreenTime.fmt(ScreenTime.total(ScreenTime.weekAll))
                           + (ScreenTime.top(ScreenTime.weekAll, 1).length ? "  ·  most: " + ScreenTime.top(ScreenTime.weekAll, 1)[0].label : "")
                     width: parent.width; elide: Text.ElideRight; color: Theme.muted; font.family: Theme.font; font.pixelSize: 10
                 }
@@ -301,7 +341,7 @@ Scope {
                 Text {
                     visible: stCard.music
                     anchors.bottom: parent.bottom; anchors.bottomMargin: -2
-                    text: "today  " + MusicStats.fmt(MusicStats.total(MusicStats.today)) + "  ·  " + Object.keys(MusicStats.today).length + " songs"
+                    text: "Today  " + MusicStats.fmt(MusicStats.total(MusicStats.today)) + "  ·  " + Object.keys(MusicStats.today).length + " songs"
                     width: parent.width; elide: Text.ElideRight; color: Theme.muted; font.family: Theme.font; font.pixelSize: 10
                 }
             }
@@ -315,7 +355,7 @@ Scope {
                     MouseArea { anchors.fill: parent }
                     CcSlider {
                         width: parent.width
-                        icon: "\u{f057e}"; text: "volume"
+                        icon: "\u{f057e}"; text: "Volume"
                         muted: !!(root.sink && root.sink.audio && root.sink.audio.muted)
                         value: root.sink && root.sink.audio ? Math.min(1, root.sink.audio.volume) : 0
                         onMoved: v => { if (root.sink) { root.sink.audio.muted = false; root.sink.audio.volume = v } }
@@ -326,7 +366,7 @@ Scope {
                     title: "notifications" + (Notifs.count > 0 ? "  ·  " + Notifs.count : "")
                     Layout.fillWidth: true; Layout.fillHeight: true
                     MouseArea { anchors.fill: parent }
-                    Text { visible: Notifs.count === 0; anchors.centerIn: parent; text: "all caught up"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 12 }
+                    Text { visible: Notifs.count === 0; anchors.centerIn: parent; text: "All caught up"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 12 }
                     ListView {
                         visible: Notifs.count > 0; anchors.fill: parent; clip: true; spacing: 6
                         verticalLayoutDirection: ListView.BottomToTop; model: Notifs.model
@@ -336,38 +376,25 @@ Scope {
             }
         }
 
-        // ---------- session ----------
+        // ---------- session: lock and sleep right here, the rest in the power menu ----------
         Row {
             anchors.horizontalCenter: parent.horizontalCenter
-            y: cards.y + cards.height + 50; spacing: 14
+            y: cards.y + cards.height + 50; spacing: 12
             Repeater {
-                model: [["\u{f033e}", "lock", ["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "curtain", "lock"]],
-                        ["\u{f0904}", "sleep", ["systemctl", "suspend"]],
-                        ["\u{f0343}", "log out", ["hyprctl", "dispatch", "hl.dsp.exit()"]],
-                        ["\u{f0709}", "restart", ["systemctl", "reboot"]],
-                        ["\u{f0425}", "shut down", ["systemctl", "poweroff"]]]
-                Column {
+                model: [["\u{f033e}", "Lock", () => root.go(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "curtain", "lock"])],
+                        ["\u{f0904}", "Sleep", () => root.go(["systemctl", "suspend"])],
+                        ["\u{f0425}", "Power…", () => { root.visible = false; PowerMenu.toggle() }]]
+                Rectangle {
                     required property var modelData
-                    required property int index
-                    spacing: 6
-                    property bool armed: false
-                    Timer { id: disarm; interval: 3000; onTriggered: parent.armed = false }
-                    Rectangle {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: 50; height: 50; radius: 25
-                        color: parent.armed ? Theme.red : (sb.containsMouse ? Theme.on : Theme.card)
-                        border.width: 1; border.color: Theme.stroke
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                        Text { anchors.centerIn: parent; text: modelData[0]; font.family: Theme.font; font.pixelSize: 18
-                               color: sb.containsMouse && !parent.parent.armed ? Theme.onText : "#e0e0e0" }
-                        MouseArea { id: sb; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                            onClicked: {   // log out / restart / shut down ask for a second click
-                                if (index >= 2 && Settings.cur("confirm_power") && !parent.parent.armed) { parent.parent.armed = true; disarm.restart(); return }
-                                root.go(modelData[2])
-                            } }
+                    width: sl.implicitWidth + 58; height: 46; radius: 23
+                    color: sb.containsMouse ? "#ececec" : "#cc141414"; border.width: 1; border.color: sb.containsMouse ? "#ececec" : "#30ffffff"
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Row {
+                        anchors.centerIn: parent; spacing: 10
+                        Text { text: modelData[0]; font.family: Theme.font; font.pixelSize: 16; color: sb.containsMouse ? "#0b0b0b" : "#e0e0e0"; anchors.verticalCenter: parent.verticalCenter }
+                        Text { id: sl; text: modelData[1]; font.family: Theme.font; font.pixelSize: 12; font.bold: true; color: sb.containsMouse ? "#0b0b0b" : "#e0e0e0"; anchors.verticalCenter: parent.verticalCenter }
                     }
-                    Text { anchors.horizontalCenter: parent.horizontalCenter; text: parent.armed ? "again" : modelData[1]
-                           color: parent.armed ? Theme.red : Theme.muted; font.family: Theme.font; font.pixelSize: 10 }
+                    MouseArea { id: sb; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: modelData[2]() }
                 }
             }
         }

@@ -69,7 +69,7 @@ Scope {
         implicitWidth: 460; implicitHeight: 520
 
         Rectangle {
-            anchors.fill: parent; radius: 3; color: Theme.mix(Qt.rgba(0.035, 0.035, 0.035, 0.94), Theme.tint, 0.07 * Theme.tintOn); border.width: 1; border.color: "#3dffffff"
+            anchors.fill: parent; radius: 26; color: "#f50b0b0b"; border.width: 1; border.color: "#1fffffff"
             ColumnLayout {
                 anchors.fill: parent; anchors.margins: 16; spacing: 12
                 TextField {
@@ -81,7 +81,7 @@ Scope {
                     placeholderText: "Search emoji…"; placeholderTextColor: Theme.muted
                     color: Theme.fg; font.family: Theme.font; font.pixelSize: 14
                     leftPadding: 40
-                    background: Rectangle { radius: 2; color: Theme.bgAlt; border.width: search.activeFocus ? 2 : 1; border.color: search.activeFocus ? Theme.blue : Theme.line }
+                    background: Rectangle { radius: 14; color: "#161616"; border.width: 1; border.color: search.activeFocus ? "#40ffffff" : "transparent" }
                     Label { x: 14; anchors.verticalCenter: parent.verticalCenter; text: ""; color: Theme.muted }
                     Keys.onEscapePressed: root.visible = false
                     Keys.onReturnPressed: if (root.shown.length) root.pick(root.shown[0].e)
@@ -96,14 +96,14 @@ Scope {
                             model: root.recent
                             Rectangle {
                                 required property var modelData
-                                width: 42; height: 42; radius: 2
-                                color: rMouse.containsMouse ? Theme.bgHover : "transparent"
+                                width: 42; height: 42; radius: 12
+                                color: rMouse.containsMouse ? "#262626" : "transparent"
                                 Text { anchors.centerIn: parent; text: modelData; font.family: "Noto Color Emoji"; font.pixelSize: 24 }
                                 MouseArea { id: rMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.pick(modelData) }
                             }
                         }
                     }
-                    Rectangle { width: parent.width; height: 1; color: Theme.border }
+                    Rectangle { width: parent.width; height: 1; color: "#1fffffff" }
                 }
                 GridView {
                     id: grid
@@ -114,8 +114,8 @@ Scope {
                     cacheBuffer: 400
                     delegate: Rectangle {
                         required property var modelData
-                        width: grid.cellWidth; height: grid.cellHeight; radius: 2
-                        color: eMouse.containsMouse ? Theme.bgHover : "transparent"
+                        width: grid.cellWidth; height: grid.cellHeight; radius: 12
+                        color: eMouse.containsMouse ? "#262626" : "transparent"
                         Text { anchors.centerIn: parent; text: modelData.e; font.family: "Noto Color Emoji"; font.pixelSize: 24 }
                         MouseArea {
                             id: eMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor

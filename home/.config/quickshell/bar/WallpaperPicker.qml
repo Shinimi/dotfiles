@@ -17,7 +17,7 @@ Scope {
     property var favs: []
     property string cat: "all"
     readonly property string favFile: Quickshell.env("HOME") + "/.local/state/wall-favs.json"
-    readonly property var cats: [["all", "all"], ["mono", "monochrome"], ["dark", "dark"], ["light", "light"], ["colour", "colour"], ["fav", "favourites"]]
+    readonly property var cats: [["all", "All"], ["mono", "Monochrome"], ["dark", "Dark"], ["light", "Light"], ["colour", "Colour"], ["fav", "Favourites"]]
     readonly property var list: cat === "all" ? all : cat === "fav" ? all.filter(w => favs.indexOf(w.path) >= 0) : all.filter(w => w.cat === cat)
     readonly property var cur: list.length ? list[Math.max(0, Math.min(pv.currentIndex, list.length - 1))] : null
     property string flash: ""
@@ -58,7 +58,7 @@ Scope {
         Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "curtain", "wall", target, p])
         if (target !== "DP-2") Settings.setNow("wall_main", p)
         if (target !== "DP-1") Settings.setNow("wall_side", p)
-        flash = "applied to " + (target === "both" ? "both screens" : target === "DP-1" ? "main screen" : "side screen")
+        flash = "Applied to " + (target === "both" ? "both screens" : target === "DP-1" ? "the main screen" : "the side screen")
         flashTimer.restart()
         if (close) visible = false
     }
@@ -104,7 +104,7 @@ Scope {
         Row {
             anchors.right: parent.right; anchors.rightMargin: 60; y: 70; spacing: 6
             Repeater {
-                model: [["DP-1", "main"], ["DP-2", "side"], ["both", "both"]]
+                model: [["DP-1", "Main"], ["DP-2", "Side"], ["both", "Both"]]
                 Rectangle {
                     required property var modelData
                     readonly property bool on: root.target === modelData[0]
@@ -203,7 +203,7 @@ Scope {
             y: pv.y + pv.height + 14; spacing: 12
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: root.cur ? root.cur.name.replace(/[-_]/g, " ").toLowerCase() : (root.cat === "fav" ? "no favourites yet · press F on one you like" : "")
+                text: root.cur ? (n => n.charAt(0).toUpperCase() + n.slice(1))(root.cur.name.replace(/[-_]/g, " ")) : (root.cat === "fav" ? "No favourites yet. Press F on one you like" : "")
                 color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 15; font.letterSpacing: 1
             }
             Canvas {   // the palette as one soft gradient
@@ -232,6 +232,43 @@ Scope {
                     }
                 }
             }
+            Row {   // how it will look on your screens, and the two buttons
+                anchors.horizontalCenter: parent.horizontalCenter; spacing: 28; topPadding: 8
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter; spacing: 6
+                    Repeater {
+                        model: [["DP-1", 160, 90, "Main"], ["DP-2", 120, 68, "Side"]]
+                        Column {
+                            required property var modelData
+                            readonly property bool picked: root.target === "both" || root.target === modelData[0]
+                            readonly property string now: Settings.cur(modelData[0] === "DP-2" ? "wall_side" : "wall_main")
+                            anchors.bottom: parent.bottom; spacing: 5
+                            Rectangle {
+                                width: modelData[1]; height: modelData[2]; radius: 7; color: "#111"; clip: true
+                                border.width: parent.picked ? 2 : 1; border.color: parent.picked ? "#ececec" : "#3a3a3a"
+                                Image { anchors.fill: parent; anchors.margins: 2; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 320
+                                        source: parent.parent.picked ? (root.cur ? "file://" + root.cur.thumb : "") : (parent.parent.now ? "file://" + parent.parent.now : "")
+                                        opacity: parent.parent.picked ? 1 : 0.5 }
+                            }
+                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[3] + (parent.picked ? " · new" : ""); color: parent.picked ? "#e0e0e0" : "#6a6a6a"; font.family: Theme.font; font.pixelSize: 10 }
+                        }
+                    }
+                }
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter; spacing: 8
+                    Rectangle {
+                        readonly property bool fav: !!root.cur && root.favs.indexOf(root.cur.path) >= 0
+                        width: fvt.implicitWidth + 32; height: 42; radius: 21; color: fvm.containsMouse ? "#2a2a2a" : "#cc141414"; border.width: 1; border.color: "#33ffffff"
+                        Text { id: fvt; anchors.centerIn: parent; text: (parent.fav ? "\u{f02d1}" : "\u{f02d5}") + "  " + (parent.fav ? "Favourite" : "Add to favourites"); color: "#e6e6e6"; font.family: Theme.font; font.pixelSize: 12 }
+                        MouseArea { id: fvm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.toggleFav() }
+                    }
+                    Rectangle {
+                        width: apt.implicitWidth + 40; height: 42; radius: 21; color: apm.containsMouse ? "#ffffff" : "#ececec"
+                        Text { id: apt; anchors.centerIn: parent; text: "\u{f012c}  Apply"; color: "#0b0b0b"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
+                        MouseArea { id: apm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.apply(false) }
+                    }
+                }
+            }
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: root.flash !== "" ? "\u{f012c}  " + root.flash : (root.list.length ? (pv.currentIndex + 1) + " / " + root.list.length : "")
@@ -240,7 +277,7 @@ Scope {
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 46
-            text: "←  →  browse    tab  category    r  random    f  favourite    space  apply    enter  apply & close    esc"
+            text: "← →  browse    Tab  category    R  random    F  favourite    Space  apply    Enter  apply and close    Esc  close"
             color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 11
         }
     }

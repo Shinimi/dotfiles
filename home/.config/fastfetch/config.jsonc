@@ -1,4 +1,4 @@
-// fastfetch – monochrome · ガッツ. A katana in braille, a tree of what matters. Made by Claude.
+// fastfetch – monochrome · Guts. A katana in braille, a tree of what matters. Made by Claude.
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
   "logo": { "type": "file-raw", "source": "~/.config/fastfetch/katana.txt", "padding": { "top": 0, "left": 2, "right": 5 } }, // LOGO (Settings → Theme)
@@ -10,7 +10,7 @@
     "percent": { "type": ["bar", "num"], "color": { "green": "#bdbdbd", "yellow": "#e6e6e6", "red": "#cf6b6b" } }
   },
   "modules": [
-    { "type": "custom", "format": "{#1;38;2;255;255;255}ガ ッ ツ" },
+    { "type": "custom", "format": "{#1;38;2;255;255;255}G U T S" },
     { "type": "custom", "format": "{#38;2;46;46;46}────────────────────────────────" },
     { "type": "custom", "format": "{#38;2;120;120;120}┌ {#38;2;200;200;200}hardware" },
     { "type": "cpu",    "key": "{#38;2;120;120;120}│  {#38;2;110;110;110}cpu",  "format": "{name}  {#38;2;110;110;110}{temperature}", "temp": true },

@@ -289,7 +289,7 @@ hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true },
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop|dropterm)$" }, opacity = "1.0 override 1.0 override" })
 -- blur behind the bar, panels and pop-ups
-hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview|launcher|notes|keys))$" }, blur = true, ignore_alpha = 0.2 })
+hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(panel|notifications|osd|alttab|games|wallpapers|emoji|clipboard|settings|control|calendar|media|overview|launcher|notes|keys|power))$" }, blur = true, ignore_alpha = 0.2 })
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
 
 -- Games go to workspace 5 via gamemode.sh (it remembers where you were and brings you back after)

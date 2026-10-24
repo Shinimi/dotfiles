@@ -67,7 +67,7 @@ Scope {
 
         Text {
             anchors.horizontalCenter: parent.horizontalCenter; y: 70
-            text: "workspaces"; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 15
+            text: "WORKSPACES"; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 11; font.bold: true; font.letterSpacing: 2
         }
 
         Flow {
@@ -84,10 +84,10 @@ Scope {
                     width: root.tileW; height: root.mh * root.k + 30
                     Rectangle {
                         id: frame
-                        width: parent.width; height: root.mh * root.k; radius: 2; clip: true
-                        color: Theme.bgAlt
+                        width: parent.width; height: root.mh * root.k; radius: 14; clip: true
+                        color: "#121212"
                         border.width: drop.containsDrag ? 3 : (tile.cur ? 2 : 1)
-                        border.color: drop.containsDrag ? Theme.purple : (tile.cur ? Theme.blue : "#22eaeaea")
+                        border.color: drop.containsDrag ? "#ffffff" : (tile.cur ? "#ececec" : "#262626")
                         Behavior on border.color { ColorAnimation { duration: 120 } }
                         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.go(tile.modelData) }
                         DropArea { id: drop; anchors.fill: parent; onDropped: d => root.moveTo(d.source.addr, tile.modelData) }
@@ -100,8 +100,8 @@ Scope {
                                 property string addr: modelData.address
                                 x: modelData.at[0] * root.k; y: (modelData.at[1]) * root.k
                                 width: Math.max(24, modelData.size[0] * root.k); height: Math.max(18, modelData.size[1] * root.k)
-                                radius: 2; color: Theme.bg; clip: true
-                                border.width: 1; border.color: dm.containsMouse ? Theme.purple : "#33eaeaea"
+                                radius: 8; color: "#0b0b0b"; clip: true
+                                border.width: 1; border.color: dm.containsMouse ? "#ececec" : "#3a3a3a"
                                 Drag.active: dm.drag.active; Drag.source: win; Drag.hotSpot.x: width / 2; Drag.hotSpot.y: height / 2
                                 ScreencopyView {
                                     anchors.fill: parent
@@ -120,7 +120,7 @@ Scope {
                     }
                     Text {
                         anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom
-                        text: Theme.wsName(tile.modelData); color: tile.cur ? Theme.blue : Theme.muted
+                        text: Theme.wsName(tile.modelData); color: tile.cur ? "#ffffff" : "#7a7a7a"
                         font.family: Theme.font; font.pixelSize: 13; font.bold: tile.cur
                     }
                 }
@@ -128,7 +128,7 @@ Scope {
         }
         Text {
             anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 60
-            text: "click to go  ·  drag a window to move it  ·  1–9 jumps  ·  esc closes"
+            text: "Click to go  ·  drag a window to move it  ·  1–9 jumps  ·  Esc closes"
             color: Theme.muted; font.family: Theme.font; font.pixelSize: 12
         }
     }

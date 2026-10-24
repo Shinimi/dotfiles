@@ -105,12 +105,12 @@ Scope {
 
             Row {
                 id: head; x: 20; y: 16; spacing: 12
-                Text { text: "clipboard"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
+                Text { text: "Clipboard"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
             }
             Row {
                 anchors.right: parent.right; anchors.rightMargin: 16; y: 12; spacing: 4
                 Repeater {
-                    model: [["all", "all"], ["text", "text"], ["img", "images"]]
+                    model: [["all", "All"], ["text", "Text"], ["img", "Images"]]
                     Rectangle {
                         required property var modelData
                         readonly property bool on: root.kind === modelData[0]
@@ -129,7 +129,7 @@ Scope {
                 focus: root.visible
                 Connections { target: root; function onVisibleChanged() { if (root.visible) { search.text = ""; search.forceActiveFocus() } } }
                 onTextChanged: root.query = text
-                placeholderText: "search clipboard…"; placeholderTextColor: "#555555"
+                placeholderText: "Search clipboard…"; placeholderTextColor: "#555555"
                 color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 13; leftPadding: 28
                 background: Rectangle { radius: 14; color: "#161616"; border.width: 1; border.color: search.activeFocus ? "#40ffffff" : "transparent" }
                 Text { x: 11; anchors.verticalCenter: parent.verticalCenter; text: "›"; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 15 }
@@ -178,7 +178,7 @@ Scope {
                     Rectangle {
                         visible: row.modelData.img
                         anchors { left: parent.left; top: parent.top; bottom: parent.bottom; leftMargin: 38; topMargin: 8; bottomMargin: 8 }
-                        width: 170; radius: 6; color: "#0cffffff"; clip: true; border.width: 1; border.color: "#1affffff"
+                        width: 170; radius: 10; color: "#0cffffff"; clip: true; border.width: 1; border.color: "#1affffff"
                         Image {
                             anchors.fill: parent; anchors.margins: 2
                             source: row.modelData.img ? "file://" + row.modelData.path : ""
@@ -189,7 +189,7 @@ Scope {
                     Text {
                         visible: row.modelData.img
                         anchors { left: parent.left; leftMargin: 222; verticalCenter: parent.verticalCenter }
-                        text: "image\n" + row.modelData.text
+                        text: "Image\n" + row.modelData.text
                         color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10; lineHeight: 1.4
                     }
                     Row {
@@ -225,13 +225,13 @@ Scope {
                     visible: root.pendingDelete !== null
                     x: 16; anchors.verticalCenter: parent.verticalCenter
                     width: ul.implicitWidth + 22; height: 26; radius: 12; color: Theme.on
-                    Text { id: ul; anchors.centerIn: parent; text: "deleted · undo"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 9; font.bold: true }
+                    Text { id: ul; anchors.centerIn: parent; text: "Deleted · Undo"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 9; font.bold: true }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { undoTimer.stop(); root.pendingDelete = null } }
                 }
                 Text {
                     visible: root.pendingDelete === null
                     x: 18; anchors.verticalCenter: parent.verticalCenter
-                    text: "enter paste   p pin   del delete   tab filter   esc"
+                    text: "Enter paste   P pin   Del delete   Tab filter   Esc close"
                     color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 10
                 }
                 Rectangle {

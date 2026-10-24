@@ -57,7 +57,7 @@ Scope {
 
             Row {
                 id: head; x: 20; y: 18; spacing: 12
-                Text { text: "notes"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
+                Text { text: "Notes"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
             }
             Text { anchors.right: parent.right; anchors.rightMargin: 20; y: 21
                    text: root.notes.filter(n => !n.done).length + " open"; color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 11 }
@@ -68,7 +68,7 @@ Scope {
                 x: 16; y: 66; width: parent.width - 32; height: 40
                 focus: root.visible
                 Connections { target: root; function onVisibleChanged() { if (root.visible) input.forceActiveFocus() } }
-                placeholderText: "new note…  (enter adds)"; placeholderTextColor: "#555555"
+                placeholderText: "New note…  (Enter adds it)"; placeholderTextColor: "#555555"
                 color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 13; leftPadding: 28
                 background: Rectangle { radius: 14; color: "#161616"; border.width: 1; border.color: input.activeFocus ? "#40ffffff" : "transparent" }
                 Text { x: 11; anchors.verticalCenter: parent.verticalCenter; text: "+"; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 15 }
@@ -110,7 +110,7 @@ Scope {
                     }
                     MouseArea { id: rm; anchors.fill: parent; hoverEnabled: true; acceptedButtons: Qt.NoButton }
                 }
-                Text { anchors.centerIn: parent; visible: root.notes.length === 0; text: "nothing written down yet"; color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 12 }
+                Text { anchors.centerIn: parent; visible: root.notes.length === 0; text: "Nothing written down yet"; color: "#4a4a4a"; font.family: Theme.font; font.pixelSize: 12 }
             }
 
             Item {
@@ -121,7 +121,7 @@ Scope {
                     visible: root.undo !== null
                     x: 16; anchors.verticalCenter: parent.verticalCenter
                     width: ul.implicitWidth + 22; height: 26; radius: 12; color: Theme.on
-                    Text { id: ul; anchors.centerIn: parent; text: "deleted · undo"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 9; font.bold: true }
+                    Text { id: ul; anchors.centerIn: parent; text: "Deleted · Undo"; color: Theme.onText; font.family: Theme.font; font.pixelSize: 9; font.bold: true }
                     MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: root.restore() }
                 }
                 Rectangle {
@@ -129,7 +129,7 @@ Scope {
                     anchors.right: parent.right; anchors.rightMargin: 16; anchors.verticalCenter: parent.verticalCenter
                     width: cl.implicitWidth + 22; height: 26; radius: 12
                     color: cm.containsMouse ? "#14ffffff" : "transparent"; border.width: 1; border.color: "#33ffffff"
-                    Text { id: cl; anchors.centerIn: parent; text: "clear done"; color: "#a0a0a0"; font.family: Theme.font; font.pixelSize: 9 }
+                    Text { id: cl; anchors.centerIn: parent; text: "Clear done"; color: "#a0a0a0"; font.family: Theme.font; font.pixelSize: 9 }
                     MouseArea { id: cm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.clearDone() }
                 }
             }

@@ -42,12 +42,12 @@ def info():
     song = sh("playerctl metadata --format '{{title}} · {{artist}}' 2>/dev/null")
     shell = sh("ps -o comm= -p $(ps -o ppid= -p $PPID)") or "zsh"
     return [
-        ("SYSTEM", "システム", [("os", osr.get("NAME", "Linux").strip('"')), ("kernel", os.uname().release.split("-")[0]),
+        ("SYSTEM", "", [("os", osr.get("NAME", "Linux").strip('"')), ("kernel", os.uname().release.split("-")[0]),
                                ("wm", "hyprland"), ("shell", shell), ("uptime", human(up))]),
-        ("HARDWARE", "機体", [("cpu", cpu), ("gpu", gpu),
+        ("HARDWARE", "", [("cpu", cpu), ("gpu", gpu),
                              ("ram", f"{bar(used / total)}  {used:.1f} / {total:.0f} GiB"),
                              ("disk", f"{bar(st.used / st.total)}  {st.used / 2**30:.0f} / {st.total / 2**30:.0f} GiB")]),
-        ("JOURNEY", "旅路", [("packages", sh("pacman -Qq | wc -l")), ("os age", age)]
+        ("JOURNEY", "", [("packages", sh("pacman -Qq | wc -l")), ("os age", age)]
                            + ([("♪", song[:34] + ("…" if len(song) > 34 else ""))] if song else [])),
     ]
 
@@ -75,7 +75,7 @@ W = lw + gap + INNER + 4                                     # inside the frame
 h = max(len(left), len(body_r))
 top_r = (h - len(body_r)) // 2
 
-title = f" {B}{HEAD}FRIEREN{R} {DIM}//{R} {JP}葬送のフリーレン{R} "
+title = f" {B}{HEAD}FRIEREN{R} {DIM}//{R} {JP}cachyos{R} "
 tag = f" {HEAD}◆ 1000 YRS{R} "
 print()
 print(f"  {CORNER}┌─{R}{title}{LINE}" + "─" * (W - 2 - width(title) - width(tag)) + f"{R}{tag}{CORNER}─┐{R}")
@@ -87,7 +87,7 @@ for i in range(h):
     print(f"  {LINE}│{R}" + pad(row, W) + f"{LINE}│{R}")
 print(f"  {LINE}│{R}" + " " * W + f"{LINE}│{R}")
 steps = f"{DIM}01 ── 02 ── 03 ──{R} {HEAD}04 ◆{R}"
-foot = f"{DIM}the journey continues  —{R}  {JP}旅は続く{R}"
+foot = f"{DIM}the journey continues{R}"
 mid = W - 4 - width(steps) - width(foot)
 print(f"  {LINE}│{R}  " + steps + " " * max(2, mid) + foot + f"  {LINE}│{R}")
 print(f"  {CORNER}└─{R}{LINE}" + "─" * (W - 2) + f"{R}{CORNER}─┘{R}")
