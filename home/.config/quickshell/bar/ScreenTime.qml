@@ -52,7 +52,13 @@ Singleton {
         command: ["sh", "-c", "cat \"$1/$2.json\" 2>/dev/null", "sh", root.dir, root.day]
         stdout: StdioCollector { onStreamFinished: { try { const d = JSON.parse(this.text); root.today = Object.assign(d, root.today) } catch (e) {} } }
     }
-    function loadWeek() { if (!weekProc.running) weekProc.running = true }
+    function loadWeek() { if (!weekProc.running) weekProc.running = true; if (!daysProc.running) daysProc.running = true }
+    property var days: []             // [{ date, secs }] for the 6 days before today, oldest first (the bar chart)
+    Process {
+        id: daysProc
+        command: ["python3", "-I", "-c", "import json,datetime,os,sys\nd=sys.argv[1];out=[]\nfor i in range(6,0,-1):\n day=(datetime.date.today()-datetime.timedelta(days=i)).isoformat()\n try: s=sum(v[0] for v in json.load(open(os.path.join(d,day+'.json'))).values())\n except Exception: s=0\n out.append({'date':day,'secs':s})\nprint(json.dumps(out))", root.dir]
+        stdout: StdioCollector { onStreamFinished: { try { root.days = JSON.parse(this.text) } catch (e) { root.days = [] } } }
+    }
     Process {
         id: weekProc
         command: ["python3", "-I", "-c", "import json,datetime,os,sys\nd=sys.argv[1];out={}\nfor i in range(1,7):\n day=(datetime.date.today()-datetime.timedelta(days=i)).isoformat()\n try: j=json.load(open(os.path.join(d,day+'.json')))\n except Exception: continue\n for k,v in j.items():\n  o=out.setdefault(k,[0,v[1]]);o[0]+=v[0]\nprint(json.dumps(out))", root.dir]
@@ -66,6 +72,11 @@ Singleton {
         const w = Object.assign({}, week)
         for (const k in today) { const o = w[k] ? w[k].slice() : [0, today[k][1]]; o[0] += today[k][0]; w[k] = o }
         return w
+    }
+    function iconOf(key) {   // an app's icon name for the panels (games get Steam's)
+        if (/^steam_app_\d+$|^gamescope$/.test(key)) return "steam"
+        const e = DesktopEntries.heuristicLookup(key)
+        return e && e.icon ? e.icon : key
     }
     function fmt(s) { const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60); return h > 0 ? h + "h " + m + "m" : m + "m" }
 }
