@@ -21,8 +21,8 @@ Scope {
     readonly property string qsDir: Quickshell.env("HOME") + "/.config/quickshell/bar"
     function toggle() { visible = !visible }
     onVisibleChanged: {
-        if (visible) { shown = true; now = new Date(); PopupState.current = cc; SysState.refresh(); Battery.refresh(); brGet.running = true }
-        else hideLater.restart()
+        if (visible) { shown = true; now = new Date(); pickDay = ""; PopupState.current = cc; SysState.refresh(); Battery.refresh(); brGet.running = true }
+        else { hideLater.restart(); pickDay = "" }   // closing always goes back to today
     }
     Timer { id: hideLater; interval: 220; onTriggered: if (!cc.visible) cc.shown = false }
     Connections { target: PopupState; function onCurrentChanged() { if (PopupState.current !== cc) cc.visible = false } }
@@ -32,6 +32,34 @@ Scope {
 
     // ---------- data ----------
     property date now: new Date()
+    // ---- Today card: the day you tapped in the week row ("" = today)
+    property string pickDay: ""
+    readonly property string todayKey: Qt.formatDate(now, "yyyy-MM-dd")
+    readonly property string dayKey: pickDay || todayKey
+    readonly property bool dayIsToday: dayKey === todayKey
+    readonly property var dayW: Weather.week[dayKey] || null
+    readonly property var dayHours: {   // 8 slots, 3 h apart: from now on for today, the whole day otherwise
+        if (!dayW) return []
+        if (!dayIsToday) return dayW.hours.filter(x => x.h % 3 === 0)
+        const tm = new Date(now); tm.setDate(tm.getDate() + 1)
+        const next = Weather.week[Qt.formatDate(tm, "yyyy-MM-dd")]
+        const all = dayW.hours.filter(x => x.h >= now.getHours()).concat(next ? next.hours : [])
+        return all.filter((x, i) => i % 3 === 0).slice(0, 8)
+    }
+    readonly property string dayHint: {
+        if (!dayW) return ""
+        const rest = dayIsToday ? dayW.hours.filter(x => x.h >= now.getHours()) : dayW.hours
+        const wet = rest.find(x => x.rain >= 50)
+        const past = dayKey < todayKey
+        let s = wet ? (past ? "Rain from " : "Rain likely from ") + String(wet.h).padStart(2, "0") + ":00" + (dayIsToday ? ", take an umbrella" : "")
+                    : (past ? "It stayed dry" : dayIsToday ? "No rain for the rest of the day" : "No rain expected")
+        if (dayIsToday) {
+            const [sh, sm] = dayW.sunset.split(":").map(Number), mins = sh * 60 + sm - (now.getHours() * 60 + now.getMinutes())
+            if (mins > 0) s += "  ·  sunset in " + (mins >= 60 ? Math.floor(mins / 60) + "h " : "") + (mins % 60) + "m"
+        }
+        if (!past && dayW.uv >= 6) s += "  ·  UV " + dayW.uv + ", wear sunscreen"
+        return s
+    }
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property var source: Pipewire.defaultAudioSource
     readonly property var sinks: Pipewire.nodes.values.filter(n => n.isSink && !n.isStream && n.audio && !(n.name || "").startsWith("effect_") && n.name !== "headset_eq")
@@ -367,47 +395,93 @@ Scope {
 
                         Card {
                             Layout.fillHeight: true
-                            title: "Today"; icon: "\u{f00ed}"
+                            title: cc.dayIsToday ? "Today" : Qt.formatDate(new Date(cc.dayKey + "T12:00"), "dddd d"); icon: "\u{f00ed}"
                             note: Weather.ready ? Weather.place : ""
-                            Row {   // this week, today in white
+                            Row {   // this week: tap a day for its weather, tap it again (or close) for today
                                 width: parent.width; spacing: 4
                                 Repeater {
                                     model: 7
                                     Rectangle {
+                                        id: dayBox
                                         required property int index
                                         readonly property date day: { const d = new Date(cc.now); d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + index); return d }
-                                        readonly property bool today: day.toDateString() === cc.now.toDateString()
-                                        width: (parent.width - 24) / 7; height: 46; radius: 8
-                                        color: today ? cc.hi : "transparent"; border.width: 1; border.color: today ? cc.hi : cc.line
+                                        readonly property string key: Qt.formatDate(day, "yyyy-MM-dd")
+                                        readonly property bool today: key === cc.todayKey
+                                        readonly property bool picked: key === cc.dayKey
+                                        readonly property var w: Weather.week[key] || null
+                                        width: (parent.width - 24) / 7; height: 64; radius: 8
+                                        color: picked ? cc.hi : dm.containsMouse ? "#14ffffff" : "transparent"
+                                        border.width: 1; border.color: picked ? cc.hi : today ? "#9a9a9a" : cc.line
+                                        Behavior on color { ColorAnimation { duration: 120 } }
                                         Column {
                                             anchors.centerIn: parent; spacing: 1
-                                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(day, "ddd"); color: today ? "#90000000" : "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9 }
-                                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: day.getDate(); color: today ? cc.ink : "#e0e0e0"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
+                                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(dayBox.day, "ddd"); color: dayBox.picked ? "#90000000" : "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9 }
+                                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: dayBox.day.getDate(); color: dayBox.picked ? cc.ink : "#e0e0e0"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
+                                            Text { anchors.horizontalCenter: parent.horizontalCenter; visible: !!dayBox.w
+                                                   text: dayBox.w ? Weather.wmoIcon(dayBox.w.code, false) + " " + dayBox.w.max + "°" : ""
+                                                   color: dayBox.picked ? "#b0000000" : "#8a8a8a"; font.family: Theme.font; font.pixelSize: 9 }
+                                        }
+                                        Rectangle {   // small dot marks today when another day is picked
+                                            visible: dayBox.today && !dayBox.picked
+                                            anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 3
+                                            width: 4; height: 4; radius: 2; color: "#d0d0d0"
+                                        }
+                                        MouseArea {
+                                            id: dm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                            onClicked: cc.pickDay = (dayBox.today || dayBox.picked) ? "" : dayBox.key
                                         }
                                     }
                                 }
                             }
-                            RowLayout {
-                                visible: Weather.ready
+                            RowLayout {   // the picked day: right now for today, the forecast (or how it was) otherwise
+                                visible: Weather.ready || !!cc.dayW
                                 width: parent.width; spacing: 12
-                                Text { text: Weather.icon; color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 30 }
+                                Text { text: cc.dayIsToday && Weather.ready ? Weather.icon : cc.dayW ? Weather.wmoIcon(cc.dayW.code, false) : ""
+                                       color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 30 }
                                 Column {
-                                    spacing: 1
-                                    Text { text: Weather.temp + "°"; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 22; font.bold: true }
-                                    Text { text: Weather.desc + " · feels " + Weather.feels + "°"; color: cc.dim; font.family: Theme.font; font.pixelSize: 10 }
+                                    Layout.fillWidth: true; spacing: 1
+                                    Text { text: cc.dayIsToday ? Weather.temp + "°" : cc.dayW ? cc.dayW.max + "°  " + cc.dayW.min + "°" : ""
+                                           color: "#ffffff"; font.family: Theme.font; font.pixelSize: 22; font.bold: true }
+                                    Text { width: parent.width; elide: Text.ElideRight
+                                           text: cc.dayIsToday ? Weather.desc + " · feels " + Weather.feels + "°" + (cc.dayW ? " · " + cc.dayW.max + "° " + cc.dayW.min + "°" : "")
+                                                               : cc.dayW ? Qt.formatDate(new Date(cc.dayKey + "T12:00"), "dddd") + " · " + Weather.wmoDesc(cc.dayW.code) : ""
+                                           color: cc.dim; font.family: Theme.font; font.pixelSize: 10 }
                                 }
-                                Item { Layout.fillWidth: true }
-                                Repeater {
-                                    model: Weather.days.slice(1, 3)
-                                    Column {
-                                        required property var modelData
-                                        spacing: 2
-                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: Qt.formatDate(new Date(modelData.date), "ddd"); color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9 }
-                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.icon; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 15 }
-                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.max + "° " + modelData.min + "°"; color: "#a0a0a0"; font.family: Theme.font; font.pixelSize: 9 }
+                                Grid {   // rain, wind, sunrise, sunset
+                                    visible: !!cc.dayW
+                                    columns: 2; columnSpacing: 12; rowSpacing: 4
+                                    Repeater {
+                                        model: cc.dayW ? [["\u{f054a}", cc.dayW.rain + "%"], ["\u{f059d}", cc.dayW.wind + " km/h"],
+                                                          ["\u{f059c}", cc.dayW.sunrise], ["\u{f059b}", cc.dayW.sunset]] : []
+                                        Text { required property var modelData; text: modelData[0] + " " + modelData[1]; color: "#a8a8a8"; font.family: Theme.font; font.pixelSize: 10 }
                                     }
                                 }
                             }
+                            Row {   // hour by hour, with a thin rain-chance bar under each
+                                visible: cc.dayHours.length > 0
+                                width: parent.width
+                                Repeater {
+                                    model: cc.dayHours
+                                    Column {
+                                        required property var modelData
+                                        required property int index
+                                        width: parent.width / Math.max(1, cc.dayHours.length); spacing: 2
+                                        Text { anchors.horizontalCenter: parent.horizontalCenter
+                                               text: cc.dayIsToday && index === 0 ? "Now" : String(modelData.h).padStart(2, "0")
+                                               color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9 }
+                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: Weather.wmoIcon(modelData.code, modelData.h < 6 || modelData.h >= 19)
+                                               color: "#d8d8d8"; font.family: Theme.font; font.pixelSize: 13 }
+                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.temp + "°"
+                                               color: "#e8e8e8"; font.family: Theme.font; font.pixelSize: 10; font.bold: true }
+                                        Rectangle {
+                                            anchors.horizontalCenter: parent.horizontalCenter; width: 22; height: 3; radius: 2; color: "#1affffff"
+                                            Rectangle { width: parent.width * Math.min(1, modelData.rain / 100); height: 3; radius: 2; color: "#d0d0d0" }
+                                        }
+                                    }
+                                }
+                            }
+                            Text { visible: cc.dayHint !== ""; width: parent.width; elide: Text.ElideRight; text: cc.dayHint
+                                   color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 10 }
                             Rectangle { width: parent.width; height: 1; color: cc.line }
                             RowLayout {   // quick timer: pick a length, or watch it count down
                                 width: parent.width; spacing: 6
