@@ -39,6 +39,9 @@ void main() {{
     fragColor = vec4(clamp(mix(vec3(l), c.rgb, {vib/100:.2f}), 0.0, 1.0), c.a);
 }}
 ''')
+# monochrome mode (SUPER+ALT+M) wins over vibrance, except while a game runs
+if s.get("mono_mode") and not os.path.exists(os.path.join(os.environ.get("XDG_RUNTIME_DIR","/tmp"),"gamemode.state")):
+    shader=os.path.join(shd,"mono.frag")
 
 acc=pal.get(s["accent"],pal["tokyo"])
 ga=f'{int(s["glow_strength"]*255/100):02x}'

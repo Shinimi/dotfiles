@@ -150,7 +150,7 @@ Scope {
                     }
                     Column {
                         Layout.fillWidth: true; spacing: 4
-                        Text { text: cc.greeting + ", " + (Settings.cur("user_name") || "yu"); color: "#ffffff"; font.family: Theme.font; font.pixelSize: 16; font.bold: true }
+                        Text { text: cc.greeting + ", " + (n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())(Settings.cur("user_name") || "yu"); color: "#ffffff"; font.family: Theme.font; font.pixelSize: 16; font.bold: true }
                         Text {
                             text: Qt.formatDate(cc.now, "dddd d MMMM") + "   ·   up " + Stats.d.uptime
                                   + (Battery.known ? "   ·   " + Battery.icon + " " + Battery.percent + "%" + (Battery.charging ? " charging" : "") : "")
@@ -238,6 +238,7 @@ Scope {
                             ["\u{f009b}", "Silent", Notifs.dnd ? "No pop-ups" : "Off", Notifs.dnd, () => { Notifs.dnd = !Notifs.dnd }],
                             ["\u{f0176}", "Keep awake", SysState.awake ? "No auto-lock" : "Off", SysState.awake, () => SysState.toggleAwake()],
                             ["\u{f04c5}", "Performance", SysState.perf ? "Max power" : "Balanced", SysState.perf, () => SysState.setProfile(SysState.perf ? "balanced" : "performance")],
+                            ["\u{f0197}", "Monochrome", Settings.cur("mono_mode") ? (SysState.gameMode ? "Paused for game" : "Black & white") : "Off", !!Settings.cur("mono_mode"), () => Settings.setNow("mono_mode", !Settings.cur("mono_mode"))],
                             ["\u{f036c}", "Clean mic", SysState.fx.mic ? "Noise removed" : "Off", !!SysState.fx.mic, () => SysState.fxToggle("mic")],
                             ["\u{f0eb5}", "Game mode", SysState.gameMode ? "On" : "Auto", SysState.gameMode,
                              () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", SysState.gameMode ? "off" : "on"]); SysState.gameMode = !SysState.gameMode }]
@@ -245,8 +246,10 @@ Scope {
                         Rectangle {
                             id: tile
                             required property var modelData
+                            required property int index
                             readonly property bool on: modelData[3]
                             Layout.fillWidth: true; Layout.preferredWidth: 1; height: 58; radius: 10
+                            Layout.columnSpan: index === 6 ? 3 : 1   // the odd one out spans the row
                             color: on ? (tm.containsMouse ? "#ffffff" : cc.hi) : (tm.containsMouse ? cc.cardHi : cc.card)
                             border.width: 1; border.color: on ? "transparent" : cc.line
                             Behavior on color { ColorAnimation { duration: 150 } }

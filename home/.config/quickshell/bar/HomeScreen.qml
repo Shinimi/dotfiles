@@ -16,7 +16,7 @@ Scope {
     required property var screen
     property bool visible: false
     function toggle() { visible = !visible }
-    onVisibleChanged: if (visible) { PopupState.current = root; month = new Date(); now = new Date(); ScreenTime.loadWeek() }
+    onVisibleChanged: if (visible) { PopupState.current = root; month = new Date(); now = new Date(); ScreenTime.loadWeek(); MusicStats.loadWeek() }
     Connections { target: PopupState; function onCurrentChanged() { if (PopupState.current !== root) root.visible = false } }
     IpcHandler { target: "home"; function toggle(): void { root.toggle() } }
     property bool _statsOn: visible
@@ -195,13 +195,33 @@ Scope {
                 }
             }
 
-            // screen time
+            // screen time / music (switch at the top right)
             Card {
-                visible: ScreenTime.enabled
-                title: "screen time"
+                id: stCard
+                property bool music: !ScreenTime.enabled
+                visible: ScreenTime.enabled || MusicStats.enabled
+                title: music ? "music · this week" : "screen time"
                 Layout.preferredWidth: 300; Layout.fillHeight: true
                 MouseArea { anchors.fill: parent }
+                Row {
+                    visible: ScreenTime.enabled && MusicStats.enabled
+                    anchors.right: parent.right; y: -28; spacing: 4
+                    Repeater {
+                        model: [["Apps", false], ["Music", true]]
+                        Rectangle {
+                            required property var modelData
+                            readonly property bool on: stCard.music === modelData[1]
+                            width: tabT.implicitWidth + 16; height: 20; radius: 10
+                            color: on ? Theme.on : (tabM.containsMouse ? "#1fffffff" : "transparent")
+                            Text { id: tabT; anchors.centerIn: parent; text: parent.modelData[0]; color: parent.on ? Theme.onText : Theme.muted
+                                   font.family: Theme.font; font.pixelSize: 10; font.bold: parent.on }
+                            MouseArea { id: tabM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                        onClicked: stCard.music = parent.modelData[1] }
+                        }
+                    }
+                }
                 Column {
+                    visible: !stCard.music
                     anchors.fill: parent; spacing: 10
                     Row {
                         spacing: 10
@@ -229,10 +249,60 @@ Scope {
                     Text { visible: ScreenTime.total(ScreenTime.today) === 0; text: "nothing yet today"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 11 }
                 }
                 Text {
-                    anchors.bottom: parent.bottom; anchors.bottomMargin: 16; x: 18
+                    visible: !stCard.music
+                    anchors.bottom: parent.bottom; anchors.bottomMargin: -2
                     text: "last 7 days  " + ScreenTime.fmt(ScreenTime.total(ScreenTime.weekAll))
                           + (ScreenTime.top(ScreenTime.weekAll, 1).length ? "  ·  most: " + ScreenTime.top(ScreenTime.weekAll, 1)[0].label : "")
-                    width: parent.width - 36; elide: Text.ElideRight; color: Theme.muted; font.family: Theme.font; font.pixelSize: 10
+                    width: parent.width; elide: Text.ElideRight; color: Theme.muted; font.family: Theme.font; font.pixelSize: 10
+                }
+                // ---- music: top artists with bars, then top songs
+                Column {
+                    visible: stCard.music
+                    anchors.fill: parent; spacing: 7
+                    Row {
+                        spacing: 10
+                        Text { text: MusicStats.fmt(MusicStats.total(MusicStats.weekAll)); color: "#ffffff"; font.family: Theme.font; font.pixelSize: 26; font.bold: true }
+                        Text { anchors.baseline: parent.children[0].baseline; text: "listened"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 11 }
+                    }
+                    Repeater {
+                        model: MusicStats.artists(MusicStats.weekAll, 3)
+                        Column {
+                            id: ar
+                            required property var modelData
+                            required property int index
+                            readonly property real share: modelData.secs / Math.max(1, MusicStats.artists(MusicStats.weekAll, 1)[0].secs)
+                            width: parent.width; spacing: 4
+                            Item {
+                                width: parent.width; height: 14
+                                Text { width: parent.width - 60; elide: Text.ElideRight; text: (ar.index + 1) + "  " + ar.modelData.name; color: "#dcdcdc"; font.family: Theme.font; font.pixelSize: 11; font.bold: ar.index === 0 }
+                                Text { anchors.right: parent.right; text: MusicStats.fmt(ar.modelData.secs); color: Theme.muted; font.family: Theme.font; font.pixelSize: 10 }
+                            }
+                            Rectangle {
+                                width: parent.width; height: 4; radius: 2; color: "#1fffffff"
+                                Rectangle { width: Math.max(4, parent.width * ar.share); height: 4; radius: 2; color: Theme.on }
+                            }
+                        }
+                    }
+                    Text { topPadding: 3; visible: MusicStats.total(MusicStats.weekAll) > 0; text: "TOP SONGS"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 9; font.letterSpacing: 1.4 }
+                    Repeater {
+                        model: MusicStats.songs(MusicStats.weekAll, 3)
+                        Item {
+                            required property var modelData
+                            width: parent.width; height: 15
+                            Text { width: parent.width - 50; elide: Text.ElideRight; textFormat: Text.StyledText
+                                   text: parent.modelData.title.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "  <font color='#8a8a8a'>" + parent.modelData.artist.replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</font>"
+                                   color: "#dcdcdc"; font.family: Theme.font; font.pixelSize: 11 }
+                            Text { anchors.right: parent.right; text: MusicStats.fmt(parent.modelData.secs); color: Theme.muted; font.family: Theme.font; font.pixelSize: 10 }
+                        }
+                    }
+                    Text { visible: MusicStats.total(MusicStats.weekAll) === 0; width: parent.width; wrapMode: Text.WordWrap
+                           text: "Nothing yet. Play something on Spotify and it shows up here."; color: Theme.muted; font.family: Theme.font; font.pixelSize: 11 }
+                }
+                Text {
+                    visible: stCard.music
+                    anchors.bottom: parent.bottom; anchors.bottomMargin: -2
+                    text: "today  " + MusicStats.fmt(MusicStats.total(MusicStats.today)) + "  ·  " + Object.keys(MusicStats.today).length + " songs"
+                    width: parent.width; elide: Text.ElideRight; color: Theme.muted; font.family: Theme.font; font.pixelSize: 10
                 }
             }
 

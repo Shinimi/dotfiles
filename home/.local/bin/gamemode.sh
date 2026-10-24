@@ -28,6 +28,7 @@ case "$1" in
     printf 'profile=%s\n' "$(powerprofilesctl get)" > "$S"
     powerprofilesctl set "$power" 2>/dev/null
     qs ipc -p "$Q" call bar dnd true >/dev/null 2>&1
+    "$HOME/.config/hypr/scripts/screen-shader.sh"   # colours back for the game if monochrome mode is on
     # MangoHud watches its config and reloads it live
     { grep -vE '^(no_display|fps_limit|preset)' "$M/base.conf"
       [ "$fps" != 0 ] && echo "fps_limit=$fps"
@@ -43,6 +44,7 @@ case "$1" in
     . "$S"; rm -f "$S"
     powerprofilesctl set "${profile:-balanced}" 2>/dev/null
     qs ipc -p "$Q" call bar dnd false >/dev/null 2>&1
+    "$HOME/.config/hypr/scripts/screen-shader.sh"
     qs ipc -p "$Q" call bar gameSummary >/dev/null 2>&1
     cp "$M/base.conf" "$M/MangoHud.conf"
     logger -t gamemode off ;;

@@ -13,7 +13,7 @@ home_paths=(
   .config/systemd/user/weekly-checkup.service .config/systemd/user/weekly-checkup.timer
   .local/bin/audio-fx.sh .local/bin/weekly-checkup.sh .local/bin/papirus-folders-color.sh .local/bin/hypr-doctor.sh .local/bin/gamemode.sh .local/bin/fetch-logo.sh .local/bin/fetch-ascii.sh .local/bin/recolor-theme.py .local/bin/retheme.py .local/bin/mono-icons.py .local/bin/kb-colors.sh .local/bin/safe-update.sh .local/bin/kocho-sound.sh .local/bin/frieren-fetch .local/bin/tidy.sh .config/systemd/user/tidy.service .config/systemd/user/tidy.timer .local/bin/health-notify.sh .config/systemd/user/health-notify.service .config/systemd/user/health-notify.timer .local/bin/mouse-battery.py .local/bin/sort-downloads.sh .config/systemd/user/sort-downloads.path .config/systemd/user/sort-downloads.service .config/qalculate/qalc.cfg
   .local/share/sounds/mono .local/share/sounds/kocho-voice/README.txt .local/share/Steam/millennium/themes/Material-Theme .config/millennium/config.json .local/share/applications/steam.desktop .config/MangoHud .config/millennium/quick.css .config/spotify-launcher.conf
-  .config/vesktop-flags.conf .config/spotify-launcher.conf
+  .config/vesktop-flags.conf .config/spotify-launcher.conf .config/limine-theme
   .config/systemd/user/hypr-doctor.service .config/systemd/user/hypr-doctor.timer
   .config/spicetify/Themes/Monochrome .config/vesktop/settings/quickCss.css
   .config/gtk-3.0/settings.ini .config/gtk-3.0/gtk.css .config/gtk-4.0/settings.ini .config/gtk-4.0/gtk.css
@@ -28,7 +28,7 @@ system_paths=(
   /etc/systemd/system/amdgpu-power-cap.service /etc/systemd/system/cpu-boost-cap.service
   /etc/systemd/system/paccache.service.d/keep2.conf
   /etc/systemd/system/health-watch.service /etc/systemd/system/health-watch.timer /usr/local/bin/health-watch.sh
-  /etc/udev/rules.d/70-yu-battery.rules
+  /etc/udev/rules.d/70-yu-battery.rules /opt/zapret2/config /opt/zapret2/ipset/zapret-hosts-user.txt
   /usr/share/plymouth/themes/mono /usr/share/plymouth/themes/ascii /usr/share/sddm/themes/mono-yu
 )
 for p in "${home_paths[@]}"; do

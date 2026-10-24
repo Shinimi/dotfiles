@@ -57,7 +57,7 @@ Scope {
         clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", sounds: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
         sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", scroll_mode: "input", middle_paste: "input", focus_on_activate: "input",
         repeat_rate: "input", repeat_delay: "input", kb_layout: "input", numlock: "input", hide_cursor_typing: "input", cursor_hide_after: "input", ws_back_forth: "input", swallow: "input",
-        night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", monitors: "display", auto_pause: "comfort", sort_downloads: "comfort", screen_time: "comfort", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power"
+        night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", mono_mode: "display", monitors: "display", auto_pause: "comfort", sort_downloads: "comfort", screen_time: "comfort", music_stats: "comfort", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power"
 ,
         user_name: "account", avatar: "account", cc_logo: "account", wall_main: "wallpaper", wall_side: "wallpaper",
         default_apps: "defaults", autostart: "autostart", game_profiles: "games"
@@ -77,6 +77,7 @@ Scope {
         function set(key: string, value: string): void {
             Settings.setNow(key, value === "true" ? true : value === "false" ? false : isNaN(Number(value)) ? value : Number(value))
         }
+        function flip(key: string): void { Settings.setNow(key, !Settings.cur(key)) }
         function apply(): void { Settings.apply() }
         function reload(): void { Settings.reload() }
         function discard(): void { Settings.discard() }
@@ -585,6 +586,7 @@ Scope {
                             SetToggle { label: "Pause music for calls and videos"; desc: "Spotify pauses when the mic opens or a video plays, then continues"; key: "auto_pause" }
                             SetToggle { label: "Sort downloads into folders"; desc: "Images, Videos, Music, Documents, Archives, Installers"; key: "sort_downloads" }
                             SetToggle { label: "Track screen time"; desc: "time per app, shown on the home screen (stays on this PC)"; key: "screen_time" }
+                            SetToggle { label: "Music stats"; desc: "your top Spotify songs and artists, shown on the home screen (stays on this PC)"; key: "music_stats" }
                         }
                         SetSection {
                             width: (parent.width - 14) / 2; title: "Settings backup"; icon: "\u{f0bc7}"
@@ -784,6 +786,7 @@ Scope {
                             SetSection {
                                 width: (parent.width - 14) / 2; title: "Vibrance"; icon: "\u{f0e09}"
                                 SetSlider { label: "Colour vibrance (all screens)"; key: "vibrance"; from: 70; to: 150; step: 5; suffix: "%" }
+                                SetToggle { label: "Monochrome mode"; desc: "the whole screen in black and white, colours come back while you play (SUPER + ALT + M)"; key: "mono_mode" }
                                 Label { width: parent.width; wrapMode: Text.WordWrap; text: "100% = untouched. Higher makes colours pop; uses a tiny bit of GPU."; color: Theme.muted; font.pixelSize: 10 }
                             }
                             SetSection {

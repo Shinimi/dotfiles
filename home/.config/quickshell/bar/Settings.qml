@@ -37,7 +37,7 @@ Singleton {
         user_name: "yu", avatar: "", cc_logo: "avatar", wall_main: "", wall_side: "", default_apps: ({}), autostart: [],
         weather_place: "", weather_label: "", game_profiles: ({}),
         // extras
-        hot_corner: true, instant_apply: false, confirm_power: true, volume_step: 3, shot_save: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true, screensaver: true, ws_kanji: false, auto_pause: true, sort_downloads: true, screen_time: true, game_workspace: true, wall_tint: true, ascii_wall: false, ws_preview: true, login_handoff: true
+        hot_corner: true, instant_apply: false, confirm_power: true, volume_step: 3, shot_save: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true, screensaver: true, ws_kanji: false, auto_pause: true, sort_downloads: true, screen_time: true, game_workspace: true, wall_tint: true, ascii_wall: false, ws_preview: true, login_handoff: true, mono_mode: false, music_stats: true
     })
     property var v: defaults        // applied
     property var draft: defaults    // being edited

@@ -29,6 +29,7 @@
 --    SUPER + mouse L / R     drag / resize
 --    SUPER + ALT + L         lock screen         SUPER + SHIFT + E  log out
 --    SUPER + ALT + N         night light         SUPER + ALT + I    idle inhibit (no auto-lock)
+--    SUPER + ALT + M         monochrome mode (whole screen black & white, off in games)
 --    SUPER + SHIFT + C       color picker        SUPER + SHIFT + P  screens off / on
 --    CTRL + ALT + Delete / M task manager (btop)
 --    Print                   region screenshot   CTRL + Print       full screen   ALT + Print  window
@@ -331,6 +332,7 @@ b("SUPER + period",         run("qs ipc -p ~/.config/quickshell/bar call emoji t
 b("SUPER + G",              run("qs ipc -p ~/.config/quickshell/bar call games toggle"))
 b("SUPER + SHIFT + C",      run("hyprpicker -a"))
 b("SUPER + ALT + N",        run(scripts .. "/nightlight.sh"))
+b("SUPER + ALT + M",        run("qs ipc -p ~/.config/quickshell/bar call settings flip mono_mode"))   -- monochrome mode
 b("SUPER + ALT + I",        run(scripts .. "/idle-inhibit.sh"))
 b("SUPER + SHIFT + Slash",  run("qs ipc -p ~/.config/quickshell/bar call keys toggle"))
 b("SUPER + F1",             run("qs ipc -p ~/.config/quickshell/bar call keys toggle"))   -- shortcut sheet

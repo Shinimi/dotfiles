@@ -130,6 +130,8 @@
   "ascii_wall": false,
   "ws_preview": true,
   "login_handoff": true,
+  "mono_mode": false,
+  "music_stats": true,
   "bar_weather": true,
   "ws_flash": true
 }

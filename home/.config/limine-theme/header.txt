@@ -1,0 +1,17 @@
+
+# ---- look: monochrome, ASCII mountains behind the menu (by Claude; backup in ~/.config/backup-2026-10-22) ----
+wallpaper: boot():/limine-ascii.png
+wallpaper_style: stretched
+backdrop: 050505
+interface_branding: C A C H Y O S
+interface_branding_colour: ffffff
+interface_help_colour: 7a7a7a
+interface_help_colour_bright: d0d0d0
+term_palette: 0a0a0a;cf6b6b;d6d6d6;b0b0b0;e6e6e6;c4c4c4;d0d0d0;9a9a9a
+term_palette_bright: 4a4a4a;e08a8a;f0f0f0;d0d0d0;ffffff;e0e0e0;eaeaea;ffffff
+term_background: 58050505
+term_foreground: d8d8d8
+term_background_bright: 2a2a2a
+term_foreground_bright: ffffff
+term_margin: 380
+term_margin_gradient: 40

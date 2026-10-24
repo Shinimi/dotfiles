@@ -5,6 +5,7 @@ import Quickshell
 
 ShellRoot {
     readonly property bool _screenTime: ScreenTime.enabled   // starts the screen time tracker with the shell
+    readonly property bool _musicStats: MusicStats.enabled   // and the music one
     Intro {}
     Curtain {}
     AsciiWall {}
