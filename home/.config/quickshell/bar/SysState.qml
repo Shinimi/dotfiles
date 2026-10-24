@@ -23,6 +23,7 @@ Singleton {
     function setProfile(p) { profile = p; run(["powerprofilesctl", "set", p]) }
     function fxRun(args) { Quickshell.execDetached([fxCmd].concat(args)); fxLater.restart() }
     function fxToggle(k) { const n = Object.assign({}, fx); n[k] = !fx[k]; fx = n; fxRun([k, n[k] ? "on" : "off"]) }
+    function fxVoice(v) { const n = Object.assign({}, fx); n.voice = v; fx = n; fxRun(["voice", v]) }
     function fxPreset(p) { const n = Object.assign({}, fx); n.preset = p; fx = n; fxRun(["preset", p]) }
 
     Process {

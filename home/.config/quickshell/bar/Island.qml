@@ -82,7 +82,8 @@ PanelWindow {
                 onClicked: Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "settings", "open", "sound"])
             }
             Repeater {   // click one to turn it off
-                model: [[Notifs.dnd, "\u{f009b}", "Do not disturb", () => { Notifs.dnd = false }],
+                model: [[!!SysState.fx.troll, "\u{f0c6f}", "Troll mic", () => SysState.fxToggle("troll")],
+                        [Notifs.dnd, "\u{f009b}", "Do not disturb", () => { Notifs.dnd = false }],
                         [SysState.gameMode, "\u{f0eb5}", "Game mode", () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", "off"]); SysState.gameMode = false }],
                         [SysState.awake, "\u{f0176}", "Keep awake", () => SysState.toggleAwake()],
                         [!!Settings.cur("mono_mode"), "\u{f0197}", "Monochrome", () => Settings.setNow("mono_mode", false)],
@@ -145,6 +146,7 @@ PanelWindow {
             target: "bar"
             function calendar(): void { clockPill.popup.toggle() }
             function recording(on: bool): void { win.recording = on }   // rec.sh tells the bar
+            function fx(): void { SysState.refresh() }                   // the troll mic key tells the bar
             function power(): void { powerPill.popup.toggle() }
             function control(): void { win.panel() }
             function notifications(): void { win.panel() }

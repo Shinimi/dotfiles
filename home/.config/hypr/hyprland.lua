@@ -36,6 +36,7 @@
 --    SUPER + ALT + N                night light                           SUPER + ALT + I                keep awake (no auto-lock)
 --    SUPER + ALT + M                monochrome mode                       SUPER + SHIFT + P              screens off / on
 --    SUPER + ALT + R                screen recording                      mouse side button              push to talk (Settings → Sound)
+--    SUPER + ALT + T                troll mic on / off
 --    SUPER + SHIFT + C              colour picker                         CTRL + ALT + Delete            task manager (btop)
 --    SUPER + "                      drop-down terminal (key left of 1)    SUPER + Z                      focus mode
 --    SUPER + D                      draw on the screen                    SUPER + ALT + scroll           magnifier (SUPER + ALT + Z resets)
@@ -335,6 +336,7 @@ b("SUPER + SHIFT + C",      run("hyprpicker -a"))
 b("SUPER + ALT + N",        run(scripts .. "/nightlight.sh"))
 b("SUPER + ALT + M",        run("qs ipc -p ~/.config/quickshell/bar call settings flip mono_mode"))   -- monochrome mode
 b("SUPER + ALT + R",        run(scripts .. "/rec.sh"))   -- screen recording on / off
+b("SUPER + ALT + T",        run("sh -c '~/.local/bin/audio-fx.sh troll toggle; qs ipc -p ~/.config/quickshell/bar call bar fx'"))   -- troll mic on / off
 -- push to talk (Settings → Sound): the mouse side buttons; they still reach games (non-consuming)
 for _, k in ipairs({ "mouse:275", "mouse:276" }) do
     b(k, run(scripts .. "/ptt.sh down " .. k), { non_consuming = true })

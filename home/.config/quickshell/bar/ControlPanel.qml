@@ -661,6 +661,35 @@ Scope {
                                             }
                                         }
                                     }
+                                    Card {   // the troll mic: a voice changer, on and off in a click (or SUPER + ALT + T)
+                                        title: "Troll mic"; icon: "\u{f0c6f}"; note: SysState.fx.troll ? "ON · Super+Alt+T" : "Super+Alt+T"
+                                        RowLayout {
+                                            width: parent.width; spacing: 6
+                                            Repeater {
+                                                model: [["demon", "\u{f0c6f}", "Demon"], ["chipmunk", "\u{f0907}", "Chipmunk"], ["robot", "\u{f06a9}", "Robot"],
+                                                        ["alien", "\u{f089a}", "Alien"], ["radio", "\u{f043a}", "Radio"], ["glitch", "\u{f092b}", "Glitch"]]
+                                                Rectangle {
+                                                    id: vt
+                                                    required property var modelData
+                                                    readonly property bool picked: (SysState.fx.voice || "demon") === modelData[0]
+                                                    readonly property bool live: picked && !!SysState.fx.troll
+                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 50; radius: 12
+                                                    color: live ? cc.hi : vtm.containsMouse ? cc.cardHi : "#0f0f0f"
+                                                    border.width: 1; border.color: live ? cc.hi : picked ? "#8a8a8a" : cc.line
+                                                    Behavior on color { ColorAnimation { duration: 130 } }
+                                                    Column {
+                                                        anchors.centerIn: parent; spacing: 2
+                                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: vt.modelData[1]; color: vt.live ? cc.ink : "#d8d8d8"; font.family: Theme.font; font.pixelSize: 15 }
+                                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: vt.modelData[2]; color: vt.live ? cc.ink : "#8a8a8a"; font.family: Theme.font; font.pixelSize: 8 }
+                                                    }
+                                                    MouseArea {   // click a voice: use it (and switch the troll mic on); click the live one again: off
+                                                        id: vtm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                                        onClicked: { if (vt.live) SysState.fxToggle("troll"); else { SysState.fxVoice(vt.modelData[0]); if (!SysState.fx.troll) SysState.fxToggle("troll") } }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                     Card {   // every app that's making sound, with its own volume
                                         Layout.fillHeight: true
                                         title: "Apps"; icon: "\u{f0388}"; note: Streams.apps.length ? Streams.apps.length + " playing" : "nothing playing"
