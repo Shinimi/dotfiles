@@ -1,4 +1,5 @@
-// System settings (SUPER + comma): sidebar + pages. Changes wait for Apply (Ctrl+S); Discard throws them away. Made by Claude.
+// System settings (SUPER + comma): grouped sidebar + pages, opening on Home (profile, search, a tile per page).
+// Look pages show a live mini desktop. Changes wait for Apply (the pill at the bottom, or Ctrl+S). Changes wait for Apply (Ctrl+S); Discard throws them away. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
@@ -12,7 +13,7 @@ Scope {
     id: root
     required property var screen
     property bool visible: false
-    property string page: "appearance"
+    property string page: "home"
     property string kbMode: "kocho"
     property bool focusOn: false
     property bool _statsOn: visible
@@ -62,8 +63,37 @@ Scope {
         user_name: "account", avatar: "account", cc_logo: "account", wall_main: "wallpaper", wall_side: "wallpaper",
         default_apps: "defaults", autostart: "autostart", game_profiles: "games"
     })
+    // Home tiles: one live line per page
+    function summary(id) {
+        const g = k => Settings.get(k)
+        const n = (a, one, many) => a + " " + (a === 1 ? one : many)
+        switch (id) {
+        case "appearance": return ({ tokyo: "Silver", storm: "Wisteria", sakura: "Sakura", matcha: "Matcha", sunset: "Sunset", mono: "Mono" })[g("accent")] + " · gaps " + g("gaps_in") + "/" + g("gaps_out")
+        case "effects": return (g("animations") ? "Animations on" : "Animations off") + (g("shadows") ? " · shadows" : "")
+        case "theme": return g("icon_base") + " · " + g("ui_font")
+        case "glass": return "Windows " + g("opacity_active") + "%" + (g("blur") ? " · blur" : "")
+        case "wallpaper": return "Main and side screen"
+        case "bar": return "Clock" + (g("clock_seconds") ? " with seconds" : "") + " · pop-ups"
+        case "comfort": return g("screen_time") ? "Screen time on" : "Everyday helpers"
+        case "extras": return g("hot_corner") ? "Hot corner on" : "Little helpers"
+        case "shortcuts": return "Every keybind"
+        case "defaults": return "Browser, files, media"
+        case "autostart": return n((g("autostart") || []).length, "app", "apps") + " at login"
+        case "games": return n(Object.keys(g("game_profiles") || {}).length, "profile", "profiles")
+        case "display": return n(root.monitors.length, "screen", "screens") + (g("mono_mode") ? " · monochrome" : "")
+        case "sound": { const s = Pipewire.defaultAudioSink; return s ? (s.nickname || s.description || s.name || "").replace(/ Analog Stereo| Stereo/g, "") : "Audio" }
+        case "input": return "Sensitivity " + g("sensitivity") + " · " + String(g("kb_layout")).toUpperCase()
+        case "network": return "Your connection"
+        case "bluetooth": return "Wireless devices"
+        case "storage": return root.info.disk ? root.info.disk + " used" : "Drives"
+        case "power": return "Lock after " + g("lock_minutes") + " min"
+        case "datetime": return Qt.formatTime(new Date(), "HH:mm")
+        case "about": return Updates.total > 0 ? n(Updates.total, "update", "updates") + " waiting" : "Up to date"
+        }
+        return ""
+    }
     function pageDirty(id) { return Settings.changedKeys.some(k => keyPage[k] === id) }
-    function toggle() { visible = !visible }
+    function toggle() { if (!visible) { page = "home"; search = "" } visible = !visible }
     function open(p) { page = p; visible = true }
     function exec(cmd) { visible = false; Quickshell.execDetached(cmd) }
     onVisibleChanged: if (visible) { PopupState.current = root; SysState.refresh(); about.running = true; mons.running = true; focusChk.running = true }
@@ -214,52 +244,77 @@ Scope {
                             Avatar { size: 42; radius: 21; pick: Settings.get("avatar") }
                             Column {
                                 anchors.verticalCenter: parent.verticalCenter
-                                Label { text: Settings.get("user_name") || Quickshell.env("USER"); font.pixelSize: 15; font.weight: Font.Bold }
-                                Label { text: "picture and name"; color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
+                                Label { text: (n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())(Settings.get("user_name") || Quickshell.env("USER")); font.pixelSize: 15; font.weight: Font.Bold }
+                                Label { text: "Picture and name"; color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
                             }
                         }
                         MouseArea { id: um; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = "account" }
                     }
+                    Rectangle {   // Home: the overview with a tile per page
+                        width: parent.width; height: 38; radius: 12
+                        readonly property bool cur: root.page === "home"
+                        color: cur ? "#ececec" : (hmM.containsMouse ? "#181818" : "transparent")
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Row {
+                            x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
+                            Label { width: 18; text: "\u{f02dc}"; color: parent.parent.cur ? "#0b0b0b" : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
+                            Label { text: "Home"; color: parent.parent.cur ? "#0b0b0b" : "#c4c4c4"; font.pixelSize: 12; font.bold: parent.parent.cur; anchors.verticalCenter: parent.verticalCenter }
+                        }
+                        MouseArea { id: hmM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { root.page = "home"; root.search = ""; find.text = "" } }
+                    }
                     TextField {
                         id: find
                         width: parent.width; height: 40
-                        placeholderText: "search settings"; placeholderTextColor: Theme.muted
-                        onTextEdited: { root.search = text; if (root.shownPages.length) root.page = root.shownPages[0][0] }
+                        placeholderText: "Search settings"; placeholderTextColor: Theme.muted
+                        onTextEdited: { root.search = text; if (root.page !== "home" && root.shownPages.length) root.page = root.shownPages[0][0] }
                         Keys.onEscapePressed: { text = ""; root.search = "" }
                         color: Theme.fg; font.family: Theme.font; font.pixelSize: 12; leftPadding: 34
                         background: Rectangle { radius: 14; color: "#151515"; border.width: 1; border.color: find.activeFocus ? "#40ffffff" : "transparent" }
                         Label { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 14 }
                     }
                 }
-                ListView {
+                Flickable {   // the pages, grouped: LOOK & FEEL, DESKTOP, DEVICES, SYSTEM
                     id: nav
-                    anchors { top: sideTop.bottom; topMargin: 8; left: parent.left; right: parent.right; bottom: sideBottom.top; leftMargin: 16; rightMargin: 16; bottomMargin: 8 }
-                    clip: true; spacing: 2; boundsBehavior: Flickable.StopAtBounds
-                    model: root.shownPages.filter(p => p[0] !== "account")
-                    section.property: "modelData.3"
-                    section.criteria: ViewSection.FullString
-                    section.delegate: Item {
-                        required property string section
-                        width: nav.width; height: 30
-                        Label { x: 6; anchors.bottom: parent.bottom; anchors.bottomMargin: 6; text: parent.section.toLowerCase(); color: "#555555"; font.pixelSize: 10 }
-                    }
-                    delegate: Rectangle {
-                        required property var modelData
-                        readonly property bool cur: root.page === modelData[0]
-                        width: nav.width; height: 38; radius: 14
-                        color: cur ? "#ececec" : (nm.containsMouse ? "#181818" : "transparent")
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                        Row {
-                            x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
-                            Label { width: 18; text: modelData[1]; color: cur ? "#0b0b0b" : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
-                            Label { text: modelData[2]; color: cur ? "#0b0b0b" : "#c4c4c4"; font.pixelSize: 12
-                                    font.bold: cur; anchors.verticalCenter: parent.verticalCenter }
+                    anchors { top: sideTop.bottom; topMargin: 4; left: parent.left; right: parent.right; bottom: sideBottom.top; leftMargin: 16; rightMargin: 16; bottomMargin: 8 }
+                    clip: true; boundsBehavior: Flickable.StopAtBounds
+                    contentHeight: navCol.implicitHeight
+                    Column {
+                        id: navCol
+                        width: nav.width; spacing: 2
+                        Repeater {
+                            model: ["Look & feel", "Desktop", "Devices", "System"]
+                            Column {
+                                id: ng
+                                required property string modelData
+                                readonly property var items: root.shownPages.filter(p => p[3] === ng.modelData)
+                                visible: items.length > 0
+                                width: navCol.width; spacing: 2
+                                Item {
+                                    width: parent.width; height: 28
+                                    Label { x: 12; anchors.bottom: parent.bottom; anchors.bottomMargin: 6; text: ng.modelData.toUpperCase(); color: "#5a5a5a"; font.pixelSize: 9; font.letterSpacing: 1.6; font.bold: true }
+                                }
+                                Repeater {
+                                    model: ng.items
+                                    Rectangle {
+                                        required property var modelData
+                                        readonly property bool cur: root.page === modelData[0]
+                                        width: navCol.width; height: 36; radius: 12
+                                        color: cur ? "#ececec" : (nm.containsMouse ? "#181818" : "transparent")
+                                        Behavior on color { ColorAnimation { duration: 120 } }
+                                        Row {
+                                            x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
+                                            Label { width: 18; text: modelData[1]; color: cur ? "#0b0b0b" : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
+                                            Label { text: modelData[2]; color: cur ? "#0b0b0b" : "#c4c4c4"; font.pixelSize: 12; font.bold: cur; anchors.verticalCenter: parent.verticalCenter }
+                                        }
+                                        Rectangle { visible: root.pageDirty(modelData[0]); anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                                                    width: 7; height: 7; radius: 4; color: cur ? "#0b0b0b" : "#ffffff" }
+                                        MouseArea { id: nm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = modelData[0] }
+                                    }
+                                }
+                            }
                         }
-                        Rectangle { visible: root.pageDirty(modelData[0]); anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
-                                    width: 7; height: 7; radius: 4; color: Theme.yellow }
-                        MouseArea { id: nm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = modelData[0] }
                     }
-                    Label { anchors.centerIn: parent; visible: nav.count === 0; text: "Nothing found"; color: Theme.muted; font.pixelSize: 11 }
+                    Label { anchors.centerIn: parent; visible: root.shownPages.filter(p => p[0] !== "account").length === 0; text: "Nothing found"; color: Theme.muted; font.pixelSize: 11 }
                 }
                 Column {
                     id: sideBottom
@@ -268,34 +323,30 @@ Scope {
                 }
             }
 
-            // ================= apply bar (always there) =================
+            // ================= apply pill: only while something is waiting =================
             Rectangle {
                 id: applyBar
-                visible: !Settings.cur("instant_apply")
-                anchors { left: side.right; right: parent.right; bottom: parent.bottom; margins: 16; leftMargin: 4 }
-                height: 60; radius: 22
-                color: Settings.dirty ? "#1c1c1c" : "#131313"
-                Behavior on color { ColorAnimation { duration: 160 } }
+                readonly property bool show: !Settings.cur("instant_apply") && Settings.dirty
+                z: 5; visible: opacity > 0; opacity: show ? 1 : 0
+                anchors.horizontalCenter: flick.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: show ? 22 : 8
+                Behavior on opacity { NumberAnimation { duration: 160 } }
+                Behavior on anchors.bottomMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                width: pillRow.implicitWidth + 24; height: 52; radius: 26
+                color: "#1e1e1e"; border.width: 1; border.color: "#33ffffff"
                 RowLayout {
-                    anchors.fill: parent; anchors.leftMargin: 20; anchors.rightMargin: 12; spacing: 10
-                    Rectangle { width: 8; height: 8; radius: 4; color: Settings.dirty ? "#ffffff" : "#3a3a3a" }
-                    Column {
-                        Layout.fillWidth: true
-                        Label { text: Settings.dirty ? Settings.changedKeys.length + (Settings.changedKeys.length === 1 ? " change" : " changes") + " waiting" : "Everything is applied"; font.pixelSize: 13 }
-                        Label { text: Settings.dirty ? "Apply (Ctrl+S) to use them, Discard to undo" : "change anything, then press Apply"; color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
-                    }
-                    SetButton { visible: Settings.dirty; icon: "\u{f0156}"; text: "Discard"; accent: Theme.red; onClicked: { Settings.discard(); root.lastGoodMonitors = null } }
-                    SetButton {
-                        icon: "\u{f012c}"; text: "Apply"; primary: Settings.dirty; opacity: Settings.dirty ? 1 : 0.45
-                        onClicked: Settings.apply()
-                    }
+                    id: pillRow
+                    anchors.centerIn: parent; spacing: 10
+                    Rectangle { width: 8; height: 8; radius: 4; color: "#ffffff"; Layout.leftMargin: 8 }
+                    Label { text: Settings.changedKeys.length + (Settings.changedKeys.length === 1 ? " change waiting" : " changes waiting"); font.pixelSize: 12; Layout.rightMargin: 6 }
+                    SetButton { icon: "\u{f0156}"; text: "Discard"; onClicked: { Settings.discard(); root.lastGoodMonitors = null } }
+                    SetButton { icon: "\u{f012c}"; text: "Apply"; primary: true; onClicked: Settings.apply() }
                 }
             }
 
             // ================= page =================
             Flickable {
                 id: flick
-                anchors { left: side.right; right: parent.right; top: parent.top; bottom: applyBar.visible ? applyBar.top : parent.bottom; margins: 26; leftMargin: 8; bottomMargin: 10 }
+                anchors { left: side.right; right: parent.right; top: parent.top; bottom: parent.bottom; margins: 26; leftMargin: 8; bottomMargin: 6 }
                 contentHeight: pageCol.implicitHeight; clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 Connections { target: root; function onPageChanged() { flick.contentY = 0; fadeIn.restart() } }
@@ -304,9 +355,10 @@ Scope {
                 Column {
                     id: pageCol
                     readonly property bool isPage: true
-                    width: flick.width; spacing: 14
+                    width: flick.width; spacing: 18; bottomPadding: 80   // room under the last group for the apply pill
 
                     Column {
+                        visible: root.page !== "home"
                         spacing: 4; bottomPadding: 6
                         Text { id: ttl; text: root.pageInfo[2]; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 24; font.bold: true }
                         Label {
@@ -323,6 +375,73 @@ Scope {
                         }
                     }
 
+
+                    // ---------- Home: you, a big search, and a tile per page ----------
+                    Column {
+                        visible: root.page === "home"; width: parent.width; spacing: 18
+                        RowLayout {
+                            width: parent.width; spacing: 16
+                            Avatar { size: 64; radius: 32; pick: Settings.get("avatar") }
+                            Column {
+                                Layout.fillWidth: true; spacing: 4
+                                Text { text: (n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())(Settings.get("user_name") || Quickshell.env("USER"))
+                                       color: "#ffffff"; font.family: Theme.font; font.pixelSize: 24; font.bold: true }
+                                Label { text: (root.info.host || "CachyOS") + "  ·  Hyprland " + (root.info.hypr || "") + "  ·  up " + Stats.d.uptime; color: "#7a7a7a"; font.pixelSize: 11; font.weight: Font.Normal }
+                            }
+                            SetButton { visible: Updates.total > 0; icon: "\u{f06b0}"; text: Updates.total + " updates"; onClicked: root.page = "about" }
+                        }
+                        TextField {
+                            id: bigFind
+                            width: parent.width; height: 48
+                            text: root.search
+                            placeholderText: "Search all settings"; placeholderTextColor: Theme.muted
+                            onTextEdited: root.search = text
+                            onAccepted: { const p = root.shownPages.filter(x => x[0] !== "account"); if (p.length) root.page = p[0][0] }
+                            Keys.onEscapePressed: { text = ""; root.search = "" }
+                            color: Theme.fg; font.family: Theme.font; font.pixelSize: 13; leftPadding: 44
+                            background: Rectangle { radius: 16; color: "#131313"; border.width: 1; border.color: bigFind.activeFocus ? "#40ffffff" : "#1d1d1d" }
+                            Label { x: 16; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 16 }
+                        }
+                        Repeater {
+                            model: ["Look & feel", "Desktop", "Devices", "System"]
+                            Column {
+                                id: grp
+                                required property string modelData
+                                readonly property var items: root.shownPages.filter(p => p[3] === grp.modelData)
+                                visible: items.length > 0
+                                width: parent.width; spacing: 8
+                                Label { x: 6; text: grp.modelData.toUpperCase(); color: "#5a5a5a"; font.pixelSize: 9; font.letterSpacing: 1.6; font.bold: true }
+                                Grid {
+                                    width: parent.width; columns: 4; columnSpacing: 10; rowSpacing: 10
+                                    Repeater {
+                                        model: grp.items
+                                        Rectangle {
+                                            id: tl
+                                            required property var modelData
+                                            width: (parent.width - 30) / 4; height: 92; radius: 16
+                                            color: tlM.containsMouse ? "#1a1a1a" : "#131313"; border.width: 1; border.color: tlM.containsMouse ? "#33ffffff" : "#1d1d1d"
+                                            Behavior on color { ColorAnimation { duration: 120 } }
+                                            scale: tlM.pressed ? 0.97 : 1
+                                            Behavior on scale { NumberAnimation { duration: 90 } }
+                                            Rectangle {
+                                                x: 14; y: 14; width: 32; height: 32; radius: 10; color: tlM.containsMouse ? "#ececec" : "#1f1f1f"
+                                                Behavior on color { ColorAnimation { duration: 120 } }
+                                                Label { anchors.centerIn: parent; text: tl.modelData[1]; color: tlM.containsMouse ? "#0b0b0b" : "#d0d0d0"; font.pixelSize: 15 }
+                                            }
+                                            Rectangle { visible: root.pageDirty(tl.modelData[0]); x: parent.width - 18; y: 14; width: 7; height: 7; radius: 4; color: "#ffffff" }
+                                            Column {
+                                                x: 14; y: 54; width: parent.width - 28; spacing: 2
+                                                Label { width: parent.width; elide: Text.ElideRight; text: tl.modelData[2]; color: "#ececec"; font.pixelSize: 12 }
+                                                Label { width: parent.width; elide: Text.ElideRight; text: root.summary(tl.modelData[0]); color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
+                                            }
+                                            MouseArea { id: tlM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = tl.modelData[0] }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        Label { visible: root.shownPages.filter(p => p[0] !== "account").length === 0; text: "Nothing matches \u201c" + root.search + "\u201d"; color: Theme.muted; font.pixelSize: 12 }
+                    }
                     PgAccount { visible: root.page === "account"; width: parent.width }
                     PgWallpaper { visible: root.page === "wallpaper"; width: parent.width }
                     PgShortcuts { visible: root.page === "shortcuts"; width: parent.width }
@@ -336,7 +455,8 @@ Scope {
 
                     // ---------- 0 Appearance ----------
                     Column {
-                        visible: root.page === "appearance"; width: parent.width; spacing: 14
+                        visible: root.page === "appearance"; width: parent.width; spacing: 18
+                        LivePreview { visible: root.page === "appearance" }
                         SetSection {
                             width: parent.width; title: "Accent"; icon: "\u{f0e09}"
                             Row {
@@ -393,7 +513,8 @@ Scope {
 
                     // ---------- Effects ----------
                     Column {
-                        visible: root.page === "effects"; width: parent.width; spacing: 14
+                        visible: root.page === "effects"; width: parent.width; spacing: 18
+                        LivePreview { visible: root.page === "effects" }
                         Row {
                             width: parent.width; spacing: 14
                             SetSection {
@@ -521,7 +642,8 @@ Scope {
 
                     // ---------- 1 Glass ----------
                     Row {
-                        visible: root.page === "glass"; width: parent.width; spacing: 14
+                        visible: root.page === "glass"; width: parent.width; spacing: 18
+                        LivePreview { visible: root.page === "glass" }
                         SetSection {
                             width: (parent.width - 14) / 2; title: "Transparency"; icon: "\u{f0c8a}"
                             SetSlider { label: "Focused window"; key: "opacity_active"; from: 50; to: 100; suffix: "%" }
