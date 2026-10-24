@@ -118,6 +118,10 @@ if ! cmp -s "$S/monitors.lua.new" "$S/monitors.lua"; then
   [ -s "$S/monitors.lua" ] && hyprctl eval "$(tr '\n' ' ' < "$S/monitors.lua")" >/dev/null
 fi
 
+# ---- push to talk: the mic stays muted while it's on (hold a mouse side button to talk); unmuted when it's turned off
+ptt=$(python3 -I -c "import json;print(int(bool(json.load(open('$H/settings.json')).get('ptt'))))")
+if [ "$ptt" != "$(cat "$S/ptt.applied" 2>/dev/null)" ]; then wpctl set-mute @DEFAULT_AUDIO_SOURCE@ "$ptt"; echo "$ptt" > "$S/ptt.applied"; fi
+
 # ---- night light: apply new temperature if it's on
 if pgrep -x hyprsunset >/dev/null; then pkill -x hyprsunset; t=$(python3 -I -c "import json;print(json.load(open('$H/settings.json')).get('night_temp',4500))"); setsid hyprsunset -t "$t" >/dev/null 2>&1 & fi
 

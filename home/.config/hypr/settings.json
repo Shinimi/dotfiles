@@ -131,6 +131,9 @@
   "login_handoff": true,
   "mono_mode": false,
   "music_stats": true,
+  "game_bg_share": true,
+  "ptt": false,
+  "ptt_key": "mouse:276",
   "ws_kanji": false,
   "bar_weather": true,
   "ws_flash": true

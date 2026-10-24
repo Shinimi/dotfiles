@@ -9,6 +9,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Widgets
 import Quickshell.Services.Mpris
+import Quickshell.Services.Pipewire
 
 PanelWindow {
     id: win
@@ -35,6 +36,10 @@ PanelWindow {
     Connections { target: win.player; function onTrackTitleChanged() { if (win.player && win.player.trackTitle) win.showPeek("media") } }
     function ipc(target, fn) { Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", target, fn]) }
     function panel() { ipc("panel", "toggle") }
+    property bool recording: false
+    readonly property var mic: Pipewire.defaultAudioSource
+    PwObjectTracker { objects: [Pipewire.defaultAudioSource] }
+    readonly property bool talking: !!(mic && mic.audio && !mic.audio.muted)
 
     // ---------- the bar ----------
     Rectangle {
@@ -58,6 +63,24 @@ PanelWindow {
 
         Row {   // right: what's on right now (only while it's on), then control center + power
             anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
+            Pill {   // recording: a red dot and the time; click to stop
+                id: recPill
+                visible: win.recording; anchors.verticalCenter: parent.verticalCenter
+                property int secs: 0
+                Timer { running: win.recording; interval: 1000; repeat: true; onTriggered: recPill.secs++ }
+                onVisibleChanged: secs = 0
+                Rectangle { width: 9; height: 9; radius: 5; color: "#e05252"; anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+                            SequentialAnimation on opacity { running: win.recording; loops: Animation.Infinite
+                                NumberAnimation { to: 0.3; duration: 700 } NumberAnimation { to: 1; duration: 700 } } }
+                Label { text: Math.floor(recPill.secs / 60) + ":" + String(recPill.secs % 60).padStart(2, "0"); color: "#ffffff"; font.pixelSize: 12; font.bold: true }
+                onClicked: Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/rec.sh"])
+            }
+            Pill {   // push to talk: dim mic = muted, white = you're talking
+                visible: !!Settings.cur("ptt"); anchors.verticalCenter: parent.verticalCenter
+                implicitWidth: 28; active: win.talking
+                Label { text: win.talking ? "\u{f036c}" : "\u{f036d}"; color: win.talking ? "#ffffff" : "#6a6a6a"; font.pixelSize: 13 }
+                onClicked: Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "settings", "open", "sound"])
+            }
             Repeater {   // click one to turn it off
                 model: [[Notifs.dnd, "\u{f009b}", "Do not disturb", () => { Notifs.dnd = false }],
                         [SysState.gameMode, "\u{f0eb5}", "Game mode", () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", "off"]); SysState.gameMode = false }],
@@ -121,6 +144,7 @@ PanelWindow {
         IpcHandler {
             target: "bar"
             function calendar(): void { clockPill.popup.toggle() }
+            function recording(on: bool): void { win.recording = on }   // rec.sh tells the bar
             function power(): void { powerPill.popup.toggle() }
             function control(): void { win.panel() }
             function notifications(): void { win.panel() }

@@ -16,7 +16,7 @@ Singleton {
     // our own plumbing (EQ, clean mic, meters, the shell itself) never counts as an "app"
     function ours(n) {
         const s = (prop(n, "node.name") + " " + appName(n) + " " + prop(n, "application.process.binary")).toLowerCase()
-        return /effect_|clean_mic|headset_eq|cava|quickshell|\bqs\b|pavucontrol|volume control|peak|pw-play|paplay|kocho|wireplumber/.test(s)
+        return /effect_|clean_mic|headset_eq|cava|quickshell|\bqs\b|pavucontrol|volume control|peak|pw-play|paplay|kocho|wireplumber|gpu-screen-recorder|gsr/.test(s)
     }
     function cls(n) { return prop(n, "media.class") }
 

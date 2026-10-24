@@ -35,6 +35,7 @@
 --    SUPER + ALT + L                lock screen                           SUPER + SHIFT + E              log out
 --    SUPER + ALT + N                night light                           SUPER + ALT + I                keep awake (no auto-lock)
 --    SUPER + ALT + M                monochrome mode                       SUPER + SHIFT + P              screens off / on
+--    SUPER + ALT + R                screen recording                      mouse side button              push to talk (Settings → Sound)
 --    SUPER + SHIFT + C              colour picker                         CTRL + ALT + Delete            task manager (btop)
 --    SUPER + "                      drop-down terminal (key left of 1)    SUPER + Z                      focus mode
 --    SUPER + D                      draw on the screen                    SUPER + ALT + scroll           magnifier (SUPER + ALT + Z resets)
@@ -333,6 +334,12 @@ b("SUPER + G",              run("qs ipc -p ~/.config/quickshell/bar call games t
 b("SUPER + SHIFT + C",      run("hyprpicker -a"))
 b("SUPER + ALT + N",        run(scripts .. "/nightlight.sh"))
 b("SUPER + ALT + M",        run("qs ipc -p ~/.config/quickshell/bar call settings flip mono_mode"))   -- monochrome mode
+b("SUPER + ALT + R",        run(scripts .. "/rec.sh"))   -- screen recording on / off
+-- push to talk (Settings → Sound): the mouse side buttons; they still reach games (non-consuming)
+for _, k in ipairs({ "mouse:275", "mouse:276" }) do
+    b(k, run(scripts .. "/ptt.sh down " .. k), { non_consuming = true })
+    b(k, run(scripts .. "/ptt.sh up " .. k), { release = true, non_consuming = true })
+end
 b("SUPER + ALT + I",        run(scripts .. "/idle-inhibit.sh"))
 b("SUPER + SHIFT + Slash",  run("qs ipc -p ~/.config/quickshell/bar call keys toggle"))
 b("SUPER + F1",             run("qs ipc -p ~/.config/quickshell/bar call keys toggle"))   -- shortcut sheet

@@ -58,7 +58,7 @@ Scope {
         clock_seconds: "bar", clock_12h: "bar", clock_date: "bar", bar_media: "bar", notif_timeout: "bar", notif_center: "bar", sounds: "bar", desktop_clock: "bar", desktop_clock_pos: "bar",
         sensitivity: "input", accel_flat: "input", natural_scroll: "input", scroll_factor: "input", follow_mouse: "input", middle_scroll: "input", scroll_mode: "input", middle_paste: "input", focus_on_activate: "input",
         repeat_rate: "input", repeat_delay: "input", kb_layout: "input", numlock: "input", hide_cursor_typing: "input", cursor_hide_after: "input", ws_back_forth: "input", swallow: "input",
-        night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", mono_mode: "display", monitors: "display", auto_pause: "comfort", sort_downloads: "comfort", screen_time: "comfort", music_stats: "comfort", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power", game_bg_share: "power"
+        night_temp: "display", night_auto: "display", night_from: "display", night_to: "display", vibrance: "display", mono_mode: "display", monitors: "display", auto_pause: "comfort", sort_downloads: "comfort", screen_time: "comfort", music_stats: "comfort", lock_minutes: "power", screen_off_after: "power", mouse_wakes: "power", game_mode: "power", game_bg_share: "power", ptt: "sound", ptt_key: "sound"
 ,
         user_name: "account", avatar: "account", cc_logo: "account", wall_main: "wallpaper", wall_side: "wallpaper",
         default_apps: "defaults", autostart: "autostart", game_profiles: "games"
@@ -991,6 +991,15 @@ Scope {
                                     DeviceRow { required property var modelData; node: modelData; accent: Theme.purple; current: Pipewire.defaultAudioSource && Pipewire.defaultAudioSource.id === modelData.id || (SysState.fx.mic && (modelData.name || "").indexOf("Fuxi") >= 0)
                                         onPicked: { if (SysState.fx.mic) SysState.fxToggle("mic"); Pipewire.preferredDefaultAudioSource = modelData } }
                                 }
+                            }
+                        }
+                        SetSection {
+                            width: parent.width; title: "Push to talk"; icon: "\u{f036c}"
+                            SetToggle { label: "Push to talk"; desc: "your mic stays muted until you hold a mouse side button. Works in every game and app, unlike Discord's own key (set Discord to Voice Activity)"; key: "ptt" }
+                            SetTiles {
+                                visible: Settings.get("ptt"); label: "Button"; columns: 2
+                                current: Settings.get("ptt_key"); onPicked: v => Settings.set("ptt_key", v)
+                                options: [["mouse:276", "Front side button", "the one nearer the front", "\u{f037d}"], ["mouse:275", "Back side button", "the one nearer your wrist", "\u{f037d}"]]
                             }
                         }
                         SetHeading { text: "Effects"; icon: "\u{f0ea2}" }
