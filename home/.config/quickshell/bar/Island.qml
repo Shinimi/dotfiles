@@ -56,7 +56,7 @@ PanelWindow {
             }
         }
 
-        Glass {   // middle: the time, the date and what's playing
+        Glass {   // middle: the time and the date
             anchors.horizontalCenter: parent.horizontalCenter
             width: clockPill.implicitWidth + 12
             ClockPill { id: clockPill; anchors.centerIn: parent; player: win.player }
