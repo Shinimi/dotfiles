@@ -23,16 +23,16 @@ Scope {
     readonly property var pages: [
         ["account", "\u{f0004}", "Account", "Personal", "user name picture avatar photo profile"],
         ["appearance", "\u{f03d8}", "Appearance", "Look & feel", "accent colour border gaps rounding layout tiling"],
-        ["effects", "\u{f0d4a}", "Effects", "Look & feel", "glow shadow dim animation speed"],
-        ["theme", "\u{f0e09}", "Theme", "Look & feel", "icons folder cursor font"],
-        ["glass", "\u{f0c8a}", "Glass & blur", "Look & feel", "transparency opacity blur"],
+        ["effects", "\u{f1545}", "Effects", "Look & feel", "glow shadow dim animation speed"],
+        ["theme", "\u{f08b5}", "Theme", "Look & feel", "icons folder cursor font"],
+        ["glass", "\u{f00b5}", "Glass & blur", "Look & feel", "transparency opacity blur"],
         ["wallpaper", "\u{f02e9}", "Wallpaper", "Look & feel", "background picture"],
         ["bar", "\u{f009a}", "Notifications", "Desktop", "notifications pop-ups sounds do not disturb desktop clock"],
-        ["comfort", "\u{f02dc}", "Comfort", "Desktop", "instant apply volume step screenshot confirm power snapshot backup restore"],
+        ["comfort", "\u{f04b9}", "Comfort", "Desktop", "instant apply volume step screenshot confirm power snapshot backup restore"],
         ["extras", "\u{f0674}", "Extras", "Desktop", "hot corner focus mode drop-down terminal screensaver ink draw magnifier zoom picture in picture wallpaper shuffle pause music lock"],
         ["shortcuts", "\u{f030c}", "Shortcuts", "Desktop", "keybinds keys hotkeys"],
-        ["defaults", "\u{f03d6}", "Default apps", "Desktop", "browser file manager open with"],
-        ["autostart", "\u{f0412}", "Autostart", "Desktop", "login startup apps"],
+        ["defaults", "\u{f003b}", "Default apps", "Desktop", "browser file manager open with"],
+        ["autostart", "\u{f14df}", "Autostart", "Desktop", "login startup apps"],
         ["games", "\u{f0eb5}", "Games", "Desktop", "fps cap overlay mangohud profile power"],
         ["display", "\u{f0379}", "Display", "Devices", "monitor resolution refresh hz colour night light vibrance"],
         ["sound", "\u{f057e}", "Sound", "Devices", "audio volume mic eq headset"],
@@ -42,7 +42,7 @@ Scope {
         ["storage", "\u{f02ca}", "Storage", "Devices", "disk ssd space health"],
         ["power", "\u{f0425}", "Power & lock", "System", "sleep lock screen off game mode performance"],
         ["datetime", "\u{f0954}", "Date & time", "System", "clock timezone ntp"],
-        ["about", "\u{f0493}", "About & updates", "System", "system info updates maintenance cpu gpu"]
+        ["about", "\u{f02fd}", "About & updates", "System", "system info updates maintenance cpu gpu"]
     ]
     readonly property var pageInfo: pages.find(p => p[0] === page) || pages[0]
     property string search: ""
@@ -875,92 +875,8 @@ Scope {
                         }
                     }
 
-                    // ---------- Display ----------
-                    Column {
-                        visible: root.page === "display"; width: parent.width; spacing: 14
-
-                        Row {   // pick a screen
-                            width: parent.width; spacing: 14
-                            Repeater {
-                                model: root.monitors
-                                Rectangle {
-                                    id: monCard
-                                    required property var modelData
-                                    readonly property bool sel: root.selMon === modelData.name
-                                    width: (parent.width - 14) / 2; height: 112; radius: 12
-                                    color: sel ? Qt.rgba(0.88, 0.88, 0.88, 0.12) : (mcm.containsMouse ? "#1eeaeaea" : Theme.card)
-                                    border.width: 1; border.color: sel ? Theme.blue : "#14eaeaea"
-                                    Behavior on color { ColorAnimation { duration: 120 } }
-                                    MouseArea { id: mcm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.selMon = monCard.modelData.name }
-                                    Rectangle {
-                                        x: 16; anchors.verticalCenter: parent.verticalCenter
-                                        width: monCard.modelData.width > 2000 ? 120 : 100; height: width * 9 / 16; radius: 7
-                                        color: Theme.bgAlt; border.width: 2; border.color: monCard.sel ? Theme.blue : Theme.line
-                                        Label { anchors.centerIn: parent; text: monCard.modelData.name === "DP-1" ? "Main" : "Side"; color: monCard.sel ? Theme.blue : Theme.muted; font.pixelSize: 11 }
-                                    }
-                                    Column {
-                                        x: monCard.modelData.width > 2000 ? 150 : 130; width: parent.width - x - 12
-                                        anchors.verticalCenter: parent.verticalCenter; spacing: 3
-                                        Label { width: parent.width; elide: Text.ElideRight; text: monCard.modelData.model || monCard.modelData.name; font.pixelSize: 13; font.weight: Font.Bold }
-                                        Label { text: monCard.modelData.width + " × " + monCard.modelData.height + " · " + Math.round(monCard.modelData.refreshRate) + " Hz"; color: Theme.blue; font.pixelSize: 12 }
-                                        Label { text: monCard.modelData.name + " · " + (monCard.modelData.name === "DP-1" ? "workspaces 1–20" : "Discord + Spotify"); color: Theme.muted; font.pixelSize: 10 }
-                                    }
-                                }
-                            }
-                        }
-
-                        SetSection {
-                            width: parent.width; title: "Resolution & refresh rate · " + root.selMon; icon: "\u{f0379}"
-                            SetChoice {
-                                label: "Resolution"
-                                current: root.selCfg.mode ? root.selCfg.mode.split("@")[0] : ""
-                                options: root.resolutions.map(r => [r, r.replace("x", " × ")])
-                                onPicked: v => root.monChange("mode", v + "@" + root.ratesFor(v)[0])
-                            }
-                            SetChoice {
-                                label: "Refresh rate"; accent: Theme.cyan
-                                current: root.selCfg.mode ? root.selCfg.mode.split("@")[1] : ""
-                                options: root.ratesFor(root.selCfg.mode ? root.selCfg.mode.split("@")[0] : "").map(r => [r, Math.round(parseFloat(r)) + " Hz"])
-                                onPicked: v => root.monChange("mode", root.selCfg.mode.split("@")[0] + "@" + v)
-                            }
-                        }
-
-                        SetSection {
-                            width: parent.width; title: "Colour · " + root.selMon; icon: "\u{f03d8}"
-                            SetChoice {
-                                label: "Colour mode"; desc: "How colours are mapped to this screen"; accent: Theme.purple
-                                current: root.selCfg.cm || "srgb"
-                                options: [["srgb", "Accurate (sRGB)"], ["wide", "Vivid (wide gamut)"], ["edid", "Monitor's own (EDID)"]]
-                                onPicked: v => root.monChange("cm", v)
-                            }
-                            SetSwitch {
-                                label: "10-bit colour"; desc: "smoother gradients, less banding (if the screen supports it)"; accent: Theme.purple
-                                on: root.selCfg.bitdepth === 10; onToggled: root.monChange("bitdepth", root.selCfg.bitdepth === 10 ? 8 : 10)
-                            }
-                            SetSwitch {
-                                label: "Adaptive sync (VRR)"; desc: "smoother games below max Hz; only in fullscreen, so the desktop never flickers"; accent: Theme.yellow
-                                on: !!root.selCfg.vrr; onToggled: root.monChange("vrr", root.selCfg.vrr ? 0 : 1)
-                            }
-                        }
-
-                        Row {
-                            width: parent.width; spacing: 14
-                            SetSection {
-                                width: (parent.width - 14) / 2; title: "Vibrance"; icon: "\u{f0e09}"
-                                SetSlider { label: "Colour vibrance (all screens)"; key: "vibrance"; from: 70; to: 150; step: 5; suffix: "%" }
-                                SetToggle { label: "Monochrome mode"; desc: "the whole screen in black and white, colours come back while you play (Super + Alt + M)"; key: "mono_mode" }
-                                Label { width: parent.width; wrapMode: Text.WordWrap; text: "100% = untouched. Higher makes colours pop; uses a tiny bit of GPU."; color: Theme.muted; font.pixelSize: 10 }
-                            }
-                            SetSection {
-                                width: (parent.width - 14) / 2; title: "Night light"; icon: "\u{f0594}"
-                                SetSwitch { label: "Night light"; desc: "warmer colours at night"; on: SysState.night; accent: Theme.yellow; onToggled: SysState.toggleNight() }
-                                SetSlider { label: "Warmth"; key: "night_temp"; from: 2500; to: 6500; step: 100; suffix: " K" }
-                                SetToggle { label: "On a schedule"; desc: "on in the evening, off in the morning"; key: "night_auto" }
-                                SetSlider { visible: Settings.get("night_auto"); label: "Turn on at"; key: "night_from"; from: 17; to: 23; suffix: ":00" }
-                                SetSlider { visible: Settings.get("night_auto"); label: "Turn off at"; key: "night_to"; from: 4; to: 10; suffix: ":00" }
-                            }
-                        }
-                    }
+                    // ---------- Display (its own file) ----------
+                    PgDisplay { visible: root.page === "display"; width: parent.width; host: root }
 
                     // ---------- 4 Sound ----------
                     Column {
