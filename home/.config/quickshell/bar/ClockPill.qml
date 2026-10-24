@@ -16,7 +16,7 @@ Pill {
         text: Qt.formatDateTime(clock.date, (Settings.cur("clock_12h") ? "h:mm" : "HH:mm") + (Settings.cur("clock_seconds") ? ":ss" : "") + (Settings.cur("clock_12h") ? " AP" : ""))
         color: "#ffffff"; font.pixelSize: 13; font.weight: Font.Bold; font.letterSpacing: 1
     }
-    Label { text: Qt.formatDate(clock.date, "ddd d MMM"); color: "#8a8a8a"; font.pixelSize: 11 }
+    Label { text: Qt.formatDate(clock.date, "ddd d MMM"); color: "#8a8a8a"; font.pixelSize: 13; font.weight: Font.Medium; font.letterSpacing: 1 }   // same size and baseline as the time, just dimmer
     Label { visible: Timers.timerRunning; text: "\u{f051f} " + Timers.fmt(Timers.remaining); color: "#ffffff"; font.pixelSize: 11 }
     Label { visible: Timers.swRunning && !Timers.timerRunning; text: "\u{f13ab} " + Timers.fmt(Math.floor(Timers.elapsed / 100)); color: "#ffffff"; font.pixelSize: 11 }
     onClicked: if (pill.calendar) cal.toggle()

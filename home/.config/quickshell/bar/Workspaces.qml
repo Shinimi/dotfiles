@@ -27,6 +27,25 @@ Pill {
     function leaveWs() { hoverIn.stop(); hoverOut.restart() }
     Process { id: cl; command: ["hyprctl", "clients", "-j"]
               stdout: StdioCollector { onStreamFinished: { try { wsPill.clients = JSON.parse(this.text).filter(c => c.mapped !== false) } catch (e) {} } } }
+    // which app is on each workspace (from Hyprland's own window list, refreshed on window events)
+    property var wsApp: ({})
+    Process {
+        id: appsProc
+        command: ["hyprctl", "clients", "-j"]
+        stdout: StdioCollector { onStreamFinished: {
+            try {
+                const m = {}
+                for (const c of JSON.parse(this.text)) if (c.mapped !== false && c.workspace && !(c.workspace.id in m) && c.class) m[c.workspace.id] = c.class
+                wsPill.wsApp = m
+            } catch (e) {}
+        } }
+    }
+    Timer { id: appsLater; interval: 250; onTriggered: if (!appsProc.running) appsProc.running = true }
+    Connections {
+        target: Hyprland
+        function onRawEvent(e) { if (/^(openwindow|closewindow|movewindow|windowtitle|workspace|activewindow)/.test(e.name)) appsLater.restart() }
+    }
+    Component.onCompleted: appsLater.restart()
     function toplevelFor(addr) {
         const a = addr.replace(/^0x/, "").toLowerCase()
         for (const t of Hyprland.toplevels.values) if (String(t.address).replace(/^0x/, "").toLowerCase() === a) return t.wayland
@@ -91,11 +110,7 @@ Pill {
                                              || !!(ws && ws.monitor && ws.monitor.name === "DP-1" && ws.monitor.activeWorkspace === ws)
             readonly property bool hasWindows: !!(ws && ws.toplevels && ws.toplevels.values.length > 0)
             // the app on it: its icon stands for the workspace (games show Steam's)
-            readonly property string app: {
-                if (!hasWindows) return ""
-                for (const t of ws.toplevels.values) if (t.wayland && t.wayland.appId) return t.wayland.appId
-                return ""
-            }
+            readonly property string app: hasWindows ? (wsPill.wsApp[wsId] || "") : ""
             readonly property string ico: {
                 if (!app) return ""
                 if (/^steam_app_\d+$|^gamescope$/.test(app)) return Quickshell.iconPath("steam", true)
