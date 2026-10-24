@@ -20,7 +20,7 @@ Column {
             id: dc
             required property var modelData
             readonly property bool up: modelData.state.indexOf("connected") === 0
-            width: pg.width; height: 190; radius: 18; color: "#131313"; border.width: 1; border.color: up ? Qt.rgba(0.78, 0.78, 0.78, 0.4) : "#14eaeaea"
+            width: pg.width; height: 270; radius: 18; color: "#131313"; border.width: 1; border.color: up ? Qt.rgba(0.78, 0.78, 0.78, 0.4) : "#14eaeaea"
             Row {
                 x: 22; y: 20; spacing: 16
                 Rectangle {
@@ -38,8 +38,27 @@ Column {
                 Label { text: "\u{f0045} " + pg.speed(Stats.d.netRx || 0); color: Theme.green; font.pixelSize: 13 }
                 Label { text: "\u{f005d} " + pg.speed(Stats.d.netTx || 0); color: Theme.purple; font.pixelSize: 13 }
             }
+            Row {   // the path your traffic takes
+                x: 22; y: 92; width: parent.width - 44; height: 70
+                readonly property var hops: [["\u{f0aab}", "This PC"], ["\u{f11e2}", "Router"], ["\u{f01e7}", "Internet"]]
+                Repeater {
+                    model: parent.hops
+                    Item {
+                        required property var modelData
+                        required property int index
+                        width: parent.width / 3; height: 70
+                        Rectangle { visible: index < 2; x: parent.width / 2 + 28; y: 22; width: parent.width - 56; height: 2; color: dc.up ? "#5a5a5a" : "#2a2a2a"
+                                    Rectangle { width: 6; height: 6; radius: 3; y: -2; color: "#ececec"; visible: dc.up
+                                                SequentialAnimation on x { running: dc.up && pg.visible; loops: Animation.Infinite
+                                                    NumberAnimation { from: 0; to: 140; duration: 1400 } } } }
+                        Rectangle { anchors.horizontalCenter: parent.horizontalCenter; width: 44; height: 44; radius: 14; color: dc.up ? "#ececec" : "#1f1f1f"
+                                    Text { anchors.centerIn: parent; text: modelData[0]; color: dc.up ? "#0b0b0b" : "#7a7a7a"; font.family: Theme.font; font.pixelSize: 20 } }
+                        Text { anchors.horizontalCenter: parent.horizontalCenter; y: 52; text: modelData[1]; color: "#d8d8d8"; font.family: Theme.font; font.pixelSize: 11 }
+                    }
+                }
+            }
             GridLayout {
-                x: 22; y: 96; width: parent.width - 44; columns: 4; columnSpacing: 10; rowSpacing: 4
+                x: 22; y: 186; width: parent.width - 44; columns: 4; columnSpacing: 10; rowSpacing: 4
                 Repeater {
                     model: [["IP address", (dc.modelData["IP4.ADDRESS"] || "–").split("/")[0]], ["Router", dc.modelData["IP4.GATEWAY"] || "–"],
                             ["DNS", (dc.modelData["IP4.DNS"] || "–").split("#")[0]], ["Device", dc.modelData.device]]

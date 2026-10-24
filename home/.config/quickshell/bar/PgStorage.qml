@@ -35,8 +35,48 @@ Column {
             }
         }
     }
+    SetHeading { text: "Space"; icon: "\u{f0a0a}" }
+    Row {   // a ring per drive: how full it is
+        width: parent.width; spacing: 14
+        Repeater {
+            model: pg.st.mounts
+            Rectangle {
+                id: mt
+                required property var modelData
+                readonly property real pct: modelData.used / Math.max(1, modelData.size)
+                width: (pg.width - 14 * (pg.st.mounts.length - 1)) / Math.max(1, pg.st.mounts.length); height: 150; radius: 16
+                color: "#131313"; border.width: 1; border.color: pct > 0.9 ? "#cf6b6b" : "#1d1d1d"
+                Canvas {
+                    x: 18; anchors.verticalCenter: parent.verticalCenter; width: 104; height: 104
+                    property real v: mt.pct
+                    onVChanged: requestPaint()
+                    Component.onCompleted: requestPaint()
+                    onPaint: {
+                        const c = getContext("2d"); c.reset()
+                        c.lineWidth = 10; c.lineCap = "round"
+                        c.strokeStyle = "rgba(255,255,255,0.07)"; c.beginPath(); c.arc(52, 52, 44, 0, 2 * Math.PI); c.stroke()
+                        c.strokeStyle = v > 0.9 ? "#cf6b6b" : "#ececec"; c.beginPath(); c.arc(52, 52, 44, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * v); c.stroke()
+                    }
+                    Column {
+                        anchors.centerIn: parent
+                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: Math.round(mt.pct * 100) + "%"; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 20; font.bold: true }
+                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: "used"; color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 9 }
+                    }
+                }
+                Column {
+                    x: 140; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 156; spacing: 4
+                    Text { width: parent.width; elide: Text.ElideRight; text: mt.modelData.mount === "/" ? "System" : mt.modelData.mount.split("/").pop()
+                           color: "#ececec"; font.family: Theme.font; font.pixelSize: 14; font.bold: true }
+                    Text { width: parent.width; elide: Text.ElideRight; text: mt.modelData.mount.replace(Quickshell.env("HOME"), "~"); color: "#6e6e6e"; font.family: Theme.font; font.pixelSize: 10 }
+                    Item { width: 1; height: 6 }
+                    Text { text: pg.gb(mt.modelData.free) + " free"; color: "#d8d8d8"; font.family: Theme.font; font.pixelSize: 12 }
+                    Text { text: pg.gb(mt.modelData.used) + " of " + pg.gb(mt.modelData.size) + " used"; color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 10 }
+                }
+            }
+        }
+    }
     SetSection {
-        width: parent.width; title: "Space"; icon: "\u{f0a0a}"
+        visible: false; width: parent.width; title: "Space"; icon: "\u{f0a0a}"
         Repeater {
             model: pg.st.mounts
             Column {

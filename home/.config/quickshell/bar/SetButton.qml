@@ -12,7 +12,7 @@ Rectangle {
     Row {
         id: row; anchors.centerIn: parent; spacing: 8
         Label { visible: b.icon !== ""; text: b.icon; color: b.lit ? "#0b0b0b" : "#cfcfcf"; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
-        Label { text: b.text.charAt(0).toUpperCase() + b.text.slice(1).toLowerCase(); color: b.lit ? "#0b0b0b" : "#e6e6e6"; font.pixelSize: 11; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+        Label { text: b.text.charAt(0).toUpperCase() + b.text.slice(1); color: b.lit ? "#0b0b0b" : "#e6e6e6"; font.pixelSize: 11; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
     }
     MouseArea { id: m; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: b.clicked() }
 }

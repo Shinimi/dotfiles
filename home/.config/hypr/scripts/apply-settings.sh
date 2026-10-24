@@ -72,7 +72,7 @@ main=f'''hl.config({{
     animations = {{ enabled = {b(s["animations"])} }},
     input = {{ sensitivity = {float(s["sensitivity"]):.2f}, accel_profile = "{'flat' if s['accel_flat'] else 'adaptive'}",
               natural_scroll = {b(s["natural_scroll"])}, scroll_factor = {float(s["scroll_factor"]):.2f},
-              follow_mouse = {1 if s["follow_mouse"] else 0}, kb_layout = "{s["kb_layout"]}", numlock_by_default = {b(s["numlock"])},
+              follow_mouse = {1 if s["follow_mouse"] else 0}, kb_layout = "{s["kb_layout"]}", kb_options = "{"grp:alt_shift_toggle" if "," in s["kb_layout"] else ""}", numlock_by_default = {b(s["numlock"])},
               repeat_rate = {int(s["repeat_rate"])}, repeat_delay = {int(s["repeat_delay"])},
               scroll_method = "{'on_button_down' if s.get('scroll_mode','autoscroll') == 'hold' else 'no_scroll'}" }},
     cursor = {{ hide_on_key_press = {b(s["hide_cursor_typing"])}, inactive_timeout = {int(s["cursor_hide_after"])} }},
