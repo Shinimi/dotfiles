@@ -45,5 +45,6 @@ Column {
                 }
             }
         }
+        Label { visible: pg.adapter && pg.adapter.devices.values.length === 0; text: "No devices yet. Turn on \u201cLook for new devices\u201d and put yours in pairing mode."; color: Theme.muted; font.pixelSize: 11 }
     }
 }

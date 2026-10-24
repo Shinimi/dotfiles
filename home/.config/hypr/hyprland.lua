@@ -1,5 +1,5 @@
 -- ╭──────────────────────────────────────────────────────────────────────────╮
--- │   ▄▄▄ ▄▄  yu's Hyprland · Tokyo Night glass                              │
+-- │   ▄▄▄ ▄▄  yu's Hyprland · monochrome glass                               │
 -- │   █ █ █   CachyOS · Hyprland 0.56 (Lua) · Ryzen 7 5700X · RX 9060 XT    │
 -- │   ▀ ▀ ▀   Valkyrie 1440p144 (DP-1) + ViewSonic 1080p165 (DP-2)           │
 -- │                                                                          │
@@ -7,38 +7,38 @@
 -- │   Edit by hand? press SUPER + SHIFT + R afterwards.     made by Claude   │
 -- ╰──────────────────────────────────────────────────────────────────────────╯
 --
---  KEYBINDS — DankMaterialShell layout  (SUPER = Windows key)
---    SUPER + T / Return      terminal (kitty)
---    SUPER + Space           app launcher        ALT + Space        app launcher
---    SUPER + V               clipboard history   SUPER + A          control center
---    SUPER + CTRL + N        notification center SUPER + comma      settings
---    SUPER + Tab             workspace overview  SUPER + O          find a window (search)     SUPER + X          power menu
---    SUPER + Q               close window
---    SUPER + F               maximize            SUPER + SHIFT + F  fullscreen
---    SUPER + SHIFT + T       float / tile        SUPER + W          group (tabs)
---    SUPER + R               toggle split        SUPER + [ / ]      preselect left / right
---    SUPER + arrows / HJKL   move focus          + SHIFT            move window
---    SUPER + CTRL + arrows / HJKL  focus monitor + SHIFT + CTRL     move window to monitor
---    SUPER + 1..9, 0         workspace 1-10      SUPER + SHIFT + 1..0  send window there
---    SUPER + ALT + 1..0      workspace 11-20     (+ SHIFT  send window there)
---                            (all on the main screen; the side screen has one fixed workspace)
---    SUPER + U / I, PgDn/PgUp next / prev workspace  (+ SHIFT move window)
---    SUPER + SHIFT + S       screenshot a region (copied automatically, like Windows 11)
---    SUPER + S               scratchpad          SUPER + CTRL + SHIFT + S  send to scratchpad
---    SUPER + minus / equal   narrower / wider    + SHIFT            shorter / taller
---    SUPER + mouse L / R     drag / resize
---    SUPER + ALT + L         lock screen         SUPER + SHIFT + E  log out
---    SUPER + ALT + N         night light         SUPER + ALT + I    idle inhibit (no auto-lock)
---    SUPER + ALT + M         monochrome mode (whole screen black & white, off in games)
---    SUPER + SHIFT + C       color picker        SUPER + SHIFT + P  screens off / on
---    CTRL + ALT + Delete / M task manager (btop)
---    Print                   region screenshot   CTRL + Print       full screen   ALT + Print  window
---    SUPER + "               drop-down terminal (key left of 1)   SUPER + Z          focus mode (no gaps, bar or pop-ups)
---    mouse to top-left corner  workspace overview
---    SUPER + N               quick notes         SUPER + M          Spotify drop-down   SUPER + C  Discord drop-down
---    SUPER + Esc             home screen         SUPER + D          draw on the screen  SUPER + ALT + scroll  magnifier (SUPER + ALT + Z resets)
---    SUPER + SHIFT + R       fix desktop (reload + restart bar/wallpaper/etc. if they died)
---    SUPER + SHIFT + /  or  SUPER + F1   show this list
+--  KEYBINDS  (SUPER = Windows key; the settings Shortcuts page and SUPER + F1 read this list)
+--    SUPER + T / Return             terminal (kitty)                      SUPER + Space                  app launcher
+--    ALT + Space                    app launcher                          SUPER + A                      control center
+--    SUPER + comma                  settings                              SUPER + Escape                 home screen
+--    SUPER + V                      clipboard history                     SUPER + CTRL + N               notification center
+--    SUPER + E                      file manager                          SUPER + B                      browser
+--    SUPER + N                      quick notes                           SUPER + period                 emoji picker
+--    SUPER + Y                      wallpapers                            SUPER + G                      game library
+--    SUPER + M                      Spotify drop-down                     SUPER + C                      Discord drop-down
+--    SUPER + Tab                    workspace overview                    SUPER + O                      find a window
+--    ALT + Tab                      switch windows                        SUPER + X                      power menu
+--    SUPER + Q                      close window                          SUPER + F                      maximize
+--    SUPER + SHIFT + F              fullscreen                            SUPER + SHIFT + T              float / tile
+--    SUPER + W                      group (tabs)                          SUPER + R                      toggle split
+--    SUPER + [ / ]                  preselect left / right                SUPER + Home / End             first / last window
+--    SUPER + arrows / HJKL          move focus                            SUPER + SHIFT + arrows         move window
+--    SUPER + CTRL + arrows          focus other screen                    SUPER + SHIFT + CTRL + arrows  move window to other screen
+--    SUPER + 1..9, 0                workspace 1-10                        SUPER + SHIFT + 1..0           send window to 1-10
+--    SUPER + ALT + 1..0             workspace 11-20                       SUPER + ALT + SHIFT + 1..0     send window to 11-20
+--    SUPER + U / I                  next / previous workspace             SUPER + SHIFT + U / I          move window to next / previous
+--    SUPER + S                      scratchpad                            SUPER + CTRL + SHIFT + S       send to scratchpad
+--    SUPER + minus / equal          narrower / wider                      SUPER + SHIFT + minus / equal  shorter / taller
+--    SUPER + left mouse             drag window                           SUPER + right mouse            resize window
+--    Print                          screenshot of an area                 CTRL + Print                   screenshot of the screen
+--    ALT + Print                    screenshot of a window                SUPER + SHIFT + S              snip an area (copied)
+--    SUPER + ALT + L                lock screen                           SUPER + SHIFT + E              log out
+--    SUPER + ALT + N                night light                           SUPER + ALT + I                keep awake (no auto-lock)
+--    SUPER + ALT + M                monochrome mode                       SUPER + SHIFT + P              screens off / on
+--    SUPER + SHIFT + C              colour picker                         CTRL + ALT + Delete            task manager (btop)
+--    SUPER + "                      drop-down terminal (key left of 1)    SUPER + Z                      focus mode
+--    SUPER + D                      draw on the screen                    SUPER + ALT + scroll           magnifier (SUPER + ALT + Z resets)
+--    SUPER + SHIFT + R              fix the desktop (reload)              SUPER + F1                     show this list
 -- ============================================================================
 
 

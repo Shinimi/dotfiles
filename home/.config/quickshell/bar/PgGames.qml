@@ -39,9 +39,9 @@ Column {
                 Row {
                     spacing: 18
                     Repeater {
-                        model: [["fps", "FPS cap", [[0, "off"], [60, "60"], [90, "90"], [120, "120"], [141, "141"]]],
-                                ["hud", "Overlay", [["off", "off"], ["fps", "fps"], ["full", "full"]]],
-                                ["power", "Power", [["performance", "max"], ["balanced", "balanced"]]]]
+                        model: [["fps", "FPS cap", [[0, "Off"], [60, "60"], [90, "90"], [120, "120"], [141, "141"]]],
+                                ["hud", "Overlay", [["off", "Off"], ["fps", "FPS"], ["full", "Full"]]],
+                                ["power", "Power", [["performance", "Max"], ["balanced", "Balanced"]]]]
                         Column {
                             id: grp
                             required property var modelData

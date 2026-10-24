@@ -26,7 +26,7 @@ Column {
             Avatar { size: 104; pick: Settings.get("avatar"); radius: 52 }
             Column {
                 anchors.verticalCenter: parent.verticalCenter; spacing: 6
-                Label { text: Settings.get("user_name") || Quickshell.env("USER"); font.pixelSize: 24; font.weight: Font.Bold }
+                Label { text: (n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())(Settings.get("user_name") || Quickshell.env("USER")); font.pixelSize: 24; font.weight: Font.Bold }
                 Label { text: Quickshell.env("USER") + "@cachyos"; color: Theme.blue; font.pixelSize: 12 }
                 Label { text: "Shown in the control center, lock screen and login screen"; color: Theme.muted; font.pixelSize: 11 }
             }

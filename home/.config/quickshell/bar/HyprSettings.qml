@@ -27,7 +27,7 @@ Scope {
         ["theme", "\u{f0e09}", "Theme", "Look & feel", "icons folder cursor font"],
         ["glass", "\u{f0c8a}", "Glass & blur", "Look & feel", "transparency opacity blur"],
         ["wallpaper", "\u{f02e9}", "Wallpaper", "Look & feel", "background picture"],
-        ["bar", "\u{f0e9e}", "Bar & notifications", "Desktop", "clock seconds popup do not disturb"],
+        ["bar", "\u{f009a}", "Notifications", "Desktop", "notifications pop-ups sounds do not disturb desktop clock"],
         ["comfort", "\u{f02dc}", "Comfort", "Desktop", "instant apply volume step screenshot confirm power snapshot backup restore"],
         ["extras", "\u{f0674}", "Extras", "Desktop", "hot corner focus mode drop-down terminal screensaver ink draw magnifier zoom picture in picture wallpaper shuffle pause music lock"],
         ["shortcuts", "\u{f030c}", "Shortcuts", "Desktop", "keybinds keys hotkeys"],
@@ -68,12 +68,12 @@ Scope {
         const g = k => Settings.get(k)
         const n = (a, one, many) => a + " " + (a === 1 ? one : many)
         switch (id) {
-        case "appearance": return ({ tokyo: "Silver", storm: "Wisteria", sakura: "Sakura", matcha: "Matcha", sunset: "Sunset", mono: "Mono" })[g("accent")] + " · gaps " + g("gaps_in") + "/" + g("gaps_out")
+        case "appearance": return ({ tokyo: "Silver", storm: "Pearl", sakura: "Ember", matcha: "Ash", sunset: "Dusk", mono: "Mono" })[g("accent")] + " · gaps " + g("gaps_in") + "/" + g("gaps_out")
         case "effects": return (g("animations") ? "Animations on" : "Animations off") + (g("shadows") ? " · shadows" : "")
         case "theme": return g("icon_base") + " · " + g("ui_font")
         case "glass": return "Windows " + g("opacity_active") + "%" + (g("blur") ? " · blur" : "")
         case "wallpaper": return "Main and side screen"
-        case "bar": return "Clock" + (g("clock_seconds") ? " with seconds" : "") + " · pop-ups"
+        case "bar": return (g("sounds") ? "Sounds on" : "Silent pop-ups") + (g("desktop_clock") ? " · desktop clock" : "")
         case "comfort": return g("screen_time") ? "Screen time on" : "Everyday helpers"
         case "extras": return g("hot_corner") ? "Hot corner on" : "Little helpers"
         case "shortcuts": return "Every keybind"
@@ -133,7 +133,8 @@ Scope {
                   "echo \"gpu=$(lspci | grep -m1 -E 'VGA|Display' | sed 's/.*: //; s/Advanced Micro Devices, Inc. //; s/\\[AMD\\/ATI\\] //')\"; " +
                   "echo \"ram=$(free -g | awk '/Mem/{print $2}') GB\"; echo \"pkgs=$(pacman -Qq | wc -l)\"; " +
                   "echo \"hypr=$(hyprctl version -j | python3 -I -c 'import json,sys;print(json.load(sys.stdin)[\"tag\"])' 2>/dev/null)\"; " +
-                  "echo \"disk=$(df -h --output=used,size / | tail -1 | awk '{print $1\" / \"$2}')\""]
+                  "echo \"disk=$(df -B1 --output=used,size / | tail -1 | awk '{printf \"%d GB of %d GB\", $1/1e9, $2/1e9}')\"; " +
+                  "echo \"gpu2=$(glxinfo -B 2>/dev/null | sed -n 's/.*renderer string: \\(.*\\) (.*/\\1/p')\""]
         stdout: StdioCollector {
             onStreamFinished: {
                 const o = {}
@@ -189,6 +190,9 @@ Scope {
             monsLater.restart()
         }
     }
+    // one popup style for the whole window: "are you sure?" questions, and the display keep/revert countdown
+    property var ask: null           // { icon, title, body, yes, fn }
+    function confirm(icon, title, body, yes, fn) { ask = { icon: icon, title: title, body: body, yes: yes, fn: fn } }
     function keepMonitors() { undoMonitors = null; revertTimer.stop() }
     function revertMonitors() { if (undoMonitors) Settings.setNow("monitors", undoMonitors); undoMonitors = null; revertTimer.stop(); monsLater.restart() }
     Timer { id: revertTimer; interval: 1000; repeat: true; onTriggered: { root.countdown--; if (root.countdown <= 0) root.revertMonitors() } }
@@ -222,7 +226,7 @@ Scope {
             anchors.fill: parent; radius: 30; color: "#f70b0b0b"
             border.width: 1; border.color: "#14ffffff"
             focus: true
-            Keys.onEscapePressed: root.visible = false
+            Keys.onEscapePressed: { if (root.ask) root.ask = null; else if (root.undoMonitors) root.revertMonitors(); else root.visible = false }
             Keys.onPressed: e => { if ((e.modifiers & Qt.ControlModifier) && e.key === Qt.Key_S) { Settings.apply(); e.accepted = true } }
             Keys.onUpPressed: { const i = root.shownPages.findIndex(p => p[0] === root.page); if (i > 0) root.page = root.shownPages[i - 1][0] }
             Keys.onDownPressed: { const i = root.shownPages.findIndex(p => p[0] === root.page); if (i < root.shownPages.length - 1) root.page = root.shownPages[i + 1][0] }
@@ -319,7 +323,8 @@ Scope {
                 Column {
                     id: sideBottom
                     anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 16 }
-                    SetButton { width: parent.width; icon: "\u{f0450}"; text: "Reset to defaults"; accent: Theme.muted; onClicked: Settings.reset() }
+                    SetButton { width: parent.width; icon: "\u{f0450}"; text: "Reset to defaults"; accent: Theme.muted
+                        onClicked: root.confirm("\u{f0450}", "Reset every setting?", Settings.cur("instant_apply") ? "Everything goes back to how it came, right away." : "Everything goes back to how it came. Nothing changes until you press Apply, so you can still Discard.", "Reset", () => Settings.reset()) }
                 }
             }
 
@@ -340,6 +345,62 @@ Scope {
                     Label { text: Settings.changedKeys.length + (Settings.changedKeys.length === 1 ? " change waiting" : " changes waiting"); font.pixelSize: 12; Layout.rightMargin: 6 }
                     SetButton { icon: "\u{f0156}"; text: "Discard"; onClicked: { Settings.discard(); root.lastGoodMonitors = null } }
                     SetButton { icon: "\u{f012c}"; text: "Apply"; primary: true; onClicked: Settings.apply() }
+                }
+            }
+
+            // ================= popup: dims the window, one card in the middle =================
+            Item {
+                id: modal
+                readonly property bool isDisplay: root.undoMonitors !== null
+                readonly property bool show: isDisplay || root.ask !== null
+                anchors.fill: parent; z: 20
+                visible: opacity > 0; opacity: show ? 1 : 0
+                Behavior on opacity { NumberAnimation { duration: 160 } }
+                Rectangle { anchors.fill: parent; radius: 30; color: "#b3000000" }
+                MouseArea { anchors.fill: parent; hoverEnabled: true; onClicked: if (!modal.isDisplay) root.ask = null }   // clicking outside = cancel
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 440; height: mcol.implicitHeight + 56; radius: 24
+                    color: "#151515"; border.width: 1; border.color: "#2c2c2c"
+                    scale: modal.show ? 1 : 0.94
+                    Behavior on scale { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+                    MouseArea { anchors.fill: parent }
+                    Column {
+                        id: mcol
+                        x: 28; y: 28; width: parent.width - 56; spacing: 14
+                        Item {   // a ring that empties as the countdown runs, or the question's icon
+                            width: 64; height: 64
+                            Canvas {
+                                id: ring
+                                visible: modal.isDisplay; anchors.fill: parent
+                                property real v: root.countdown / 15
+                                onVChanged: requestPaint()
+                                onPaint: {
+                                    const c = getContext("2d"); c.reset()
+                                    c.lineWidth = 4; c.lineCap = "round"
+                                    c.strokeStyle = "rgba(255,255,255,0.08)"; c.beginPath(); c.arc(32, 32, 28, 0, 2 * Math.PI); c.stroke()
+                                    c.strokeStyle = "#ececec"; c.beginPath(); c.arc(32, 32, 28, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * v); c.stroke()
+                                }
+                            }
+                            Text { visible: modal.isDisplay; anchors.centerIn: parent; text: root.countdown; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 22; font.bold: true }
+                            Rectangle {
+                                visible: !modal.isDisplay; width: 52; height: 52; radius: 16; color: "#222222"; anchors.verticalCenter: parent.verticalCenter
+                                Label { anchors.centerIn: parent; text: root.ask ? root.ask.icon : ""; color: "#e6e6e6"; font.pixelSize: 22 }
+                            }
+                        }
+                        Text { width: parent.width; wrapMode: Text.WordWrap; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 17; font.bold: true
+                               text: modal.isDisplay ? "Keep these display settings?" : root.ask ? root.ask.title : "" }
+                        Label { width: parent.width; wrapMode: Text.WordWrap; color: "#8a8a8a"; font.pixelSize: 11; font.weight: Font.Normal; lineHeight: 1.15
+                                text: modal.isDisplay ? "Your screens go back to how they were in " + root.countdown + " s unless you keep them. If the picture went black or looks wrong, just wait or press Esc."
+                                                      : root.ask ? root.ask.body : "" }
+                        Item { width: 1; height: 4 }
+                        Row {
+                            anchors.right: parent.right; spacing: 8
+                            SetButton { text: modal.isDisplay ? "Revert" : "Cancel"; onClicked: modal.isDisplay ? root.revertMonitors() : (root.ask = null) }
+                            SetButton { text: modal.isDisplay ? "Keep" : root.ask ? root.ask.yes : ""; primary: true
+                                        onClicked: { if (modal.isDisplay) root.keepMonitors(); else { const f = root.ask.fn; root.ask = null; f() } } }
+                        }
+                    }
                 }
             }
 
@@ -366,7 +427,7 @@ Scope {
                             text: ({ comfort: "Little things that make the desktop nicer to live with", account: "Your picture and name", appearance: "Colours, borders, gaps and window layout",
                                      effects: "Glow, shadows, dimming and animations", theme: "Icons, folders, cursor and fonts",
                                      glass: "How see-through windows and panels are", wallpaper: "Pick a picture for each screen",
-                                     bar: "Clock, bar items and pop-ups", shortcuts: "Every keyboard shortcut",
+                                     bar: "Pop-ups, sounds and the clock on the wallpaper", shortcuts: "Every keyboard shortcut",
                                      defaults: "Which app opens links, folders, pictures and more", autostart: "Apps that open when you log in", games: "A profile for each game, applied while it runs",
                                      display: "Resolution, refresh rate and colour", sound: "Devices, clean mic and headset EQ (changes here are instant)",
                                      input: "Pointer, scrolling, typing and focus", network: "Your connection", bluetooth: "Wireless devices",
@@ -386,7 +447,7 @@ Scope {
                                 Layout.fillWidth: true; spacing: 4
                                 Text { text: (n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())(Settings.get("user_name") || Quickshell.env("USER"))
                                        color: "#ffffff"; font.family: Theme.font; font.pixelSize: 24; font.bold: true }
-                                Label { text: (root.info.host || "CachyOS") + "  ·  Hyprland " + (root.info.hypr || "") + "  ·  up " + Stats.d.uptime; color: "#7a7a7a"; font.pixelSize: 11; font.weight: Font.Normal }
+                                Label { text: "CachyOS  ·  Hyprland " + (root.info.hypr || "") + "  ·  up " + Stats.d.uptime; color: "#7a7a7a"; font.pixelSize: 11; font.weight: Font.Normal }
                             }
                             SetButton { visible: Updates.total > 0; icon: "\u{f06b0}"; text: Updates.total + " updates"; onClicked: root.page = "about" }
                         }
@@ -462,9 +523,9 @@ Scope {
                             Row {
                                 spacing: 10
                                 Repeater {
-                                    model: [["tokyo", "Silver", ["#e0e0e0", "#b0b0b0", "#c4c4c4"]], ["storm", "Wisteria", ["#e0e0e0", "#c4c4c4"]],
-                                            ["sakura", "Sakura", ["#cf6b6b", "#b0b0b0"]], ["matcha", "Matcha", ["#c8c8c8", "#bdbdbd"]],
-                                            ["sunset", "Sunset", ["#c0c0c0", "#d6d6d6", "#cf6b6b"]], ["mono", "Mono", ["#eaeaea", "#7a7a7a"]]]
+                                    model: [["tokyo", "Silver", ["#e0e0e0", "#b0b0b0", "#c4c4c4"]], ["storm", "Pearl", ["#e0e0e0", "#c4c4c4"]],
+                                            ["sakura", "Ember", ["#cf6b6b", "#b0b0b0"]], ["matcha", "Ash", ["#c8c8c8", "#bdbdbd"]],
+                                            ["sunset", "Dusk", ["#c0c0c0", "#d6d6d6", "#cf6b6b"]], ["mono", "Mono", ["#eaeaea", "#7a7a7a"]]]
                                     Column {
                                         id: sw
                                         required property var modelData
@@ -506,7 +567,6 @@ Scope {
                                 SetToggle { label: "Smart split"; desc: "split towards where the mouse is"; key: "smart_split" }
                                 SetToggle { label: "Snap floating windows"; desc: "to edges and other windows"; key: "snap" }
                                 SetToggle { label: "Resize by dragging borders"; key: "resize_on_border" }
-                                SetButton { icon: "\u{f02e9}"; text: "Wallpaper"; onClicked: root.exec(["qs", "ipc", "-p", root.qsDir, "call", "wallpaper", "toggle"]) }
                             }
                         }
                     }
@@ -658,7 +718,7 @@ Scope {
                             SetSlider { label: "Colour vibrancy"; key: "vibrancy"; from: 0; to: 60; suffix: "%" }
                             SetSlider { label: "Background brightness"; key: "blur_brightness"; from: 50; to: 110; suffix: "%" }
                             SetSlider { label: "Grain"; key: "blur_noise"; from: 0; to: 10; suffix: "%" }
-                            SetToggle { label: "See wallpaper through windows (x-ray)"; key: "blur_xray" }
+                            SetToggle { label: "Blur shows only the wallpaper (x-ray)"; key: "blur_xray" }
                             SetToggle { label: "Blur menus and pop-ups"; key: "blur_popups" }
                         }
                     }
@@ -667,11 +727,7 @@ Scope {
                     Row {
                         visible: root.page === "bar"; width: parent.width; spacing: 14
                         SetSection {
-                            width: (parent.width - 14) / 2; title: "Bar"; icon: "\u{f0e9e}"
-                            SetToggle { label: "Show seconds"; key: "clock_seconds" }
-                            SetToggle { label: "12-hour clock"; desc: "3:45 PM instead of 15:45"; key: "clock_12h" }
-                            SetToggle { label: "Show the date"; key: "clock_date" }
-                            SetToggle { label: "Show what's playing"; key: "bar_media" }
+                            width: (parent.width - 14) / 2; title: "Desktop clock"; icon: "\u{f0954}"
                             SetToggle { label: "Desktop clock"; desc: "big clock, date and today's line on the wallpaper"; key: "desktop_clock" }
                             SetChoice {
                                 visible: Settings.get("desktop_clock"); label: "Desktop clock position"
@@ -688,7 +744,7 @@ Scope {
                                 onPicked: v => Settings.set("notif_center", v === "c")
                             }
                             SetToggle { label: "Sounds"; desc: "soft sounds for notifications, login and screenshots"; key: "sounds" }
-                            SetSwitch { label: "Do not disturb"; desc: "hide pop-ups (instant)"; on: Notifs.dnd; accent: Theme.purple; onToggled: Notifs.dnd = !Notifs.dnd }
+                            SetSwitch { label: "Do not disturb"; desc: "hide pop-ups, works right away"; on: Notifs.dnd; accent: Theme.purple; onToggled: Notifs.dnd = !Notifs.dnd }
                         }
                     }
 
@@ -707,7 +763,7 @@ Scope {
                             SetToggle { label: "Keep screenshot files"; desc: "off: screenshots only go to the clipboard"; key: "shot_save" }
                             SetToggle { label: "Pause music for calls and videos"; desc: "Spotify pauses when the mic opens or a video plays, then continues"; key: "auto_pause" }
                             SetToggle { label: "Sort downloads into folders"; desc: "Images, Videos, Music, Documents, Archives, Installers"; key: "sort_downloads" }
-                            SetToggle { label: "Track screen time"; desc: "time per app, shown on the home screen (stays on this PC)"; key: "screen_time" }
+                            SetToggle { label: "Track screen time"; desc: "time per app, shown on the home screen and in the control center (stays on this PC)"; key: "screen_time" }
                             SetToggle { label: "Music stats"; desc: "your top Spotify songs and artists, shown on the home screen (stays on this PC)"; key: "music_stats" }
                         }
                         SetSection {
@@ -717,7 +773,8 @@ Scope {
                             Row {
                                 spacing: 8
                                 SetButton { icon: "\u{f0193}"; text: "Save snapshot"; onClicked: Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/settings-snapshot.sh", "save"]) }
-                                SetButton { icon: "\u{f0450}"; text: "Restore last"; onClicked: Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/settings-snapshot.sh", "restore"]) }
+                                SetButton { icon: "\u{f0450}"; text: "Restore last"
+                                    onClicked: root.confirm("\u{f0450}", "Restore your last snapshot?", "Your current settings are replaced by the last copy you saved. Save a snapshot first if you want to keep these.", "Restore", () => Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/settings-snapshot.sh", "restore"])) }
                             }
                             Label { width: parent.width; wrapMode: Text.WordWrap; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal
                                     text: "Once a month the system tidies itself: old thumbnails, AUR build leftovers, 30-day-old trash and unused cache files (game shader caches are kept)." }
@@ -760,7 +817,7 @@ Scope {
                                 onToggled: { root.visible = false; Quickshell.execDetached([Quickshell.env("HOME") + "/.config/hypr/scripts/dropterm.sh"]) }
                             }
                             SetSwitch {
-                                label: "Ink  ·  Super + D"; desc: "draw on the screen; ctrl+s saves a screenshot with it"
+                                label: "Ink  ·  Super + D"; desc: "draw on the screen; Ctrl + S saves a screenshot with it"
                                 on: false; accent: Theme.on
                                 onToggled: { root.visible = false; Quickshell.execDetached(["qs", "ipc", "-p", root.qsDir, "call", "ink", "toggle"]) }
                             }
@@ -822,23 +879,6 @@ Scope {
                     Column {
                         visible: root.page === "display"; width: parent.width; spacing: 14
 
-                        Rectangle {   // "keep these settings?" after a screen change
-                            visible: root.undoMonitors !== null
-                            width: parent.width; height: 58; radius: 12
-                            color: Qt.rgba(0.84, 0.84, 0.84, 0.14); border.width: 1; border.color: Theme.yellow
-                            RowLayout {
-                                anchors.fill: parent; anchors.leftMargin: 16; anchors.rightMargin: 12; spacing: 10
-                                Label { text: "\u{f0026}"; color: Theme.yellow; font.pixelSize: 18 }
-                                Column {
-                                    Layout.fillWidth: true
-                                    Label { text: "Keep these display settings?"; font.pixelSize: 13 }
-                                    Label { text: "Going back in " + root.countdown + " s if you don't answer"; color: Theme.muted; font.pixelSize: 11; font.weight: Font.Normal }
-                                }
-                                SetButton { text: "Revert"; icon: "\u{f0450}"; onClicked: root.revertMonitors() }
-                                SetButton { text: "Keep"; icon: "\u{f012c}"; primary: true; accent: Theme.green; onClicked: root.keepMonitors() }
-                            }
-                        }
-
                         Row {   // pick a screen
                             width: parent.width; spacing: 14
                             Repeater {
@@ -898,7 +938,7 @@ Scope {
                                 on: root.selCfg.bitdepth === 10; onToggled: root.monChange("bitdepth", root.selCfg.bitdepth === 10 ? 8 : 10)
                             }
                             SetSwitch {
-                                label: "Adaptive sync (VRR)"; desc: "smoother games below max Hz — it made these screens flicker before"; accent: Theme.yellow
+                                label: "Adaptive sync (VRR)"; desc: "smoother games below max Hz; only in fullscreen, so the desktop never flickers"; accent: Theme.yellow
                                 on: !!root.selCfg.vrr; onToggled: root.monChange("vrr", root.selCfg.vrr ? 0 : 1)
                             }
                         }
@@ -908,7 +948,7 @@ Scope {
                             SetSection {
                                 width: (parent.width - 14) / 2; title: "Vibrance"; icon: "\u{f0e09}"
                                 SetSlider { label: "Colour vibrance (all screens)"; key: "vibrance"; from: 70; to: 150; step: 5; suffix: "%" }
-                                SetToggle { label: "Monochrome mode"; desc: "the whole screen in black and white, colours come back while you play (SUPER + ALT + M)"; key: "mono_mode" }
+                                SetToggle { label: "Monochrome mode"; desc: "the whole screen in black and white, colours come back while you play (Super + Alt + M)"; key: "mono_mode" }
                                 Label { width: parent.width; wrapMode: Text.WordWrap; text: "100% = untouched. Higher makes colours pop; uses a tiny bit of GPU."; color: Theme.muted; font.pixelSize: 10 }
                             }
                             SetSection {
@@ -951,7 +991,7 @@ Scope {
                             SetChoice {
                                 visible: !!SysState.fx.eq
                                 label: "EQ preset"; accent: Theme.cyan; current: SysState.fx.preset
-                                options: [["flat", "Flat"], ["music", "Music"], ["games", "Games · footsteps"], ["bass", "Bass boost"]]
+                                options: [["flat", "Flat"], ["music", "Music"], ["vocal", "Vocal"], ["games", "Games · footsteps"], ["bass", "Bass boost"]]
                                 onPicked: v => SysState.fxPreset(v)
                             }
                         }
@@ -996,7 +1036,7 @@ Scope {
                                 Column {
                                     anchors.verticalCenter: parent.verticalCenter; spacing: 4
                                     Label { text: "CachyOS"; font.pixelSize: 20; font.weight: Font.Bold }
-                                    Label { text: (root.info.host || "") + " · Hyprland " + (root.info.hypr || ""); color: Theme.blue; font.pixelSize: 12 }
+                                    Label { text: "Hyprland " + (root.info.hypr || "") + " · " + (root.info.host || ""); color: "#b0b0b0"; font.pixelSize: 12 }
                                     Label { text: "Linux " + (root.info.kernel || "") + " · up " + Stats.d.uptime; color: Theme.muted; font.pixelSize: 11 }
                                 }
                             }
@@ -1004,7 +1044,7 @@ Scope {
                         GridLayout {
                             width: parent.width; columns: 2; columnSpacing: 10; rowSpacing: 10
                             Repeater {
-                                model: [["\u{f0ee0}", "Processor", root.info.cpu, Theme.cyan], ["\u{f08ae}", "Graphics", root.info.gpu, Theme.purple],
+                                model: [["\u{f0ee0}", "Processor", root.info.cpu, Theme.cyan], ["\u{f08ae}", "Graphics", root.info.gpu2 || root.info.gpu, Theme.purple],
                                         ["\u{f035b}", "Memory", root.info.ram, Theme.yellow], ["\u{f02ca}", "Disk", root.info.disk, Theme.green],
                                         ["\u{f03d6}", "Packages", root.info.pkgs, Theme.blue], ["\u{f0aaa}", "Updates", Updates.total > 0 ? Updates.total + " waiting" : "up to date", Updates.total > 0 ? Theme.yellow : Theme.green]]
                                 Rectangle {
