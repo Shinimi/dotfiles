@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lock-info.sh greeting|music|line|island – small text snippets for hyprlock. Made by Claude.
+# lock-info.sh greeting|music|line|date – small text snippets for hyprlock. Made by Claude.
 case "$1" in
   line)   # today's quote, the same one the desktop shows (read from Journey.qml)
     python3 -I - <<'PY'
@@ -7,18 +7,19 @@ import re,datetime,os
 t=open(os.path.expanduser("~/.config/quickshell/bar/Journey.qml")).read()
 q=re.findall(r'\["(.+?)", "(.+?)"\]', t)
 d=datetime.date.today(); n=(d-datetime.date(d.year,1,1)).days+1
-print(f"“{q[n % len(q)][0]}”  — {q[n % len(q)][1].lower()}" if q else "")
+print(f"“{q[n % len(q)][0]}”  — {q[n % len(q)][1]}" if q else "")
 PY
     ;;
-  island)   # the pill at the top: time · date
-    echo "󰌾   $(date +%H:%M)   ·   $(LC_TIME=C date +'%a %-d %b')" ;;
+  date)     # "Saturday · 24 October 2026"
+    LC_TIME=C date +'%A  ·  %-d %B %Y' ;;
   greeting)
     h=$(date +%-H); n=$(python3 -I -c "import json,os;print(json.load(open(os.path.expanduser('~/.config/hypr/settings.json'))).get('user_name',''))" 2>/dev/null); n=${n:-$USER}
     if   [ "$h" -lt 5 ];  then g="Good night"
     elif [ "$h" -lt 12 ]; then g="Good morning"
     elif [ "$h" -lt 18 ]; then g="Good afternoon"
     else g="Good evening"; fi
-    echo "$g, $n" ;;
+    n=$(echo "$n" | sed -E 's/^(.)(.*)$/\U\1\L\2/')
+    echo "$g, $n." ;;
   music)
     s=$(playerctl -p spotify status 2>/dev/null || playerctl status 2>/dev/null)
     [ "$s" = Playing ] || [ "$s" = Paused ] || exit 0

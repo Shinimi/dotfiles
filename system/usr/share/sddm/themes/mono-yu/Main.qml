@@ -1,6 +1,10 @@
-// Monochrome login screen (SDDM, Qt 6), island style to match the lock screen: torii at night, slow zoom,
-// the picture drawn in glowing ASCII characters,
-// drifting dust, thin clock and today's line in the sky, a dark glass login card on the beach. Made by Claude.
+// Login screen (SDDM, Qt 6) — "Night console". The torii-at-night picture redrawn in glowing ASCII characters,
+// breathing slowly, with drifting dust and a scanline that sweeps down now and then. On top:
+//   left   a giant stacked clock with a seconds rail, the date and today's quote
+//   right  the console: avatar inside a turning ring, your name, a password field that draws its own
+//          pulsing dots, hints, and a status line that types itself out
+//   bottom session + keyboard (left), this machine (centre), sleep / restart / power off (right)
+// Text is in normal case; only the small labels are spaced capitals. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
@@ -78,7 +82,7 @@ Item {
         target: sddm
         function onLoginFailed() {
             root.busy = false
-            root.errorText = "Wrong password"
+            root.errorText = "Wrong password, try again"
             password.text = ""
             password.forceActiveFocus()
             shake.restart()
@@ -163,213 +167,363 @@ Item {
         acceleration: PointDirection { x: 8; xVariation: 12; y: 4 }
     }
     Wander { system: petals; xVariance: 70; pace: 120; affectedParameter: Wander.Velocity }
+    // shade: dark on both sides so the clock (left) and the console (right) read, the art stays bright in the middle
     Rectangle {
         anchors.fill: parent
-        gradient: Gradient {   // darker at the top so the clock reads over the bright character sky
-            GradientStop { position: 0.0;  color: "#d0000000" }
-            GradientStop { position: 0.36; color: "#a0000000" }
-            GradientStop { position: 0.55; color: "#18000000" }
-            GradientStop { position: 1.0;  color: "#40000000" }
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0.0;  color: "#e6000000" }
+            GradientStop { position: 0.30; color: "#99000000" }
+            GradientStop { position: 0.50; color: "#22000000" }
+            GradientStop { position: 0.68; color: "#99000000" }
+            GradientStop { position: 1.0;  color: "#ee000000" }
         }
+    }
+    Rectangle {
+        anchors.fill: parent
+        gradient: Gradient {
+            GradientStop { position: 0.0;  color: "#66000000" }
+            GradientStop { position: 0.2;  color: "#00000000" }
+            GradientStop { position: 0.85; color: "#00000000" }
+            GradientStop { position: 1.0;  color: "#cc000000" }
+        }
+    }
+    // a soft scanline that sweeps down over the art every few seconds
+    Rectangle {
+        id: scan
+        width: parent.width; height: 220; y: -height
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#00ffffff" }
+            GradientStop { position: 0.8; color: "#0dffffff" }
+            GradientStop { position: 1.0; color: "#26ffffff" }
+        }
+        SequentialAnimation on y { loops: Animation.Infinite
+            PauseAnimation { duration: 4000 }
+            NumberAnimation { from: -220; to: root.height; duration: 5200; easing.type: Easing.InOutSine } }
     }
 
     property date now: new Date()
-    readonly property var lines: ["“The impediment to action advances action.”  — marcus aurelius", "“Waste no more time arguing what a good man should be. Be one.”  — marcus aurelius", "“You have power over your mind, not outside events.”  — marcus aurelius", "“We suffer more often in imagination than in reality.”  — seneca", "“While we wait for life, life passes.”  — seneca", "“A journey of a thousand miles begins with a single step.”  — lao tzu", "“Nature does not hurry, yet everything is accomplished.”  — lao tzu", "“It does not matter how slowly you go, as long as you do not stop.”  — confucius", "“Do nothing that is of no use.”  — miyamoto musashi", "“Perceive that which cannot be seen with the eye.”  — miyamoto musashi", "“Today is victory over yourself of yesterday.”  — miyamoto musashi", "“Fall seven times, stand up eight.”  — japanese proverb", "“Every day is a journey, and the journey itself is home.”  — matsuo bashō", "“No man ever steps in the same river twice.”  — heraclitus", "“Well begun is half done.”  — aristotle", "“First say to yourself what you would be; then do what you have to do.”  — epictetus", "“He who has a why to live can bear almost any how.”  — nietzsche", "“The unexamined life is not worth living.”  — socrates"]
-    readonly property string todayLine: {
-        const d = new Date(), start = new Date(d.getFullYear(), 0, 0)
-        return lines[Math.floor((d - start) / 86400000) % lines.length]
-    }
     Timer { interval: 1000; running: true; repeat: true; onTriggered: root.now = new Date() }
+    readonly property var quotes: [
+        ["The impediment to action advances action.", "Marcus Aurelius"], ["Waste no more time arguing what a good man should be. Be one.", "Marcus Aurelius"],
+        ["You have power over your mind, not outside events.", "Marcus Aurelius"], ["We suffer more often in imagination than in reality.", "Seneca"],
+        ["While we wait for life, life passes.", "Seneca"], ["A journey of a thousand miles begins with a single step.", "Lao Tzu"],
+        ["Nature does not hurry, yet everything is accomplished.", "Lao Tzu"], ["It does not matter how slowly you go, as long as you do not stop.", "Confucius"],
+        ["Do nothing that is of no use.", "Miyamoto Musashi"], ["Perceive that which cannot be seen with the eye.", "Miyamoto Musashi"],
+        ["Today is victory over yourself of yesterday.", "Miyamoto Musashi"], ["Fall seven times, stand up eight.", "Japanese proverb"],
+        ["Every day is a journey, and the journey itself is home.", "Matsuo Bashō"], ["No man ever steps in the same river twice.", "Heraclitus"],
+        ["Well begun is half done.", "Aristotle"], ["First say to yourself what you would be; then do what you have to do.", "Epictetus"],
+        ["He who has a why to live can bear almost any how.", "Nietzsche"], ["The unexamined life is not worth living.", "Socrates"]]
+    readonly property var quote: {
+        const d = new Date(), start = new Date(d.getFullYear(), 0, 0)
+        return quotes[Math.floor((d - start) / 86400000) % quotes.length]
+    }
+    function nice(n) { n = n || ""; return n.charAt(0).toUpperCase() + n.slice(1).toLowerCase() }
+    readonly property string who: nice(root.realName || root.userName)
+    readonly property string hello: {
+        const h = now.getHours()
+        return h < 5 ? "Still up" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"
+    }
 
-    // side screens: just a quiet clock
+    // small spaced capitals, the only uppercase on the screen
+    component Tag: Text {
+        color: "#7a7a7a"; font.family: root.font; font.pixelSize: 11; font.bold: true; font.letterSpacing: 3
+    }
+
+    // side screens: a quiet clock
     Text {
         visible: !root.isMain
         anchors.centerIn: parent
         text: Qt.formatTime(root.now, "HH:mm")
-        color: "#bbeaeaea"; font.family: root.font; font.pixelSize: 96; font.weight: Font.Light
+        color: "#bbeaeaea"; font.family: root.font; font.pixelSize: 96; font.weight: Font.Thin
     }
 
-    // ---------- clock, date, today's line (in the sky) ----------
-    Column {
+    // ================= left: the stacked clock =================
+    Item {
+        id: clockBlock
         visible: root.isMain
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: root.height / 2 - 420 - 110
-        spacing: 10
+        x: 120; y: root.height * 0.20
+        width: 640; height: clockCol.implicitHeight
         opacity: 0
         NumberAnimation on opacity { from: 0; to: 1; duration: 1400; easing.type: Easing.OutCubic }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatTime(root.now, "HH:mm")
-            color: "#f5f5f5"; font.family: root.font; font.pixelSize: 200; font.weight: Font.Thin
-            layer.enabled: true
-            layer.effect: MultiEffect { shadowEnabled: true; shadowColor: "#880b0b0b"; shadowBlur: 0.9; shadowVerticalOffset: 3 }
-        }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: Qt.formatDate(root.now, "dddd, d MMMM").toLowerCase()
-            color: "#d8d8d8"; font.family: root.font; font.pixelSize: 21
-        }
-        Text {
-            anchors.horizontalCenter: parent.horizontalCenter
-            text: root.todayLine
-            color: "#b0ffffff"; font.family: root.font; font.pixelSize: 16; font.italic: true
+        NumberAnimation on x { from: 80; to: 120; duration: 1400; easing.type: Easing.OutCubic }
+        Rectangle { x: -36; y: 18; width: 2; height: clockCol.implicitHeight - 36; color: "#40ffffff" }   // the rail
+        Column {
+            id: clockCol
+            spacing: 0
+            Tag { text: Qt.formatDate(root.now, "dddd").toUpperCase(); bottomPadding: 6 }
+            Text {
+                text: Qt.formatTime(root.now, "HH")
+                color: "#ffffff"; font.family: root.font; font.pixelSize: 210; font.weight: Font.ExtraBold
+                height: 178; verticalAlignment: Text.AlignTop; topPadding: -24
+            }
+            Text {
+                text: Qt.formatTime(root.now, "mm")
+                color: "transparent"; font.family: root.font; font.pixelSize: 210; font.weight: Font.ExtraBold
+                style: Text.Outline; styleColor: "#b0ffffff"
+                height: 196; verticalAlignment: Text.AlignTop; topPadding: -24
+            }
+            Item {   // seconds: a thin rail that fills once a minute, with a dot riding on it
+                width: 420; height: 18
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width; height: 2; color: "#26ffffff" }
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; width: parent.width * root.now.getSeconds() / 59; height: 2; color: "#ffffff"
+                            Behavior on width { NumberAnimation { duration: 400 } } }
+                Rectangle { anchors.verticalCenter: parent.verticalCenter; x: parent.width * root.now.getSeconds() / 59 - 4; width: 8; height: 8; radius: 4; color: "#ffffff"
+                            Behavior on x { NumberAnimation { duration: 400 } } }
+            }
+            Item { width: 1; height: 26 }
+            Text { text: Qt.formatDate(root.now, "d MMMM yyyy"); color: "#e8e8e8"; font.family: root.font; font.pixelSize: 24; font.weight: Font.Medium }
+            Item { width: 1; height: 26 }
+            Text {
+                width: 520; wrapMode: Text.WordWrap
+                text: "“" + root.quote[0] + "”"
+                color: "#c8c8c8"; font.family: root.font; font.pixelSize: 17; font.italic: true; lineHeight: 1.25
+            }
+            Text { topPadding: 8; text: "— " + root.quote[1]; color: "#7a7a7a"; font.family: root.font; font.pixelSize: 14 }
         }
     }
 
-    // ---------- you + password: one dark glass card on the beach ----------
-    Rectangle {
-        id: col
+    // ================= right: the console =================
+    Item {
+        id: consoleBox
         visible: root.isMain
-        anchors.horizontalCenter: parent.horizontalCenter
-        y: root.height * 0.60
-        width: 380; height: cardCol.implicitHeight + 56
-        radius: 28
-        color: "#0c0c0c"; border.width: 1; border.color: "#24ffffff"
+        width: 470; height: con.implicitHeight + 64
+        x: root.width - width - 120; y: root.height * 0.5 - height / 2 + 20
         opacity: 0
         NumberAnimation on opacity { from: 0; to: 1; duration: 1600; easing.type: Easing.OutCubic }
+        NumberAnimation on y { from: root.height * 0.5 - consoleBox.height / 2 + 60; to: root.height * 0.5 - consoleBox.height / 2 + 20; duration: 1600; easing.type: Easing.OutCubic }
+
+        Rectangle {   // the slab
+            anchors.fill: parent; radius: 6
+            color: "#f00a0a0a"; border.width: 1; border.color: "#2affffff"
+        }
+        Rectangle { x: 0; y: 0; width: parent.width; height: 3; radius: 2; color: root.errorText ? root.red : "#ffffff"   // top edge light
+                    Behavior on color { ColorAnimation { duration: 200 } } }
+
         Column {
-            id: cardCol
-            anchors.horizontalCenter: parent.horizontalCenter; y: 28
-            spacing: 14
-            Rectangle {   // avatar
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 88; height: 88; radius: 44; color: "#1c1c1c"; border.width: 2; border.color: "#33ffffff"
-                Image {
-                    id: av; anchors.fill: parent; anchors.margins: 2; source: root.avatar; fillMode: Image.PreserveAspectCrop
-                    visible: false; sourceSize.width: 176; sourceSize.height: 176
+            id: con
+            x: 40; y: 34; width: parent.width - 80
+            spacing: 0
+
+            // header: a tiny title bar
+            Row {
+                spacing: 10
+                Rectangle { width: 8; height: 8; radius: 4; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
+                            SequentialAnimation on opacity { loops: Animation.Infinite
+                                NumberAnimation { to: 0.25; duration: 1100 } NumberAnimation { to: 1; duration: 1100 } } }
+                Tag { text: "SIGN IN"; color: "#bdbdbd" }
+                Tag { text: "·  " + root.sessionName.toUpperCase(); color: "#5a5a5a" }
+            }
+            Item { width: 1; height: 34 }
+
+            // you
+            Row {
+                spacing: 22
+                Item {
+                    width: 96; height: 96
+                    Canvas {   // a dashed ring that slowly turns around the picture
+                        id: ring; anchors.fill: parent
+                        onPaint: {
+                            const c = getContext("2d"); c.reset(); c.strokeStyle = "rgba(255,255,255,0.55)"; c.lineWidth = 1.5
+                            for (let i = 0; i < 24; i++) {
+                                const a0 = i / 24 * 2 * Math.PI, a1 = a0 + 0.14
+                                c.beginPath(); c.arc(48, 48, 46, a0, a1); c.stroke()
+                            }
+                        }
+                        RotationAnimation on rotation { from: 0; to: 360; duration: 24000; loops: Animation.Infinite }
+                    }
+                    Rectangle {
+                        anchors.centerIn: parent; width: 78; height: 78; radius: 39; color: "#1c1c1c"
+                        Image {
+                            id: av; anchors.fill: parent; source: root.avatar; fillMode: Image.PreserveAspectCrop
+                            visible: false; sourceSize.width: 156; sourceSize.height: 156
+                        }
+                        Rectangle { id: avMask; anchors.fill: av; radius: width / 2; visible: false; layer.enabled: true }
+                        MultiEffect { anchors.fill: av; source: av; maskEnabled: true; maskSource: avMask; visible: root.avatar !== "" }
+                        Text { anchors.centerIn: parent; visible: root.avatar === ""; text: "\u{f0004}"; color: root.muted; font.family: root.font; font.pixelSize: 30 }
+                    }
                 }
-                Rectangle { id: avMask; anchors.fill: av; radius: width / 2; visible: false; layer.enabled: true }
-                MultiEffect { anchors.fill: av; source: av; maskEnabled: true; maskSource: avMask; visible: root.avatar !== "" }
-                Text { anchors.centerIn: parent; visible: root.avatar === ""; text: "\u{f0004}"; color: root.muted; font.family: root.font; font.pixelSize: 34 }
+                Column {
+                    anchors.verticalCenter: parent.verticalCenter; spacing: 4
+                    Text { text: root.hello + ","; color: "#8a8a8a"; font.family: root.font; font.pixelSize: 15 }
+                    Text { text: root.who; color: "#ffffff"; font.family: root.font; font.pixelSize: 34; font.weight: Font.Bold }
+                }
             }
-            Column {
-                anchors.horizontalCenter: parent.horizontalCenter; spacing: 3
-                Text { anchors.horizontalCenter: parent.horizontalCenter; text: root.realName || root.userName
-                       color: "#ffffff"; font.family: root.font; font.pixelSize: 19; font.bold: true }
-                Text { anchors.horizontalCenter: parent.horizontalCenter; text: "welcome back"
-                       color: root.muted; font.family: root.font; font.pixelSize: 12 }
-            }
-            Item { width: 1; height: 4 }
+            Item { width: 1; height: 34 }
+
+            // password: the real field is invisible; we draw the dots ourselves
+            Tag { text: "PASSWORD"; bottomPadding: 10 }
             Item {
                 id: cardWrap
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 300; height: 48
+                width: con.width; height: 56
                 SequentialAnimation {
                     id: shake
-                    NumberAnimation { target: card; property: "x"; to: -14; duration: 45 }
-                    NumberAnimation { target: card; property: "x"; to: 12; duration: 45 }
-                    NumberAnimation { target: card; property: "x"; to: -8; duration: 45 }
+                    NumberAnimation { target: card; property: "x"; to: -16; duration: 45 }
+                    NumberAnimation { target: card; property: "x"; to: 13; duration: 45 }
+                    NumberAnimation { target: card; property: "x"; to: -9; duration: 45 }
                     NumberAnimation { target: card; property: "x"; to: 5; duration: 45 }
                     NumberAnimation { target: card; property: "x"; to: 0; duration: 45 }
                 }
                 Item {
                     id: card
                     width: parent.width; height: parent.height
+                    Rectangle {
+                        anchors.fill: parent; radius: 4; color: "#121212"
+                        border.width: 1
+                        border.color: root.errorText ? root.red : (password.activeFocus ? "#66ffffff" : "#22ffffff")
+                        Behavior on border.color { ColorAnimation { duration: 150 } }
+                    }
+                    Text { x: 18; anchors.verticalCenter: parent.verticalCenter; text: "\u{f033e}"; color: password.text.length ? "#ffffff" : "#5a5a5a"; font.family: root.font; font.pixelSize: 16 }
                     TextField {
                         id: password
                         anchors.fill: parent
                         echoMode: TextInput.Password
-                        passwordCharacter: "●"
-                        placeholderText: "password"
-                        placeholderTextColor: "#6a6a6a"
-                        horizontalAlignment: TextInput.AlignHCenter
-                        color: root.fg
+                        color: "transparent"; selectionColor: "transparent"; selectedTextColor: "transparent"
+                        cursorVisible: false; cursorDelegate: Item {}
+                        background: Item {}
                         font.family: root.font; font.pixelSize: 15
-                        leftPadding: 48; rightPadding: 48
-                        selectByMouse: true
                         focus: root.isMain
                         enabled: !root.busy
                         onAccepted: root.doLogin()
                         onTextChanged: if (text.length) root.errorText = ""
-                        background: Rectangle {
-                            radius: height / 2
-                            color: "#161616"
-                            border.width: 1
-                            border.color: root.errorText ? root.red : (password.activeFocus ? "#55ffffff" : "#1affffff")
-                            Behavior on border.color { ColorAnimation { duration: 150 } }
-                        }
-                        Text { x: 18; anchors.verticalCenter: parent.verticalCenter; text: "\u{f033e}"; color: root.muted; font.family: root.font; font.pixelSize: 15 }
-                        Rectangle {   // go
-                            anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter
-                            width: 36; height: 36; radius: 18
-                            color: root.busy ? root.line : (password.text.length ? (goMouse.containsMouse ? "#ffffff" : "#ededed") : "#262626")
-                            Behavior on color { ColorAnimation { duration: 150 } }
-                            Text {
-                                anchors.centerIn: parent
-                                text: root.busy ? "\u{f0450}" : "\u{f0054}"
-                                color: password.text.length || root.busy ? "#0b0b0b" : "#7a7a7a"; font.family: root.font; font.pixelSize: 16
-                                RotationAnimation on rotation { running: root.busy; from: 0; to: 360; duration: 900; loops: Animation.Infinite }
+                        Keys.onEscapePressed: { text = ""; sessionMenu.visible = false }
+                        Keys.onPressed: e => { if (e.key === Qt.Key_F2) { sessionMenu.visible = !sessionMenu.visible; e.accepted = true } }
+                    }
+                    Text {   // placeholder
+                        x: 50; anchors.verticalCenter: parent.verticalCenter
+                        visible: password.text.length === 0
+                        text: root.busy ? "Signing in…" : "Type your password"
+                        color: "#5a5a5a"; font.family: root.font; font.pixelSize: 15
+                    }
+                    Row {   // our own dots: each one pops in, the newest pulses
+                        x: 50; anchors.verticalCenter: parent.verticalCenter; spacing: 9
+                        Repeater {
+                            model: Math.min(password.text.length, 24)
+                            Rectangle {
+                                id: dotR
+                                required property int index
+                                width: 9; height: 9; radius: 2; color: "#ffffff"
+                                anchors.verticalCenter: parent ? parent.verticalCenter : undefined
+                                scale: 0
+                                Component.onCompleted: pop.start()
+                                NumberAnimation { id: pop; target: dotR; property: "scale"; from: 0; to: 1; duration: 160; easing.type: Easing.OutBack }
+                                SequentialAnimation on opacity {
+                                    running: index === password.text.length - 1; loops: Animation.Infinite
+                                    NumberAnimation { to: 0.35; duration: 500 } NumberAnimation { to: 1; duration: 500 }
+                                }
                             }
-                            MouseArea { id: goMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.doLogin() }
                         }
+                        Rectangle {   // block cursor
+                            width: 10; height: 20; color: "#ffffff"; anchors.verticalCenter: parent.verticalCenter
+                            visible: password.activeFocus && !root.busy
+                            SequentialAnimation on opacity { loops: Animation.Infinite
+                                NumberAnimation { to: 0; duration: 500 } NumberAnimation { to: 1; duration: 500 } }
+                        }
+                    }
+                    Rectangle {   // go
+                        anchors.right: parent.right; anchors.rightMargin: 8; anchors.verticalCenter: parent.verticalCenter
+                        width: 40; height: 40; radius: 4
+                        color: root.busy ? "#2a2a2a" : (password.text.length ? (goMouse.containsMouse ? "#ffffff" : "#ececec") : "#1e1e1e")
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                        Text {
+                            anchors.centerIn: parent
+                            text: root.busy ? "\u{f0450}" : "\u{f0054}"
+                            color: password.text.length && !root.busy ? "#0b0b0b" : "#6a6a6a"; font.family: root.font; font.pixelSize: 17
+                            RotationAnimation on rotation { running: root.busy; from: 0; to: 360; duration: 900; loops: Animation.Infinite }
+                        }
+                        MouseArea { id: goMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.doLogin() }
                     }
                 }
             }
+            Item { width: 1; height: 16 }
+
+            // status line: types itself out whenever it changes
             Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                height: 16
-                text: root.errorText ? root.errorText : (keyboard.capsLock ? "\u{f0632}  caps lock is on" : "press enter to sign in")
-                color: root.errorText ? root.red : (keyboard.capsLock ? "#ffffff" : "#555555")
-                font.family: root.font; font.pixelSize: 12
+                id: status
+                readonly property string full: root.errorText ? root.errorText
+                                              : keyboard.capsLock ? "Caps Lock is on"
+                                              : root.busy ? "Starting " + root.sessionName + "…"
+                                              : "Press Enter to sign in"
+                property int shown: 0
+                onFullChanged: { shown = 0; typer.restart() }
+                Component.onCompleted: typer.start()
+                Timer { id: typer; interval: 22; repeat: true; onTriggered: { if (status.shown < status.full.length) status.shown++; else stop() } }
+                text: "> " + full.slice(0, shown)
+                color: root.errorText ? root.red : keyboard.capsLock ? "#ffffff" : "#8a8a8a"
+                font.family: root.font; font.pixelSize: 13
+            }
+            Item { width: 1; height: 26 }
+            Rectangle { width: con.width; height: 1; color: "#1affffff" }
+            Item { width: 1; height: 16 }
+            Row {   // key hints
+                spacing: 22
+                Repeater {
+                    model: [["Enter", "sign in"], ["Esc", "clear"], ["F2", "session"]]
+                    Row {
+                        required property var modelData
+                        spacing: 8
+                        Rectangle {
+                            width: kl.implicitWidth + 14; height: 22; radius: 4; color: "transparent"; border.width: 1; border.color: "#33ffffff"
+                            Text { id: kl; anchors.centerIn: parent; text: modelData[0]; color: "#bdbdbd"; font.family: root.font; font.pixelSize: 11 }
+                        }
+                        Text { anchors.verticalCenter: parent.verticalCenter; text: modelData[1]; color: "#6a6a6a"; font.family: root.font; font.pixelSize: 12 }
+                    }
+                }
             }
         }
     }
 
-    // ---------- bottom bar: session + layout (left), power (right) ----------
+    // ================= bottom strip =================
     component Chip: Rectangle {
-        property string icon; property string label; property color accent: root.fgDim
+        property string icon; property string label; property string tag
         signal clicked()
-        height: 38; radius: 19
+        height: 44; radius: 4
         width: chipRow.implicitWidth + 30
-        color: chipMouse.containsMouse ? "#f01c1c1c" : "#e6050505"
-        border.width: 1; border.color: "#16ffffff"
+        color: chipMouse.containsMouse ? "#1c1c1c" : "#d90a0a0a"
+        border.width: 1; border.color: chipMouse.containsMouse ? "#40ffffff" : "#1fffffff"
         Behavior on color { ColorAnimation { duration: 120 } }
         Row {
             id: chipRow; anchors.centerIn: parent; spacing: 10
-            Text { text: icon; color: accent; font.family: root.font; font.pixelSize: 15; anchors.verticalCenter: parent.verticalCenter }
-            Text { visible: label !== ""; text: label; color: root.fg; font.family: root.font; font.pixelSize: 13; font.weight: Font.DemiBold; anchors.verticalCenter: parent.verticalCenter }
+            Text { text: icon; color: "#e8e8e8"; font.family: root.font; font.pixelSize: 15; anchors.verticalCenter: parent.verticalCenter }
+            Column {
+                anchors.verticalCenter: parent.verticalCenter; spacing: 1
+                visible: label !== ""
+                Text { text: tag; color: "#6a6a6a"; font.family: root.font; font.pixelSize: 9; font.bold: true; font.letterSpacing: 2 }
+                Text { text: label; color: "#e8e8e8"; font.family: root.font; font.pixelSize: 13; font.weight: Font.Medium }
+            }
         }
         MouseArea { id: chipMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: parent.clicked() }
     }
 
+    Rectangle { visible: root.isMain; x: 48; width: parent.width - 96; y: parent.height - 108; height: 1; color: "#1affffff" }
     Row {
         visible: root.isMain
-        anchors.left: parent.left; anchors.bottom: parent.bottom; anchors.margins: 36
+        anchors.left: parent.left; anchors.bottom: parent.bottom; anchors.leftMargin: 48; anchors.bottomMargin: 36
         spacing: 10
+        Chip { icon: "\u{f0d3f}"; tag: "SESSION"; label: root.sessionName; onClicked: sessionMenu.visible = !sessionMenu.visible }
         Chip {
-            id: sessionChip
-            icon: root.sessionName.indexOf("Plasma") >= 0 ? "" : ""
-            label: root.sessionName + "  "
-            accent: root.purple
-            onClicked: sessionMenu.visible = !sessionMenu.visible
-        }
-        Chip {
-            icon: ""
+            icon: "\u{f030c}"; tag: "KEYBOARD"
             label: keyboard.layouts.length ? keyboard.layouts[keyboard.currentLayout].shortName.toUpperCase() : "TR"
-            accent: root.cyan
             onClicked: if (keyboard.layouts.length > 1) keyboard.currentLayout = (keyboard.currentLayout + 1) % keyboard.layouts.length
         }
     }
     Rectangle {   // session picker
         id: sessionMenu
         visible: false
-        x: 36; y: root.height - 36 - 38 - 10 - height
-        width: 260; height: sessCol.implicitHeight + 16
-        radius: 18; color: "#f2050505"; border.width: 1; border.color: "#16ffffff"
+        x: 48; y: root.height - 36 - 44 - 12 - height
+        width: 280; height: sessCol.implicitHeight + 16
+        radius: 6; color: "#f50a0a0a"; border.width: 1; border.color: "#2affffff"
         Column {
-            id: sessCol; x: 8; y: 8; width: parent.width - 16; spacing: 4
+            id: sessCol; x: 8; y: 8; width: parent.width - 16; spacing: 2
             Repeater {
                 model: root.sessions
                 Rectangle {
                     required property var modelData
                     readonly property bool cur: modelData.index === root.sessionIndex
-                    width: parent.width; height: 38; radius: 10
-                    color: cur ? root.bgHover : (sMouse.containsMouse ? root.bgAlt : "transparent")
-                    Row {
-                        anchors.verticalCenter: parent.verticalCenter; x: 12; spacing: 10
-                        Text { text: cur ? "" : ""; color: cur ? root.blue : root.muted; font.family: root.font; font.pixelSize: 14 }
-                        Text { text: modelData.name; color: cur ? root.fg : root.fgDim; font.family: root.font; font.pixelSize: 13 }
-                    }
+                    width: parent.width; height: 40; radius: 4
+                    color: cur ? "#ececec" : (sMouse.containsMouse ? "#1c1c1c" : "transparent")
+                    Text { x: 14; anchors.verticalCenter: parent.verticalCenter; text: modelData.name; color: cur ? "#0b0b0b" : "#d8d8d8"
+                           font.family: root.font; font.pixelSize: 13; font.weight: cur ? Font.Bold : Font.Normal }
                     MouseArea { id: sMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                         onClicked: { root.sessionIndex = modelData.index; sessionMenu.visible = false; password.forceActiveFocus() } }
                 }
@@ -377,31 +531,32 @@ Item {
         }
     }
 
-    Row {
+    Column {   // this machine
         visible: root.isMain
-        anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: 36
-        spacing: 10
-        Chip { icon: ""; label: ""; accent: root.purple; visible: sddm.canSuspend; onClicked: sddm.suspend() }
-        Chip { icon: ""; label: ""; accent: root.cyan;   visible: sddm.canReboot;  onClicked: sddm.reboot() }
-        Chip { icon: ""; label: ""; accent: root.red;    visible: sddm.canPowerOff; onClicked: sddm.powerOff() }
+        anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 38
+        spacing: 4
+        Text { anchors.horizontalCenter: parent.horizontalCenter; text: "\u{f303}  CachyOS"; color: "#d8d8d8"; font.family: root.font; font.pixelSize: 14; font.weight: Font.Medium }
+        Text { anchors.horizontalCenter: parent.horizontalCenter; text: "Ryzen 7 5700X  ·  Radeon RX 9060 XT  ·  32 GB"; color: "#5a5a5a"; font.family: root.font; font.pixelSize: 11 }
     }
 
-    Text {
+    Row {
         visible: root.isMain
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom; anchors.bottomMargin: 46
-        text: "  CachyOS"
-        color: root.muted; font.family: root.font; font.pixelSize: 13
+        anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.rightMargin: 48; anchors.bottomMargin: 36
+        spacing: 10
+        Chip { icon: "\u{f0904}"; tag: ""; label: ""; visible: sddm.canSuspend; onClicked: sddm.suspend() }
+        Chip { icon: "\u{f0709}"; tag: ""; label: ""; visible: sddm.canReboot; onClicked: sddm.reboot() }
+        Chip { icon: "\u{f0425}"; tag: ""; label: ""; visible: sddm.canPowerOff; onClicked: sddm.powerOff() }
     }
 
     // ---------- fade in / out ----------
     Rectangle {
         id: veil
         anchors.fill: parent; color: "#000000"; opacity: 1
-        NumberAnimation on opacity { from: 1; to: 0; duration: 700; easing.type: Easing.OutCubic }
-        NumberAnimation { id: fadeOut; target: veil; property: "opacity"; to: 1; duration: 400 }
+        NumberAnimation on opacity { from: 1; to: 0; duration: 900; easing.type: Easing.OutCubic }
+        NumberAnimation { id: fadeOut; target: veil; property: "opacity"; to: 1; duration: 500 }
     }
 
     Component.onCompleted: if (root.isMain) password.forceActiveFocus()
     Keys.onEscapePressed: sessionMenu.visible = false
+    Keys.onPressed: e => { if (e.key === Qt.Key_F2) { sessionMenu.visible = !sessionMenu.visible; e.accepted = true } }
 }
