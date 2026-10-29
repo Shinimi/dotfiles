@@ -156,6 +156,8 @@ networkmanager
 networkmanager-openvpn
 nfs-utils
 nilfs-utils
+niri
+noctalia
 noise-suppression-for-voice
 noto-fonts
 noto-fonts-cjk
@@ -249,4 +251,5 @@ xf86-video-amdgpu
 xfsprogs
 xl2tpd
 xsettingsd
+xwayland-satellite
 yay

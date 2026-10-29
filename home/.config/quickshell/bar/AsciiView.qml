@@ -1,5 +1,5 @@
 // A picture redrawn as glowing ASCII characters, with a slow wave of light and rising motes, plus a soft glow.
-// Used by the screensaver and the (optional) ASCII desktop wallpaper. Animates at 20 fps only while `running`.
+// Used by the screensaver and the (optional) ASCII desktop wallpaper. Animates at 10 fps only while `running` (the motion is slow, so this looks the same at half the cost).
 // Made by Claude.
 import QtQuick
 import QtQuick.Effects
@@ -73,6 +73,6 @@ Item {
         property variant src: srcTex
         property variant atlas: atlasTex
         fragmentShader: Qt.resolvedUrl("shaders/ascii.frag.qsb")
-        Timer { interval: 50; repeat: true; running: v.running && v.visible; onTriggered: parent.time += 0.05 }
+        Timer { interval: 100; repeat: true; running: v.running && v.visible; onTriggered: parent.time += 0.1 }
     }
 }

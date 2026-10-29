@@ -1,4 +1,0 @@
-// Noctalia is the whole shell: bar, launcher, notifications, lock, wallpaper, polkit, clipboard.
-spawn-at-startup "noctalia"
-spawn-at-startup "sh" "-c" "systemctl --user start audio-fx.service remember-volume.service"   // your audio effects
-spawn-sh-at-startup "sleep 2; ~/.local/bin/kocho-sound.sh desktop-login"

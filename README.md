@@ -16,11 +16,6 @@ Hyprland (Lua config) + custom Quickshell bar, in **monochrome** (greys, white a
 | `extras/waterfox` | Waterfox monochrome theme (userChrome) |
 | `home/.local/share/{mono-chrome,mono-newtab}` | Helium/Brave monochrome theme + new tab page |
 
-**Niri + Noctalia (optional second session):** `home/.config/niri` (keys, screens, rules: same as Hyprland) and
-`home/.config/noctalia/config.toml` (monochrome theme, floating bar). Set up with `~/dotfiles/niri-setup.sh`, then pick
-"Niri" on the login screen. Use the `noctalia` package, not `noctalia-shell` (on CachyOS that one ships only sources and
-replaces Quickshell, which the Hyprland bar needs).
-
 **Save changes:** `~/dotfiles/sync.sh "what I changed"`
 
 **Restore on a fresh install:**

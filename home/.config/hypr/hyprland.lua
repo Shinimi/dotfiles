@@ -78,7 +78,9 @@ local scripts     = os.getenv("HOME") .. "/.config/hypr/scripts"
 
 ---------------------------------------------------------------- AUTOSTART
 hl.on("hyprland.start", function()
-    hl.exec_cmd("systemctl --user start hyprpolkitagent")   -- password prompts (sudo dialogs)
+    -- hand this login's session to background services first: after a log out/in without reboot they'd keep the
+    -- old session's id, and the password-prompt agent would crash on start
+    hl.exec_cmd("dbus-update-activation-environment --systemd XDG_SESSION_ID WAYLAND_DISPLAY DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE && systemctl --user reset-failed hyprpolkitagent; systemctl --user restart hyprpolkitagent")   -- password prompts (sudo dialogs)
     hl.exec_cmd("hyprpaper")                                 -- wallpaper
     hl.exec_cmd("sleep 1; ~/.config/hypr/scripts/livewall.sh restore")   -- live (video) wallpapers, if any
     hl.exec_cmd("~/.config/quickshell/bar/run.sh")          -- top bar (custom Quickshell, auto-restarts)

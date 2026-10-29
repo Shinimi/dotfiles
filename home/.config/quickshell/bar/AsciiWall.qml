@@ -1,11 +1,21 @@
 // ASCII living wallpaper (Settings → Extras): each screen's wallpaper redrawn as glowing characters,
 // with a slow wave of light and rising motes. Sits on the desktop layer, behind windows. Updates at a
-// calm 20 fps and stops completely in game mode. Made by Claude.
+// calm 10 fps and stops completely in game mode. While it's on, hyprpaper isn't needed (it would only draw
+// underneath), so it's stopped, and started again when you turn this off. Made by Claude.
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 
 Scope {
+    readonly property bool on: Settings.cur("ascii_wall") === true
+    Process { id: paper }
+    function syncPaper() {
+        paper.command = ["sh", "-c", on ? "pkill -x hyprpaper; true" : "pgrep -x hyprpaper >/dev/null || setsid -f hyprpaper >/dev/null 2>&1"]
+        paper.running = true
+    }
+    onOnChanged: syncPaper()
+    Component.onCompleted: syncPaper()
     Variants {
         model: Quickshell.screens
         PanelWindow {
