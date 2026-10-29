@@ -1,0 +1,8 @@
+[Unit]
+Description=Sounds for plugging in and removing USB devices. Made by Claude.
+After=graphical-session.target pipewire.service
+[Service]
+ExecStart=%h/.local/bin/usb-sounds.sh
+Restart=on-failure
+[Install]
+WantedBy=default.target

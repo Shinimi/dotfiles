@@ -7,15 +7,22 @@ W = os.path.expanduser("~/Pictures/wallpaper"); T = os.path.expanduser("~/.cache
 os.makedirs(T, exist_ok=True); M = os.path.join(T, "meta.json")
 try: meta = json.load(open(M))
 except Exception: meta = {}
-exts = (".png", ".jpg", ".jpeg", ".webp")
+exts = (".png", ".jpg", ".jpeg", ".webp", ".mp4", ".webm", ".mkv", ".mov")
+vids = (".mp4", ".webm", ".mkv", ".mov")   # live wallpapers: a frame from 1 s in stands in for the picture
 files = sorted(f for f in os.listdir(W) if f.lower().endswith(exts) and os.path.isfile(os.path.join(W, f)))
 
 def analyse(f):
     src = os.path.join(W, f); th = os.path.join(T, os.path.splitext(f)[0] + ".jpg"); mt = os.path.getmtime(src)
     old = meta.get(f)
     if old and old.get("mtime") == mt and os.path.exists(th): return f, old
+    video = f.lower().endswith(vids)
     if not (os.path.exists(th) and os.path.getmtime(th) >= mt):
-        subprocess.run(["magick", src + "[0]", "-auto-orient", "-thumbnail", "640x360^", "-gravity", "center",
+        if video:
+            frame = th + ".frame.jpg"
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-ss", "1", "-i", src, "-frames:v", "1", frame], capture_output=True)
+            src_img = frame
+        else: src_img = src + "[0]"
+        subprocess.run(["magick", src_img, "-auto-orient", "-thumbnail", "640x360^", "-gravity", "center",
                         "-extent", "640x360", "-quality", "84", th], capture_output=True)
     # saturation + lightness (HSL means), and a 5-colour palette sorted dark → light
     st = subprocess.run(["magick", th, "-colorspace", "HSL", "-format", "%[fx:mean.g] %[fx:mean.b]", "info:"],
@@ -28,7 +35,7 @@ def analyse(f):
         h = line.split("#")[1][:6] if "#" in line else ""
         if h: cols.append("#" + h.lower())
     cols.sort(key=lambda c: sum(int(c[i:i+2], 16) for i in (1, 3, 5)))
-    cat = "mono" if sat < 0.09 else ("dark" if light < 0.26 else ("light" if light > 0.62 else "colour"))
+    cat = "live" if video else "mono" if sat < 0.09 else ("dark" if light < 0.26 else ("light" if light > 0.62 else "colour"))
     return f, {"mtime": mt, "thumb": th, "sat": round(sat, 3), "light": round(light, 3), "palette": cols, "cat": cat}
 
 with ThreadPoolExecutor(os.cpu_count() or 4) as ex:

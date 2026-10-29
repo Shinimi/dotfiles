@@ -6,7 +6,9 @@ import Quickshell.Io
 
 Singleton {
     property var d: ({ cpu: 0, cpuTemp: 0, cpuFreq: 0, ramUsed: 0, ramTotal: 0, ram: 0,
-                       gpu: 0, gpuTemp: 0, gpuPower: 0, vramUsed: 0, vramTotal: 0, uptime: "" })
+                       gpu: 0, gpuTemp: 0, gpuPower: 0, vramUsed: 0, vramTotal: 0, uptime: "",
+                       gpuHot: 0, gpuMem: 0, fan: 0, gpuCap: 0, fanMode: "balanced", fanOk: 0 })
+    function refresh() { proc.running = true }
     Process {
         id: proc
         command: [Qt.resolvedUrl("stats.sh").toString().replace("file://", "")]

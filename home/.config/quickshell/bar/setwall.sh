@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
-# setwall.sh <DP-1|DP-2|both> <image>: set live via hyprpaper and save to hyprpaper.conf. Made by Claude.
+# setwall.sh <DP-1|DP-2|both> <image|video>: set live via hyprpaper (videos via livewall.sh) and save to hyprpaper.conf. Made by Claude.
 target=$1; img=$2; conf="$HOME/.config/hypr/hyprpaper.conf"
 mons=("$target"); [ "$target" = both ] && mons=(DP-1 DP-2)
+# a video plays as a live wallpaper (livewall.sh); its first frame becomes the still picture underneath and on the lock screen
+lw="$HOME/.config/hypr/scripts/livewall.sh"
+case "${img,,}" in
+  *.mp4|*.webm|*.mkv|*.mov)
+    for m in "${mons[@]}"; do "$lw" set "$m" "$img"; done
+    still="$HOME/.cache/qs-wall-thumbs/$(basename "${img%.*}")-still.jpg"
+    [ "$still" -nt "$img" ] || ffmpeg -y -loglevel error -ss 1 -i "$img" -frames:v 1 -q:v 2 "$still"
+    img=$still ;;
+  *) for m in "${mons[@]}"; do "$lw" clear "$m"; done ;;
+esac
 for m in "${mons[@]}"; do
   hyprctl hyprpaper wallpaper "$m,$img,cover" >/dev/null
   python3 -I - "$conf" "$m" "$img" <<'PY'

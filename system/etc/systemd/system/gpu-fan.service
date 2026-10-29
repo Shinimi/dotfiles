@@ -1,0 +1,8 @@
+[Unit]
+Description=Re-apply the GPU fan mode picked in the control center (gpu-ctl). Made by Claude.
+After=amdgpu-power-cap.service multi-user.target
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/gpu-ctl restore
+[Install]
+WantedBy=multi-user.target

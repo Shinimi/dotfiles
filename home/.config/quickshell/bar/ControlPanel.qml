@@ -35,7 +35,7 @@ Scope {
     // ---------- pages ----------
     property int page: 0
     readonly property var pages: [["\u{f02dc}", "Home"], ["\u{f057e}", "Sound & screens"], ["\u{f0599}", "Weather"],
-                                  ["\u{f051f}", "Screen time"], ["\u{f04bc}", "System"], ["\u{f009a}", "Notifications"], ["\u{f01da}", "Downloads"]]
+                                  ["\u{f051f}", "Screen time"], ["\u{f04bc}", "System"], ["\u{f009a}", "Notifications"], ["\u{f024b}", "Files"], ["\u{f0eb5}", "Games"]]
 
     // ---------- data ----------
     property date now: new Date()
@@ -91,7 +91,23 @@ Scope {
         command: ["sh", "-c", "find \"$HOME/Downloads\" -type f -not -path '*/.*' -printf '%T@\\t%s\\t%p\\n' 2>/dev/null | sort -nr | head -10"]
         stdout: StdioCollector { onStreamFinished: cc.downloads = this.text.trim().split("\n").filter(l => l).map(l => { const f = l.split("\t"); return { t: parseFloat(f[0]), size: parseInt(f[1]), path: f[2] } }) }
     }
-    onPageChanged: if (page === 6) dlProc.running = true
+    // Files page: the newest screenshots and recordings
+    property var captures: []
+    Process {
+        id: capProc
+        command: ["sh", "-c", "ls -t \"$HOME\"/Pictures/Screenshots/*.png \"$HOME\"/Videos/Recordings/*.mp4 2>/dev/null | head -5"]
+        stdout: StdioCollector { onStreamFinished: cc.captures = this.text.trim().split("\n").filter(l => l) }
+    }
+    onPageChanged: { if (page === 6) { dlProc.running = true; capProc.running = true } if (page === 7) gsProc.running = true; if (page === 2) ratesProc.running = true }
+    // Games page: this week, most played, the latest sessions (gamestats.py)
+    // Weather page: the lira against USD, EUR and GBP (rates.sh)
+    property var rates: ({})
+    Process { id: ratesProc; command: [cc.qsDir + "/rates.sh"]
+              stdout: StdioCollector { onStreamFinished: { try { cc.rates = JSON.parse(this.text) } catch (e) {} } } }
+    property var gs: ({ week: { minutes: 0, sessions: 0, days: [], peakGpu: 0, avgFps: 0 }, top: [], recent: [], allTime: [], allTimeHours: 0, installed: 0, recorded: 0 })
+    Process { id: gsProc; command: ["python3", "-I", cc.qsDir + "/gamestats.py"]
+              stdout: StdioCollector { onStreamFinished: { try { cc.gs = JSON.parse(this.text) } catch (e) {} } } }
+    function hm(m) { m = Math.round(m || 0); return m >= 60 ? Math.floor(m / 60) + "h " + (m % 60 ? (m % 60) + "m" : "") : m + "m" }
     function fileIcon(p) {
         const e = (p.split(".").pop() || "").toLowerCase()
         return /^(png|jpe?g|webp|gif|bmp|svg|avif)$/.test(e) ? "\u{f021f}" : /^(mp4|mkv|webm|mov|avi)$/.test(e) ? "\u{f022b}" : /^(mp3|flac|ogg|wav|m4a|opus)$/.test(e) ? "\u{f0223}"
@@ -110,6 +126,14 @@ Scope {
     }
     Timer { running: cc.visible && cc.page === 4; interval: 20000; repeat: true; triggeredOnStart: true; onTriggered: if (!dcProc.running) dcProc.running = true }
     Timer { id: dcLater; interval: 3500; onTriggered: dcProc.running = true }
+    // System page: the connection doctor (netdoctor.sh)
+    property var net: ({})
+    property bool netBusy: netProc.running
+    Process { id: netProc; command: [cc.qsDir + "/netdoctor.sh"]
+              stdout: StdioCollector { onStreamFinished: { try { cc.net = JSON.parse(this.text) } catch (e) {} } } }
+    function netCheck() { if (!netProc.running) netProc.running = true }
+    Timer { running: cc.visible && cc.page === 4; interval: 45000; repeat: true; triggeredOnStart: true; onTriggered: cc.netCheck() }
+    Timer { id: netLater; interval: 6000; onTriggered: cc.netCheck() }
     function dcToggle() {
         Quickshell.execDetached(["pkexec", "systemctl", cc.dcSvc === "active" ? "disable" : "enable", "--now", "zapret2.service"])
         dcLater.restart()
@@ -145,6 +169,26 @@ Scope {
     function speed(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + " MB/s" : b >= 1024 ? Math.round(b / 1024) + " KB/s" : b + " B/s" }
     function mmss(t) { t = Math.max(0, Math.floor(t || 0)); return Math.floor(t / 60) + ":" + String(t % 60).padStart(2, "0") }
     function mem(gb) { return gb >= 1 ? gb.toFixed(1) + " GB" : Math.round(gb * 1024) + " MB" }
+    // Home: how full the drives are (the system drive and the games SSD)
+    property var disks: []
+    Process {
+        id: diskProc
+        command: ["sh", "-c", "df -B1 --output=target,size,used / /mnt/games 2>/dev/null | tail -n +2"]
+        stdout: StdioCollector { onStreamFinished: cc.disks = this.text.trim().split("\n").map(l => l.trim().split(/\s+/)).filter(f => f.length === 3)
+                                     .filter((f, i, a) => a.findIndex(g => g[0] === f[0]) === i).map(f => ({ name: f[0] === "/" ? "System" : "Games", size: +f[1], used: +f[2] })) }
+    }
+    Timer { running: cc.visible && cc.page === 0; interval: 60000; repeat: true; triggeredOnStart: true; onTriggered: diskProc.running = true }
+    // Home: the quick notes you haven't ticked off yet
+    property var openNotes: []
+    Process {
+        id: notesProc
+        command: ["cat", Quickshell.env("HOME") + "/.local/state/quick-notes.json"]
+        stdout: StdioCollector { onStreamFinished: { try { cc.openNotes = JSON.parse(this.text).filter(n => !n.done) } catch (e) { cc.openNotes = [] } } }
+    }
+    Timer { running: cc.visible && cc.page === 0; interval: 5000; repeat: true; triggeredOnStart: true; onTriggered: notesProc.running = true }
+    property string fanPick: ""   // the fan mode just clicked, shown until the stats catch up
+    function setFan(m) { cc.fanPick = m; Quickshell.execDetached(["sudo", "-n", "/usr/local/bin/gpu-ctl", "fan", m]); fanLater.restart() }
+    Timer { id: fanLater; interval: 900; onTriggered: { Stats.refresh(); cc.fanPick = "" } }
     function go(cmd) { cc.visible = false; Quickshell.execDetached(cmd) }
     function qs(target, fn) { go(["qs", "ipc", "-p", qsDir, "call", target, fn || "toggle"]) }
     readonly property string greeting: {
@@ -268,8 +312,8 @@ Scope {
 
         Rectangle {
             id: panel
-            width: 724
-            x: parent.width - width - 10; y: Theme.barBottom + 10
+            width: 1000   // wide, in the middle under the bar
+            x: (parent.width - width) / 2; y: Theme.barBottom + 10
             height: main.implicitHeight + 36
             radius: 18
             color: "#f20c0c0c"
@@ -280,7 +324,7 @@ Scope {
             MouseArea { anchors.fill: parent }
             focus: cc.visible
             Keys.onEscapePressed: cc.visible = false
-            Keys.onPressed: e => { if (e.key >= Qt.Key_1 && e.key <= Qt.Key_7) { cc.page = e.key - Qt.Key_1; e.accepted = true } }
+            Keys.onPressed: e => { if (e.key >= Qt.Key_1 && e.key <= Qt.Key_8) { cc.page = e.key - Qt.Key_1; e.accepted = true } }
 
             RowLayout {
                 id: main
@@ -337,10 +381,15 @@ Scope {
                     // ---- greeting ----
                     RowLayout {
                         Layout.fillWidth: true; spacing: 14
-                        ClippingRectangle {
+                        ClippingRectangle {   // your picture, or your initial when there's none; click to change it
                             width: 44; height: 44; radius: 22; color: cc.card
-                            Image { anchors.fill: parent; fillMode: Image.PreserveAspectCrop; sourceSize.width: 96; asynchronous: true
+                            Rectangle { anchors.fill: parent; visible: av0.status !== Image.Ready
+                                gradient: Gradient { GradientStop { position: 0; color: "#3a3a3a" } GradientStop { position: 1; color: "#141414" } } }
+                            Text { anchors.centerIn: parent; visible: av0.status !== Image.Ready; text: (Settings.cur("user_name") || "yu").charAt(0).toUpperCase()
+                                   color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 19; font.bold: true }
+                            Image { id: av0; anchors.fill: parent; fillMode: Image.PreserveAspectCrop; sourceSize.width: 96; asynchronous: true
                                     source: Settings.cur("avatar") ? "file://" + Settings.cur("avatar") : "file://" + Quickshell.env("HOME") + "/.face" }
+                            MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: cc.go(["qs", "ipc", "-p", cc.qsDir, "call", "settings", "open", "account"]) }
                         }
                         Column {
                             Layout.fillWidth: true; spacing: 4
@@ -439,7 +488,9 @@ Scope {
                                 ["\u{f036c}", "Clean mic", "", !!SysState.fx.mic, () => SysState.fxToggle("mic")],
                                 ["\u{f0eb5}", "Game", SysState.gameMode ? "" : "Auto", SysState.gameMode,
                                  () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", SysState.gameMode ? "off" : "on"]); SysState.gameMode = !SysState.gameMode }],
-                                ["\u{f00af}", "Bluetooth", cc.bt && cc.bt.enabled && cc.btDev ? cc.btDev.name : "", !!(cc.bt && cc.bt.enabled), () => { if (cc.bt) cc.bt.enabled = !cc.bt.enabled }]
+                                cc.bt ? ["\u{f00af}", "Bluetooth", cc.bt.enabled && cc.btDev ? cc.btDev.name : "", !!cc.bt.enabled, () => { cc.bt.enabled = !cc.bt.enabled }]
+                                      : ["\u{f0210}", "Fan", Stats.d.fanOk ? (cc.fanPick || Stats.d.fanMode).replace(/^./, c => c.toUpperCase()) : "Setup", (cc.fanPick || Stats.d.fanMode) !== "balanced",
+                                         () => { if (!Stats.d.fanOk) { cc.page = 4; return } const m = ["quiet", "balanced", "loud"]; cc.setFan(m[(m.indexOf(cc.fanPick || Stats.d.fanMode) + 1) % 3]) }]
                             ]
                             Rectangle {
                                 id: tile
@@ -466,7 +517,9 @@ Scope {
 
                     // ================= the page area =================
                     Item {
-                        Layout.fillWidth: true; Layout.preferredHeight: 404
+                        property real h: cc.page === 0 ? 698 : cc.page === 4 ? 640 : cc.page === 7 ? 560 : cc.page === 2 ? 450 : 404   // Home and System hold more
+                        Behavior on h { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+                        Layout.fillWidth: true; Layout.preferredHeight: h
 
                         // ---------- 0 · Home: a glance at everything ----------
                         Page {
@@ -547,6 +600,99 @@ Scope {
                                                                       : [["5m", () => { Timers.setMinutes(5); Timers.toggleTimer() }], ["15m", () => { Timers.setMinutes(15); Timers.toggleTimer() }],
                                                                          ["25m", () => { Timers.setMinutes(25); Timers.toggleTimer() }], ["1h", () => { Timers.setMinutes(60); Timers.toggleTimer() }]]
                                             Btn { required property var modelData; text: modelData[0]; onHit: modelData[1]() }
+                                        }
+                                    }
+                                }
+                                RowLayout {   // notes + sound levels
+                                    Layout.fillWidth: true; spacing: 10
+                                    Card {   // quick notes (SUPER + N): the open ones at a glance
+                                        Layout.preferredWidth: 1; Layout.preferredHeight: 170; Layout.alignment: Qt.AlignTop
+                                        title: "Notes"; icon: "\u{f082e}"; note: cc.openNotes.length ? cc.openNotes.length + " open" : ""
+                                        clickable: true; onClicked: cc.qs("notes")
+                                        Repeater {
+                                            model: cc.openNotes.slice(0, 4)
+                                            Row {
+                                                required property var modelData
+                                                width: parent.width; spacing: 8
+                                                Rectangle { width: 10; height: 10; radius: 3; border.width: 1; border.color: "#8a8a8a"; color: "transparent"; anchors.verticalCenter: parent.verticalCenter }
+                                                Text { width: parent.width - 18; elide: Text.ElideRight; text: modelData.text; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 11 }
+                                            }
+                                        }
+                                        Text { visible: !cc.openNotes.length; width: parent.width; wrapMode: Text.WordWrap; color: cc.dim; font.family: Theme.font; font.pixelSize: 10
+                                               text: "Nothing to do. Click (or SUPER + N) to jot something down." }
+                                    }
+                                    Card {
+                                        Layout.preferredWidth: 1; Layout.preferredHeight: 170; Layout.alignment: Qt.AlignTop
+                                        title: "Sound & screens"; icon: "\u{f057e}"; note: cc.nice(cc.sink).slice(0, 22)
+                                        clickable: true; onClicked: cc.page = 1
+                                        Repeater {
+                                            model: [[cc.sink, "\u{f057e}", "\u{f075f}"], [cc.source, "\u{f036c}", "\u{f036d}"]]
+                                            RowLayout {
+                                                id: lvl
+                                                required property var modelData
+                                                readonly property var node: modelData[0]
+                                                readonly property bool muted: !!(node && node.audio && node.audio.muted)
+                                                width: parent.width; spacing: 10
+                                                Text { text: lvl.muted ? lvl.modelData[2] : lvl.modelData[1]; color: lvl.muted ? "#5a5a5a" : "#e0e0e0"; font.family: Theme.font; font.pixelSize: 14
+                                                       MouseArea { anchors.fill: parent; anchors.margins: -4; cursorShape: Qt.PointingHandCursor; onClicked: if (lvl.node) lvl.node.audio.muted = !lvl.muted } }
+                                                Slider { Layout.fillWidth: true; value: lvl.node && lvl.node.audio && !lvl.muted ? Math.min(1, lvl.node.audio.volume) : 0
+                                                         onMoved: v => { if (lvl.node) { lvl.node.audio.muted = false; lvl.node.audio.volume = v } } }
+                                                Text { Layout.preferredWidth: 34; horizontalAlignment: Text.AlignRight; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 10
+                                                       text: lvl.muted ? "off" : lvl.node && lvl.node.audio ? Math.round(lvl.node.audio.volume * 100) + "%" : "" }
+                                            }
+                                        }
+                                        Repeater {   // monitor brightness over DDC/CI (brightness.sh), Main and Side
+                                            model: [["DP-1", "\u{f00df}", "main"], ["DP-2", "\u{f00de}", "side"]]
+                                            RowLayout {
+                                                id: brt
+                                                required property var modelData
+                                                width: parent.width; spacing: 10
+                                                Text { text: brt.modelData[1]; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 14 }
+                                                Slider { Layout.fillWidth: true; value: (cc.bright[brt.modelData[0]] || 0) / 100; onMoved: v => cc.setBright(brt.modelData[0], Math.max(1, Math.round(v * 100))) }
+                                                Text { Layout.preferredWidth: 64; horizontalAlignment: Text.AlignRight; color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 10
+                                                       text: "<font color='#5a5a5a'>" + brt.modelData[2] + "</font>  " + (cc.bright[brt.modelData[0]] || 0) + "%"; textFormat: Text.StyledText }
+                                            }
+                                        }
+                                    }
+                                }
+                                RowLayout {   // drives + cooling
+                                    Layout.fillWidth: true; spacing: 10
+                                    Card {
+                                        Layout.preferredWidth: 1; Layout.preferredHeight: 112; Layout.alignment: Qt.AlignTop
+                                        title: "Storage"; icon: "\u{f02ca}"
+                                        Repeater {
+                                            model: cc.disks
+                                            RowLayout {
+                                                id: dk
+                                                required property var modelData
+                                                readonly property real frac: modelData.size > 0 ? modelData.used / modelData.size : 0
+                                                width: parent.width; spacing: 10
+                                                Text { Layout.preferredWidth: 52; text: dk.modelData.name; color: "#d0d0d0"; font.family: Theme.font; font.pixelSize: 11 }
+                                                Rectangle {
+                                                    Layout.fillWidth: true; height: 5; radius: 3; color: "#1fffffff"
+                                                    Rectangle { height: 5; radius: 3; width: Math.max(5, parent.width * dk.frac); color: dk.frac > 0.9 ? "#cf6b6b" : cc.hi }
+                                                }
+                                                Text { Layout.preferredWidth: 96; horizontalAlignment: Text.AlignRight; color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10
+                                                       text: cc.bytes(dk.modelData.size - dk.modelData.used) + " free" }
+                                            }
+                                        }
+                                    }
+                                    Card {
+                                        Layout.preferredWidth: 1; Layout.preferredHeight: 112; Layout.alignment: Qt.AlignTop
+                                        title: "Cooling"; icon: "\u{f0210}"; note: Stats.d.fanOk ? Stats.d.fanMode : ""
+                                        clickable: true; onClicked: cc.page = 4
+                                        Row {
+                                            width: parent.width
+                                            Repeater {
+                                                model: [["Hotspot", Stats.d.gpuHot + "°", Stats.d.gpuHot >= 95], ["CPU", Stats.d.cpuTemp + "°", Stats.d.cpuTemp >= 85],
+                                                        ["Fan", Stats.d.fan > 0 ? Stats.d.fan + "" : "off", false], ["Cap", Stats.d.gpuCap + " W", false]]
+                                                Column {
+                                                    required property var modelData
+                                                    width: parent.width / 4; spacing: 2
+                                                    Text { text: modelData[1]; color: modelData[2] ? "#cf6b6b" : "#f0f0f0"; font.family: Theme.font; font.pixelSize: 15; font.bold: true }
+                                                    Text { text: modelData[0]; color: cc.dim; font.family: Theme.font; font.pixelSize: 9 }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -661,38 +807,11 @@ Scope {
                                             }
                                         }
                                     }
-                                    Card {   // the troll mic: a voice changer, on and off in a click (or SUPER + ALT + T)
-                                        title: "Troll mic"; icon: "\u{f0c6f}"; note: SysState.fx.troll ? "ON · Super+Alt+T" : "Super+Alt+T"
-                                        RowLayout {
-                                            width: parent.width; spacing: 6
-                                            Repeater {
-                                                model: [["demon", "\u{f0c6f}", "Demon"], ["chipmunk", "\u{f0907}", "Chipmunk"], ["robot", "\u{f06a9}", "Robot"],
-                                                        ["alien", "\u{f089a}", "Alien"], ["radio", "\u{f043a}", "Radio"], ["glitch", "\u{f092b}", "Glitch"]]
-                                                Rectangle {
-                                                    id: vt
-                                                    required property var modelData
-                                                    readonly property bool picked: (SysState.fx.voice || "demon") === modelData[0]
-                                                    readonly property bool live: picked && !!SysState.fx.troll
-                                                    Layout.fillWidth: true; Layout.preferredWidth: 1; height: 50; radius: 12
-                                                    color: live ? cc.hi : vtm.containsMouse ? cc.cardHi : "#0f0f0f"
-                                                    border.width: 1; border.color: live ? cc.hi : picked ? "#8a8a8a" : cc.line
-                                                    Behavior on color { ColorAnimation { duration: 130 } }
-                                                    Column {
-                                                        anchors.centerIn: parent; spacing: 2
-                                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: vt.modelData[1]; color: vt.live ? cc.ink : "#d8d8d8"; font.family: Theme.font; font.pixelSize: 15 }
-                                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: vt.modelData[2]; color: vt.live ? cc.ink : "#8a8a8a"; font.family: Theme.font; font.pixelSize: 8 }
-                                                    }
-                                                    MouseArea {   // click a voice: use it (and switch the troll mic on); click the live one again: off
-                                                        id: vtm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                                                        onClicked: { if (vt.live) SysState.fxToggle("troll"); else { SysState.fxVoice(vt.modelData[0]); if (!SysState.fx.troll) SysState.fxToggle("troll") } }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
                                     Card {   // every app that's making sound, with its own volume
                                         Layout.fillHeight: true
                                         title: "Apps"; icon: "\u{f0388}"; note: Streams.apps.length ? Streams.apps.length + " playing" : "nothing playing"
+                                        Text { visible: !Streams.apps.length; width: parent.width; wrapMode: Text.WordWrap; color: cc.dim; font.family: Theme.font; font.pixelSize: 10
+                                               text: "Anything making sound shows up here with its own volume: turn a game down without touching Discord." }
                                         Repeater {
                                             model: Streams.apps
                                             RowLayout {
@@ -719,8 +838,10 @@ Scope {
                         // ---------- 2 · Weather: the week, tap a day ----------
                         Page {
                             n: 2
+                            ColumnLayout {
+                            anchors.fill: parent; spacing: 10
                             Card {
-                                anchors.fill: parent
+                                Layout.fillHeight: true
                                 title: cc.dayIsToday ? "Today" : Qt.formatDate(new Date(cc.dayKey + "T12:00"), "dddd d"); icon: "\u{f0599}"
                                 note: Weather.ready ? Weather.place : ""
                                 Row {   // this week: tap a day for its weather, tap it again (or close) for today
@@ -808,6 +929,41 @@ Scope {
                                 }
                                 Text { width: parent.width; wrapMode: Text.WordWrap; text: cc.hintFor(cc.dayKey); color: "#9a9a9a"; font.family: Theme.font; font.pixelSize: 11 }
                             }
+                            Card {   // the lira: today's rate, the change since yesterday, a week's trend (rates.sh, ECB)
+                                title: "Lira"; icon: "\u20ba"; note: cc.rates.date ? "ECB  ·  " + cc.rates.date : ""
+                                Row {
+                                    width: parent.width; spacing: 8
+                                    Repeater {
+                                        model: cc.rates.rates || []
+                                        Rectangle {
+                                            id: rt
+                                            required property var modelData
+                                            width: (parent.width - 16) / 3; height: 58; radius: 12; color: "#0d0d0d"; border.width: 1; border.color: cc.line
+                                            Column {
+                                                x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 2
+                                                Text { text: rt.modelData.sign + " " + rt.modelData.cur; color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 9; font.bold: true }
+                                                Text { text: rt.modelData.now.toFixed(2) + " \u20ba"; color: "#f2f2f2"; font.family: Theme.font; font.pixelSize: 15; font.bold: true }
+                                                Text { text: (rt.modelData.change > 0 ? "\u25b2 " : rt.modelData.change < 0 ? "\u25bc " : "") + Math.abs(rt.modelData.change).toFixed(2) + "%"
+                                                       color: rt.modelData.change > 0 ? "#d6d6d6" : "#8a8a8a"; font.family: Theme.font; font.pixelSize: 9 }
+                                            }
+                                            Canvas {   // the week as a thin line
+                                                anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                                                width: parent.width * 0.38; height: 28
+                                                onPaint: {
+                                                    const c = getContext("2d"); c.reset(); const v = rt.modelData.series || []; if (v.length < 2) return
+                                                    const lo = Math.min(...v), hi = Math.max(...v), r = hi - lo || 1
+                                                    c.strokeStyle = "#d0d0d0"; c.lineWidth = 1.5; c.lineJoin = "round"; c.beginPath()
+                                                    v.forEach((y, i) => { const px = i * (width - 4) / (v.length - 1) + 2, py = height - 2 - (y - lo) / r * (height - 4); i ? c.lineTo(px, py) : c.moveTo(px, py) })
+                                                    c.stroke()
+                                                }
+                                                Component.onCompleted: requestPaint()
+                                            }
+                                        }
+                                    }
+                                }
+                                Text { visible: !(cc.rates.rates || []).length; text: "No rates yet (needs internet)."; color: cc.dim; font.family: Theme.font; font.pixelSize: 11 }
+                            }
+                            }
                         }
 
                         // ---------- 3 · Screen time: 7-day chart, then the apps ----------
@@ -890,30 +1046,73 @@ Scope {
                                                    extra: Stats.d.vramUsed.toFixed(1) + " / " + Stats.d.vramTotal.toFixed(0) + " GB" }
                                     }
                                 }
-                                Rectangle {   // the Discord fix: status, and a switch
-                                    Layout.fillWidth: true; height: 64; radius: 14; color: cc.card; border.width: 1; border.color: cc.line
-                                    Rectangle {
-                                        x: 14; anchors.verticalCenter: parent.verticalCenter; width: 38; height: 38; radius: 12
-                                        color: cc.dcSvc === "active" ? cc.hi : "#1f1f1f"
-                                        Text { anchors.centerIn: parent; text: "\u{f066f}"; color: cc.dcSvc === "active" ? cc.ink : "#cfcfcf"; font.family: Theme.font; font.pixelSize: 18 }
-                                    }
-                                    Column {
-                                        x: 64; anchors.verticalCenter: parent.verticalCenter; spacing: 3
-                                        Text { text: "Discord fix"; color: "#f0f0f0"; font.family: Theme.font; font.pixelSize: 12; font.bold: true }
-                                        Row {
-                                            spacing: 6
-                                            Rectangle { width: 7; height: 7; radius: 4; anchors.verticalCenter: parent.verticalCenter
-                                                        color: cc.dcNet === "ok" ? "#ececec" : cc.dcNet === "blocked" ? "#cf6b6b" : "#4a4a4a" }
-                                            Text { color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10
-                                                   text: (cc.dcSvc === "active" ? "On" : cc.dcSvc ? "Off" : "Checking…") + (cc.dcNet ? "  ·  Discord " + (cc.dcNet === "ok" ? "connects" : "is blocked right now") : "") }
+                                Card {   // cooling: the GPU's hot spots, its fan, and a fan mode (gpu-ctl)
+                                    title: "Cooling"; icon: "\u{f0210}"
+                                    note: Stats.d.gpuCap ? "GPU cap " + Stats.d.gpuCap + " W" : ""
+                                    RowLayout {
+                                        width: parent.width; spacing: 0
+                                        Repeater {
+                                            model: [["Hotspot", Stats.d.gpuHot + "°", Stats.d.gpuHot >= 95], ["VRAM", Stats.d.gpuMem + "°", Stats.d.gpuMem >= 95],
+                                                    ["CPU", Stats.d.cpuTemp + "°", Stats.d.cpuTemp >= 85], ["Fan", Stats.d.fan > 0 ? Stats.d.fan + " rpm" : "stopped", false]]
+                                            Column {
+                                                required property var modelData
+                                                Layout.fillWidth: true; Layout.preferredWidth: 1; spacing: 2
+                                                Text { text: modelData[1]; color: modelData[2] ? "#cf6b6b" : "#f0f0f0"; font.family: Theme.font; font.pixelSize: 15; font.bold: true }
+                                                Text { text: modelData[0]; color: cc.dim; font.family: Theme.font; font.pixelSize: 10 }
+                                            }
                                         }
                                     }
-                                    Rectangle {   // the switch (asks for your password: it's a system service)
-                                        anchors.right: parent.right; anchors.rightMargin: 16; anchors.verticalCenter: parent.verticalCenter
-                                        width: 40; height: 22; radius: 11; color: cc.dcSvc === "active" ? cc.hi : "#262626"
-                                        Rectangle { width: 16; height: 16; radius: 8; y: 3; x: cc.dcSvc === "active" ? 21 : 3; color: cc.dcSvc === "active" ? cc.ink : "#8a8a8a"
-                                                    Behavior on x { NumberAnimation { duration: 160 } } }
-                                        MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; onClicked: cc.dcToggle() }
+                                    Seg {
+                                        visible: !!Stats.d.fanOk
+                                        options: [["quiet", "Quiet"], ["balanced", "Balanced"], ["loud", "Loud"]]
+                                        current: cc.fanPick || Stats.d.fanMode
+                                        onPicked: v => cc.setFan(v)
+                                    }
+                                    Text { visible: !Stats.d.fanOk; width: parent.width; wrapMode: Text.WordWrap; color: cc.dim; font.family: Theme.font; font.pixelSize: 10
+                                           text: "Fan modes turn on after the next reboot" }
+                                }
+                                Card {   // connection doctor: what works, what doesn't, in plain words; plus the Discord fix
+                                    title: "Connection"; icon: "\u{f0200}"
+                                    note: cc.net.ping ? cc.net.ping + " ms ping" + (cc.net.encrypted ? "  ·  encrypted DNS" : "") : (cc.netBusy ? "checking…" : "")
+                                    Row {
+                                        width: parent.width; spacing: 6
+                                        Repeater {
+                                            model: [["Internet", cc.net.net, cc.net.ping ? cc.net.ping + " ms" : ""], ["DNS", cc.net.dns, cc.net.encrypted ? "encrypted" : "plain"],
+                                                    ["Discord", cc.net.discord, cc.net.discordMs ? cc.net.discordMs + " ms" : "blocked"], ["Steam", cc.net.steam, cc.net.steamMs ? cc.net.steamMs + " ms" : ""],
+                                                    ["YouTube", cc.net.youtube, cc.net.youtubeMs ? cc.net.youtubeMs + " ms" : ""]]
+                                            Rectangle {
+                                                required property var modelData
+                                                readonly property bool known: cc.net.say !== undefined
+                                                width: (parent.width - 24) / 5; height: 42; radius: 10; color: "#0d0d0d"; border.width: 1
+                                                border.color: known && !modelData[1] ? "#66cf6b6b" : cc.line
+                                                Row {
+                                                    x: 10; anchors.verticalCenter: parent.verticalCenter; spacing: 8
+                                                    Rectangle { width: 7; height: 7; radius: 4; anchors.verticalCenter: parent.verticalCenter
+                                                                color: !parent.parent.known || cc.netBusy ? "#4a4a4a" : modelData[1] ? "#ececec" : "#cf6b6b" }
+                                                    Column {
+                                                        Text { text: modelData[0]; color: "#e6e6e6"; font.family: Theme.font; font.pixelSize: 10; font.bold: true }
+                                                        Text { text: modelData[2]; color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 8 }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    RowLayout {
+                                        width: parent.width; spacing: 10
+                                        Text { Layout.fillWidth: true; wrapMode: Text.WordWrap; color: cc.net.say === "Everything works." ? "#b0b0b0" : "#f0f0f0"; font.family: Theme.font; font.pixelSize: 11
+                                               text: cc.netBusy && !cc.net.say ? "Checking your connection…" : (cc.net.say || "") }
+                                        Btn { text: cc.netBusy ? "…" : "Check again"; onHit: cc.netCheck() }
+                                        Row {   // the Discord fix (zapret2): a system service, so it asks for your password
+                                            spacing: 8
+                                            Text { anchors.verticalCenter: parent.verticalCenter; text: "Discord fix"; color: cc.dcSvc === "missing" ? "#4a4a4a" : "#a8a8a8"; font.family: Theme.font; font.pixelSize: 10 }
+                                            Rectangle {
+                                                width: 40; height: 22; radius: 11; color: cc.dcSvc === "active" ? cc.hi : "#262626"; opacity: cc.dcSvc === "missing" ? 0.4 : 1
+                                                Rectangle { width: 16; height: 16; radius: 8; y: 3; x: cc.dcSvc === "active" ? 21 : 3; color: cc.dcSvc === "active" ? cc.ink : "#8a8a8a"
+                                                            Behavior on x { NumberAnimation { duration: 160 } } }
+                                                MouseArea { anchors.fill: parent; anchors.margins: -6; cursorShape: Qt.PointingHandCursor; enabled: cc.dcSvc !== "missing"
+                                                            onClicked: { cc.dcToggle(); netLater.restart() } }
+                                            }
+                                        }
                                     }
                                 }
                                 Card {
@@ -974,14 +1173,16 @@ Scope {
                             }
                         }
 
-                        // ---------- 6 · Downloads: the newest files, open or show in folder ----------
+                        // ---------- 6 · Files: newest downloads, latest captures, quick folders ----------
                         Page {
                             n: 6
+                            ColumnLayout {
+                            anchors.fill: parent; spacing: 10
                             Card {
-                                anchors.fill: parent
+                                Layout.fillHeight: true
                                 title: "Downloads"; icon: "\u{f01da}"; note: "sorted into folders"
                                 Repeater {
-                                    model: cc.downloads.slice(0, 6)
+                                    model: cc.downloads.slice(0, 4)
                                     Rectangle {
                                         id: dl
                                         required property var modelData
@@ -1016,7 +1217,162 @@ Scope {
                                     }
                                 }
                                 Text { visible: cc.downloads.length === 0; text: "Nothing downloaded yet"; color: cc.dim; font.family: Theme.font; font.pixelSize: 11 }
-                                Btn { text: "Open the Downloads folder"; onHit: cc.go(["xdg-open", Quickshell.env("HOME") + "/Downloads"]) }
+                            }
+                            Card {   // the latest screenshots and recordings, click to open
+                                title: "Captures"; icon: "\u{f0100}"; note: "Print · SUPER+ALT+R"
+                                Row {
+                                    width: parent.width; spacing: 8
+                                    Repeater {
+                                        model: cc.captures
+                                        ClippingRectangle {
+                                            id: capt
+                                            required property string modelData
+                                            readonly property bool video: modelData.endsWith(".mp4")
+                                            width: (parent.width - 32) / 5; height: width * 0.62; radius: 10; color: "#1a1a1a"
+                                            border.width: 1; border.color: capm.containsMouse ? cc.hi : cc.line
+                                            Image { anchors.fill: parent; visible: !capt.video; source: capt.video ? "" : "file://" + capt.modelData; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 240 }
+                                            Text { anchors.centerIn: parent; visible: capt.video; text: "\u{f0567}"; color: "#cfcfcf"; font.family: Theme.font; font.pixelSize: 22 }
+                                            MouseArea { id: capm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: cc.go(["xdg-open", capt.modelData]) }
+                                        }
+                                    }
+                                }
+                                Text { visible: !cc.captures.length; text: "No screenshots yet: press Print to snip an area"; color: cc.dim; font.family: Theme.font; font.pixelSize: 11 }
+                            }
+                            RowLayout {   // quick folders
+                                Layout.fillWidth: true; spacing: 8
+                                Repeater {
+                                    model: [["\u{f01da}", "Downloads", "/Downloads"], ["\u{f024f}", "Pictures", "/Pictures"], ["\u{f0fce}", "Videos", "/Videos"],
+                                            ["\u{f0eb5}", "Games", "/mnt/games"], ["\u{f02dc}", "Home", ""]]
+                                    Rectangle {
+                                        required property var modelData
+                                        Layout.fillWidth: true; Layout.preferredWidth: 1; height: 44; radius: 12
+                                        color: fm.containsMouse ? cc.hi : cc.card; border.width: 1; border.color: fm.containsMouse ? cc.hi : cc.line
+                                        Behavior on color { ColorAnimation { duration: 120 } }
+                                        Row {
+                                            anchors.centerIn: parent; spacing: 7
+                                            Text { text: modelData[0]; color: fm.containsMouse ? cc.ink : "#d8d8d8"; font.family: Theme.font; font.pixelSize: 14 }
+                                            Text { text: modelData[1]; color: fm.containsMouse ? cc.ink : "#a8a8a8"; font.family: Theme.font; font.pixelSize: 10; anchors.verticalCenter: parent.verticalCenter }
+                                        }
+                                        MouseArea { id: fm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                                    onClicked: cc.go(["xdg-open", modelData[2].startsWith("/mnt") ? modelData[2] : Quickshell.env("HOME") + modelData[2]]) }
+                                    }
+                                }
+                            }
+                            }
+                        }
+
+                        // ---------- 7 · Games: your week in games, most played, the latest sessions ----------
+                        Page {
+                            n: 7
+                            ColumnLayout {
+                                anchors.fill: parent; spacing: 10
+                                RowLayout {
+                                    Layout.fillWidth: true; spacing: 10
+                                    Card {   // this week: total + a bar per day
+                                        Layout.preferredWidth: 3; Layout.preferredHeight: 176; Layout.alignment: Qt.AlignTop
+                                        title: "This week"; icon: "\u{f00f0}"; note: cc.gs.week.sessions + (cc.gs.week.sessions === 1 ? " session" : " sessions")
+                                        RowLayout {
+                                            width: parent.width; spacing: 16
+                                            Column {
+                                                spacing: 2; Layout.alignment: Qt.AlignBottom
+                                                Text { text: cc.hm(cc.gs.week.minutes); color: "#ffffff"; font.family: Theme.font; font.pixelSize: 30; font.bold: true }
+                                                Text { text: "played"; color: cc.dim; font.family: Theme.font; font.pixelSize: 10 }
+                                                Text { topPadding: 6; visible: cc.gs.week.avgFps > 0; text: cc.gs.week.avgFps + " fps avg  ·  " + cc.gs.week.peakGpu + "° gpu peak"; color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 10 }
+                                            }
+                                            Row {
+                                                Layout.fillWidth: true; Layout.alignment: Qt.AlignBottom; height: 92; spacing: 6
+                                                readonly property real most: Math.max(30, ...cc.gs.week.days.map(d => d.minutes))
+                                                Repeater {
+                                                    model: cc.gs.week.days
+                                                    Column {
+                                                        required property var modelData
+                                                        width: (parent.width - 36) / 7; spacing: 4; anchors.bottom: parent.bottom
+                                                        Text { anchors.horizontalCenter: parent.horizontalCenter; visible: modelData.minutes > 0; text: cc.hm(modelData.minutes); color: "#8a8a8a"; font.family: Theme.font; font.pixelSize: 8 }
+                                                        Rectangle {
+                                                            width: parent.width; radius: 5
+                                                            height: Math.max(6, 58 * modelData.minutes / parent.parent.most)
+                                                            color: modelData.today ? "#ffffff" : modelData.minutes > 0 ? "#8a8a8a" : "#1f1f1f"
+                                                            Behavior on height { NumberAnimation { duration: 400; easing.type: Easing.OutCubic } }
+                                                        }
+                                                        Text { anchors.horizontalCenter: parent.horizontalCenter; text: modelData.d; color: modelData.today ? "#ffffff" : "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9; font.bold: modelData.today }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    Card {   // all time, from Steam
+                                        Layout.preferredWidth: 2; Layout.preferredHeight: 176; Layout.alignment: Qt.AlignTop
+                                        title: "All time"; icon: "\u{f0eb5}"; note: cc.gs.installed + " installed"
+                                        Text { text: cc.gs.allTimeHours + "h"; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 30; font.bold: true }
+                                        Repeater {
+                                            model: cc.gs.allTime.slice(0, 3)
+                                            RowLayout {
+                                                required property var modelData
+                                                width: parent.width; spacing: 8
+                                                Text { Layout.fillWidth: true; elide: Text.ElideRight; text: modelData.name; color: "#c8c8c8"; font.family: Theme.font; font.pixelSize: 10 }
+                                                Text { text: cc.hm(modelData.minutes); color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 10 }
+                                            }
+                                        }
+                                    }
+                                }
+                                Card {   // most played this week: covers in a row
+                                    title: cc.gs.top.length ? "Most played this week" : "Your library"; icon: "\u{f0d36}"
+                                    clickable: true; note: "library"; onClicked: cc.qs("games")
+                                    Row {
+                                        width: parent.width; spacing: 10
+                                        Repeater {
+                                            model: (cc.gs.top.length ? cc.gs.top : cc.gs.allTime).slice(0, 4)
+                                            Item {
+                                                id: mp
+                                                required property var modelData
+                                                required property int index
+                                                width: (parent.width - 30) / 4; height: 74
+                                                ClippingRectangle {
+                                                    width: 50; height: 74; radius: 8; color: "#1a1a1a"
+                                                    Image { anchors.fill: parent; source: mp.modelData.cover ? Theme.fileUrl(mp.modelData.cover) : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 100 }
+                                                }
+                                                Column {
+                                                    x: 60; width: parent.width - 60; anchors.verticalCenter: parent.verticalCenter; spacing: 3
+                                                    Text { text: "#" + (mp.index + 1); color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 9; font.bold: true }
+                                                    Text { width: parent.width; elide: Text.ElideRight; maximumLineCount: 2; wrapMode: Text.WordWrap; text: mp.modelData.name; color: "#ececec"; font.family: Theme.font; font.pixelSize: 11; font.bold: true }
+                                                    Text { text: cc.hm(mp.modelData.minutes) + (mp.modelData.sessions ? "  ·  " + mp.modelData.sessions + "×" : ""); color: "#7a7a7a"; font.family: Theme.font; font.pixelSize: 9 }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                Card {   // the latest sessions
+                                    Layout.fillHeight: true
+                                    title: "Latest sessions"; icon: "\u{f051f}"; note: cc.gs.recorded ? cc.gs.recorded + " recorded" : ""
+                                    Repeater {
+                                        model: cc.gs.recent
+                                        RowLayout {
+                                            required property var modelData
+                                            width: parent.width; spacing: 10
+                                            ClippingRectangle {
+                                                width: 20; height: 28; radius: 4; color: "#1a1a1a"
+                                                Image { anchors.fill: parent; source: modelData.cover ? Theme.fileUrl(modelData.cover) : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 40 }
+                                            }
+                                            Column {
+                                                Layout.fillWidth: true; spacing: 1
+                                                Text { width: parent.width; elide: Text.ElideRight; text: modelData.name; color: "#e6e6e6"; font.family: Theme.font; font.pixelSize: 11; font.bold: true }
+                                                Text { text: modelData.when; color: "#6a6a6a"; font.family: Theme.font; font.pixelSize: 9 }
+                                            }
+                                            Repeater {
+                                                model: [[cc.hm(modelData.minutes), "time"], [modelData.fps ? modelData.fps + "" : "–", "fps"],
+                                                        [modelData.gpuPeak + "°", "gpu"], [modelData.cpuPeak + "°", "cpu"]]
+                                                Column {
+                                                    required property var modelData
+                                                    Layout.preferredWidth: 52
+                                                    Text { anchors.right: parent.right; text: modelData[0]; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 11; font.bold: true }
+                                                    Text { anchors.right: parent.right; text: modelData[1]; color: "#5a5a5a"; font.family: Theme.font; font.pixelSize: 8 }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    Text { visible: !cc.gs.recent.length; width: parent.width; wrapMode: Text.WordWrap; color: cc.dim; font.family: Theme.font; font.pixelSize: 11
+                                           text: "Nothing recorded yet. Play something: every session lands here with its length, temperatures and (with the MangoHud overlay) average FPS." }
+                                }
                             }
                         }
                     }

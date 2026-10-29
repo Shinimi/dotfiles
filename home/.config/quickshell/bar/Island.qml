@@ -2,8 +2,7 @@
 //   left:   launcher · workspaces (numbers, white underline = current, scroll to switch)
 //   middle: time (hover: date and weather, click: calendar)
 //   right:  small icons for what's on right now (click to turn off) · control center · power
-// When the song changes, a small card drops out under the main screen's bar for a moment. Volume changes show
-// the pop-up in Osd.qml. Made by Claude.
+// A hairline under the middle of the bar pulses with the music. Volume changes show the pop-up in Osd.qml. Made by Claude.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -17,7 +16,7 @@ PanelWindow {
     screen: modelData
     readonly property bool isMain: modelData.name === "DP-1"
     anchors { top: true; left: true; right: true }
-    implicitHeight: 110                      // room for the song card; clicks only land on the bar (mask)
+    implicitHeight: 110                      // clicks only land on the bar (mask)
     visible: !PopupState.focusMode           // focus mode hides the bar and gives its space back
     exclusiveZone: PopupState.focusMode ? 0 : Theme.barBottom
     color: "transparent"
@@ -27,39 +26,66 @@ PanelWindow {
     readonly property var players: Mpris.players.values
     readonly property var player: players.find(p => p.isPlaying) || players.find(p => p.identity === "Spotify") || players[0] || null
     readonly property bool playing: !!(player && player.isPlaying)
-    property string peek: ""                 // "" or "media"
-    Timer { id: peekTimer; interval: 2600; onTriggered: win.peek = "" }
-    function showPeek(kind) { if (!armed || !isMain || popupOpen || !Settings.cur("island_peeks")) return; peek = kind; peekTimer.restart() }
-    readonly property bool popupOpen: clockPill.popup.visible || powerPill.popup.visible
-    property bool armed: false               // no cards while everything starts up
-    Timer { running: true; interval: 3000; onTriggered: win.armed = true }
-    Connections { target: win.player; function onTrackTitleChanged() { if (win.player && win.player.trackTitle) win.showPeek("media") } }
     function ipc(target, fn) { Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", target, fn]) }
     function panel() { ipc("panel", "toggle") }
     property bool recording: false
     readonly property var mic: Pipewire.defaultAudioSource
     PwObjectTracker { objects: [Pipewire.defaultAudioSource] }
     readonly property bool talking: !!(mic && mic.audio && !mic.audio.muted)
+    Component.onCompleted: if (isMain) Stats.watchers += 1   // the bar's readout keeps the stats ticking every 2 s
 
-    // ---------- the bar ----------
-    Rectangle {
+    // ---------- the bar: no strip, just small things floating over the wallpaper ----------
+    Rectangle {   // a soft fade from the top edge, only so the small text stays readable over any wallpaper
+        width: parent.width; height: Theme.barBottom + 22
+        gradient: Gradient { GradientStop { position: 0; color: "#8c000000" } GradientStop { position: 1; color: "#00000000" } }
+    }
+    Item {
         id: bar
-        // lined up with your windows: same outer gap, same rounding, same glass and border
         x: Settings.cur("gaps_out"); y: Theme.barTop
         width: parent.width - 2 * Settings.cur("gaps_out")
         height: Theme.barHeight
-        radius: Settings.cur("rounding")
-        color: Qt.rgba(0.06, 0.06, 0.06, 0.88)
-        border.width: 1; border.color: "#2effffff"
 
-        Row {   // left: launcher + workspaces
-            anchors.left: parent.left; anchors.leftMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 6
-            Launcher { anchors.verticalCenter: parent.verticalCenter }
-            Sep {}
-            Workspaces { anchors.verticalCenter: parent.verticalCenter }
+        // music pulse: one hairline under the middle of the bar that widens and brightens with the beat
+        // (pulse.py listens to the speakers, never the mic). Only while music plays, never in games. Settings → Extras.
+        property real beat: 0
+        Process {
+            running: win.isMain && win.playing && Settings.cur("music_pulse") !== false && !SysState.gameMode
+            onRunningChanged: if (!running) bar.beat = 0
+            command: ["python3", "-I", Quickshell.env("HOME") + "/.config/quickshell/bar/pulse.py"]
+            stdout: SplitParser { onRead: l => bar.beat = parseFloat(l) || 0 }
+        }
+        Rectangle {
+            anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 1
+            height: 1; radius: 1
+            width: bar.beat > 0 ? mid.width * (0.15 + 0.85 * bar.beat) : 0
+            color: "#ffffff"; opacity: 0.18 + 0.7 * bar.beat
+            Behavior on width { NumberAnimation { duration: 70 } }
         }
 
-        ClockPill { id: clockPill; anchors.centerIn: parent }   // middle: the time (hover: date and weather)
+        Launcher { anchors.left: parent.left; anchors.verticalCenter: parent.verticalCenter }   // left: just the logo
+
+        Row {   // middle: workspace dots · what's playing · the time
+            id: mid
+            anchors.centerIn: parent; spacing: 12
+            Workspaces { dots: true; anchors.verticalCenter: parent.verticalCenter }
+            Sep {}
+            Row {   // the machine at a glance: CPU load, CPU temperature, RAM in use
+                anchors.verticalCenter: parent.verticalCenter; spacing: 14
+                Repeater {
+                    model: [["\u{f035b}", (Stats.d.cpu || 0) + "%", false], ["\u{f050f}", (Stats.d.cpuTemp || 0) + "°C", (Stats.d.cpuTemp || 0) >= 85],
+                            ["\u{f061a}", (Stats.d.ramUsed || 0).toFixed(1) + " GiB", (Stats.d.ram || 0) >= 90]]
+                    Row {
+                        required property var modelData
+                        anchors.verticalCenter: parent.verticalCenter; spacing: 5
+                        Label { text: modelData[0]; color: "#8a8a8a"; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter
+                                renderType: Text.CurveRendering }   // grey edges, no colour fringe on small icons
+                        Label { text: modelData[1]; color: modelData[2] ? "#ffffff" : "#cfcfcf"; font.pixelSize: 11; font.bold: modelData[2]; anchors.verticalCenter: parent.verticalCenter }
+                    }
+                }
+            }
+            Sep {}
+            ClockPill { id: clockPill; anchors.verticalCenter: parent.verticalCenter }   // hover: date and weather
+        }
 
         Row {   // right: what's on right now (only while it's on), then control center + power
             anchors.right: parent.right; anchors.rightMargin: 6; anchors.verticalCenter: parent.verticalCenter; spacing: 4
@@ -82,8 +108,7 @@ PanelWindow {
                 onClicked: Quickshell.execDetached(["qs", "ipc", "-p", Quickshell.env("HOME") + "/.config/quickshell/bar", "call", "settings", "open", "sound"])
             }
             Repeater {   // click one to turn it off
-                model: [[!!SysState.fx.troll, "\u{f0c6f}", "Troll mic", () => SysState.fxToggle("troll")],
-                        [Notifs.dnd, "\u{f009b}", "Do not disturb", () => { Notifs.dnd = false }],
+                model: [[Notifs.dnd, "\u{f009b}", "Do not disturb", () => { Notifs.dnd = false }],
                         [SysState.gameMode, "\u{f0eb5}", "Game mode", () => { Quickshell.execDetached([Quickshell.env("HOME") + "/.local/bin/gamemode.sh", "off"]); SysState.gameMode = false }],
                         [SysState.awake, "\u{f0176}", "Keep awake", () => SysState.toggleAwake()],
                         [!!Settings.cur("mono_mode"), "\u{f0197}", "Monochrome", () => Settings.setNow("mono_mode", false)],
@@ -106,38 +131,8 @@ PanelWindow {
             PowerButton { id: powerPill; anchors.verticalCenter: parent.verticalCenter }
         }
     }
-    component Sep: Rectangle { anchors.verticalCenter: parent ? parent.verticalCenter : undefined; width: 1; height: 14; color: "#1fffffff" }
 
-    // ---------- song card (main screen only) ----------
-    Rectangle {
-        id: drop
-        visible: win.isMain && opacity > 0.01
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: mediaPeek.implicitWidth + 28; height: 54; radius: 18
-        y: win.peek !== "" ? bar.y + bar.height + 6 : bar.y + 4
-        opacity: win.peek !== "" ? 1 : 0
-        scale: win.peek !== "" ? 1 : 0.9
-        color: "#f00b0b0b"; border.width: 1; border.color: "#14ffffff"
-        Behavior on y { NumberAnimation { duration: 340; easing.type: Easing.OutCubic } }
-        Behavior on opacity { NumberAnimation { duration: 200 } }
-        Behavior on scale { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
-        Row {
-            id: mediaPeek
-            anchors.centerIn: parent; spacing: 12
-            ClippingRectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                width: 34; height: 34; radius: 6; color: Theme.bgAlt
-                Image { anchors.fill: parent; source: win.player ? (win.player.trackArtUrl || "") : ""; fillMode: Image.PreserveAspectCrop; asynchronous: true
-                        sourceSize.width: 68; sourceSize.height: 68 }
-            }
-            Column {
-                anchors.verticalCenter: parent.verticalCenter; spacing: 1
-                Label { text: win.player ? win.player.trackTitle : ""; font.pixelSize: 12; font.weight: Font.Bold; elide: Text.ElideRight; width: Math.min(implicitWidth, 300) }
-                Label { text: win.player ? win.player.trackArtist : ""; color: Theme.muted; font.pixelSize: 10; font.weight: Font.Normal; elide: Text.ElideRight; width: Math.min(implicitWidth, 300) }
-            }
-            MusicBars { anchors.verticalCenter: parent.verticalCenter; running: win.playing && win.peek === "media" }
-        }
-    }
+    component Sep: Rectangle { anchors.verticalCenter: parent ? parent.verticalCenter : undefined; width: 3; height: 3; radius: 2; color: "#4a4a4a" }
 
     // open panels from keybinds / scripts:  qs -p ~/.config/quickshell/bar ipc call bar calendar  (main screen only)
     LazyLoader {
@@ -146,7 +141,7 @@ PanelWindow {
             target: "bar"
             function calendar(): void { clockPill.popup.toggle() }
             function recording(on: bool): void { win.recording = on }   // rec.sh tells the bar
-            function fx(): void { SysState.refresh() }                   // the troll mic key tells the bar
+            function fx(): void { SysState.refresh() }                   // audio-fx changes tell the bar
             function power(): void { powerPill.popup.toggle() }
             function control(): void { win.panel() }
             function notifications(): void { win.panel() }
@@ -157,7 +152,7 @@ PanelWindow {
             function timer(minutes: int): void { Timers.resetTimer(); Timers.setMinutes(minutes); Timers.toggleTimer() }
             function timerReset(): void { Timers.resetTimer() }
             function clearNotifications(): void { Notifs.clearAll() }
-            function status(): string { return "cal=" + clockPill.popup.visible + " pow=" + powerPill.popup.visible + " peek=" + win.peek }
+            function status(): string { return "cal=" + clockPill.popup.visible + " pow=" + powerPill.popup.visible }
         }
     }
 }

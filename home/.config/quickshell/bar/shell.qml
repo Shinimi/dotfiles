@@ -27,6 +27,7 @@ ShellRoot {
         HomeScreen { required property var modelData; screen: modelData }
     }
     Screensaver {}
+    DeskClock {}
     Osd {}
     AutoPause {}
     Variants {
@@ -40,6 +41,10 @@ ShellRoot {
     Variants {   // the bar: main screen only
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         Island {}
+    }
+    Variants {   // the side screen: just its workspaces
+        model: Quickshell.screens.filter(s => s.name === "DP-2")
+        SideBar {}
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
@@ -60,6 +65,10 @@ ShellRoot {
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")
         GameLibrary { required property var modelData; screen: modelData }
+    }
+    Variants {
+        model: Quickshell.screens.filter(s => s.name === "DP-1")
+        GameOverlay { required property var modelData; screen: modelData }
     }
     Variants {
         model: Quickshell.screens.filter(s => s.name === "DP-1")

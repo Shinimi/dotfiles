@@ -1,4 +1,4 @@
-/* Tokyo Night for Waterfox's own pages (new tab, settings). Made by Claude. */
+/* Monochrome for Waterfox's own pages (new tab, settings). Made by Claude. */
 @-moz-document url-prefix("about:") {
   :root { --in-content-page-background: #111111 !important; --in-content-box-background: #161616 !important;
           --in-content-text-color: #eaeaea !important; --in-content-primary-button-background: #e0e0e0 !important;

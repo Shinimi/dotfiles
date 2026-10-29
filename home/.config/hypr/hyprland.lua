@@ -36,16 +36,16 @@
 --    SUPER + ALT + N                night light                           SUPER + ALT + I                keep awake (no auto-lock)
 --    SUPER + ALT + M                monochrome mode                       SUPER + SHIFT + P              screens off / on
 --    SUPER + ALT + R                screen recording                      mouse side button              push to talk (Settings → Sound)
---    SUPER + ALT + T                troll mic on / off
 --    SUPER + SHIFT + C              colour picker                         CTRL + ALT + Delete            task manager (btop)
 --    SUPER + "                      drop-down terminal (key left of 1)    SUPER + Z                      focus mode
 --    SUPER + D                      draw on the screen                    SUPER + ALT + scroll           magnifier (SUPER + ALT + Z resets)
---    SUPER + SHIFT + R              fix the desktop (reload)              SUPER + F1                     show this list
+--    SUPER + ALT + G                in-game overlay                       SUPER + SHIFT + R              fix the desktop (reload)
+--    SUPER + F1                     show this list
 -- ============================================================================
 
 
 ---------------------------------------------------------------- COLORS
--- Tokyo Night palette
+-- Monochrome palette
 local c = {
     bg      = "111111",
     bg_dark = "0b0b0b",
@@ -62,8 +62,8 @@ local function rgba(hex, a) return "rgba(" .. hex .. (a or "ff") .. ")" end
 
 ---------------------------------------------------------------- MONITORS
 -- VRR is off on purpose (it made the screens flicker).
-hl.monitor({ output = "DP-1", mode = "2560x1440@144", position = "0x0",    scale = 1, vrr = 0 })
-hl.monitor({ output = "DP-2", mode = "1920x1080@165", position = "2560x0", scale = 1, vrr = 0 })
+hl.monitor({ output = "DP-1", mode = "2560x1440@144", position = "0x0",    scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })
+hl.monitor({ output = "DP-2", mode = "1920x1080@165", position = "2560x0", scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })
 -- Anything else plugged in later: sensible default
 hl.monitor({ output = "", mode = "preferred", position = "auto", scale = "auto" })
 
@@ -80,6 +80,7 @@ local scripts     = os.getenv("HOME") .. "/.config/hypr/scripts"
 hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start hyprpolkitagent")   -- password prompts (sudo dialogs)
     hl.exec_cmd("hyprpaper")                                 -- wallpaper
+    hl.exec_cmd("sleep 1; ~/.config/hypr/scripts/livewall.sh restore")   -- live (video) wallpapers, if any
     hl.exec_cmd("~/.config/quickshell/bar/run.sh")          -- top bar (custom Quickshell, auto-restarts)
     hl.exec_cmd("hypridle")                                  -- lock / screen off when idle
     hl.exec_cmd("nm-applet --indicator")                     -- network tray icon
@@ -181,8 +182,10 @@ hl.config({
         allow_session_lock_restore = true,  -- if the lock screen ever crashes, a new one can take over
         disable_autoreload = true,          -- settings apply live; no surprise reloads (SUPER+SHIFT+R reloads)
     },
-    render = { new_render_scheduling = true, direct_scanout = 2 },   -- fullscreen games skip compositing
-    -- window tabs (SUPER + W groups): Tokyo Night pills
+    render = { new_render_scheduling = true, direct_scanout = 2,   -- fullscreen games skip compositing
+               cm_auto_hdr = 0,            -- never flip the monitor into HDR when a video/game goes fullscreen (washed-out colours on SDR content)
+               send_content_type = false },   -- don't tell the monitor "this is video/game": it would switch to another picture preset
+    -- window tabs (SUPER + W groups): monochrome pills
     group = {
         col = { border_active = { colors = { "rgba(b0b0b0ff)", "rgba(e0e0e0ff)" }, angle = 45 }, border_inactive = "rgba(3a3a3aaa)" },
         groupbar = {
@@ -226,9 +229,13 @@ for i = 1, 20 do
         persistent = (i <= 4),
     })
 end
--- Side screen: one fixed workspace, no switching.
+-- Side screen: four workspaces of its own (the bar pill on that screen shows them as 1-4). "side" stays the
+-- home of Discord and Spotify.
 hl.workspace_rule({ workspace = "name:side", monitor = "DP-2", default = true, persistent = true,
                     layout = "master", layout_opts = { orientation = "left" } })
+for _, n in ipairs({ "side2", "side3", "side4" }) do
+    hl.workspace_rule({ workspace = "name:" .. n, monitor = "DP-2", persistent = true })
+end
 -- Side screen layout: Discord big on the left (66%), Spotify / others in a slim column on the right
 hl.config({ master = { mfact = 0.5, new_status = "slave", orientation = "left" } })
 -- Game mode: Do not disturb + Performance while a game is open (toggle in Settings → Power & lock)
@@ -287,6 +294,8 @@ hl.window_rule({ name = "pip", match = { title = "^([Pp]icture[- ][Ii]n[- ][Pp]i
 hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|org.kde.gwenview|com.obsproject.Studio)$" }, opacity = "1.0 override 1.0 override" })
 -- games: allowed to tear when they turn vsync off (less input lag); nothing else ever tears
 hl.window_rule({ name = "games-immediate", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, immediate = true })
+-- games fill the screen under the bar (maximised) while they themselves think they're fullscreen: the bar stays visible
+hl.window_rule({ name = "games-under-bar", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, fullscreen_state = "1 2" })
 hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true }, opacity = "1.0 override 1.0 override" })
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop|dropterm)$" }, opacity = "1.0 override 1.0 override" })
@@ -295,10 +304,25 @@ hl.layer_rule({ name = "glass-bar", match = { namespace = "^(quickshell|qsbar-(p
 hl.layer_rule({ name = "glass-rofi", match = { namespace = "^(rofi)$" }, blur = true, ignore_alpha = 0.2 })
 
 -- Games go to workspace 5 via gamemode.sh (it remembers where you were and brings you back after)
--- Steam popups float; Discord + Spotify live on the side screen
+-- Steam popups float; Discord, Spotify and Telegram live on the side screen
 hl.window_rule({ name = "steam-popups-float", match = { class = "^(steam)$", title = "^(Friends List|Steam Settings|Properties.*|.*Chat.*|Screenshot Manager|Game Servers|Players)$" }, float = true })
 hl.window_rule({ name = "discord-side", match = { class = "^(vesktop|discord)$" }, workspace = "name:side silent" })
 hl.window_rule({ name = "spotify-side", match = { class = "^(Spotify|spotify)$" }, workspace = "name:side silent" })
+hl.window_rule({ name = "telegram-side", match = { class = "^(org.telegram.desktop|TelegramDesktop)$" }, workspace = "name:side silent" })
+-- Dialogs float in the middle of the screen at a comfortable size, whichever app opens them
+hl.window_rule({ name = "file-pickers", match = { title = "^(Open|Open File.*|Open Folder|Open Files|Save|Save As.*|Save File|Choose .*|Select .*|Pick .*|File Upload|Export.*|Import.*)$" },
+                 float = true, center = true, size = "(monitor_w*0.55) (monitor_h*0.62)" })
+hl.window_rule({ name = "portal-pickers", match = { class = "^(xdg-desktop-portal-gtk|org.freedesktop.impl.portal.desktop.kde)$" },
+                 float = true, center = true, size = "(monitor_w*0.55) (monitor_h*0.62)" })
+hl.window_rule({ name = "progress-dialogs", match = { title = "^(.*[Cc]opying.*|.*[Mm]oving.*|.*[Dd]eleting.*|.*[Pp]rogress.*|File Operation.*)$" }, float = true, center = true })
+-- Browser pop-ups (extensions, sign-in) and the downloads library float instead of splitting your screen
+hl.window_rule({ name = "browser-popups", match = { class = "^(helium|brave-origin|Brave-browser|waterfox|firefox)$", title = "^(Extension: .*|Sign in.*|Log in.*|.*- Sign In.*|Library|Downloads|Picture-in-Picture)$" },
+                 float = true, center = true })
+-- Calculators and colour pickers: small, floating
+hl.window_rule({ name = "small-tools", match = { class = "^(org.kde.kcalc|qalculate-gtk|io.github.Qalculate|gcolor3|org.kde.kcolorchooser)$" }, float = true, center = true })
+hl.window_rule({ name = "floating-term", match = { class = "^(floating-term)$" }, float = true, center = true, size = "(monitor_w*0.5) (monitor_h*0.5)" })
+-- Steam's news and sale windows float too
+hl.window_rule({ name = "steam-news-float", match = { class = "^(steam)$", title = "^(Steam - News.*|Special Offers|What's New.*|Update News)$" }, float = true, center = true })
 
 ---------------------------------------------------------------- SETTINGS PANEL
 -- Values chosen in the Hyprland settings panel (SUPER + comma) override the ones above.
@@ -332,11 +356,11 @@ b("SUPER + B",              run(browser))
 b("SUPER + Y",              run("qs ipc -p ~/.config/quickshell/bar call wallpaper toggle"))
 b("SUPER + period",         run("qs ipc -p ~/.config/quickshell/bar call emoji toggle"))
 b("SUPER + G",              run("qs ipc -p ~/.config/quickshell/bar call games toggle"))
+b("SUPER + ALT + G",        run("qs ipc -p ~/.config/quickshell/bar call gameoverlay toggle"))   -- in-game overlay
 b("SUPER + SHIFT + C",      run("hyprpicker -a"))
 b("SUPER + ALT + N",        run(scripts .. "/nightlight.sh"))
 b("SUPER + ALT + M",        run("qs ipc -p ~/.config/quickshell/bar call settings flip mono_mode"))   -- monochrome mode
 b("SUPER + ALT + R",        run(scripts .. "/rec.sh"))   -- screen recording on / off
-b("SUPER + ALT + T",        run("sh -c '~/.local/bin/audio-fx.sh troll toggle; qs ipc -p ~/.config/quickshell/bar call bar fx'"))   -- troll mic on / off
 -- push to talk (Settings → Sound): the mouse side buttons; they still reach games (non-consuming)
 for _, k in ipairs({ "mouse:275", "mouse:276" }) do
     b(k, run(scripts .. "/ptt.sh down " .. k), { non_consuming = true })
@@ -442,7 +466,7 @@ b("ALT + Print",                run(scripts .. "/screenshot.sh window"))
 -- Media / volume (3% steps like DMS)
 b("XF86AudioRaiseVolume", run(scripts .. "/vol.sh up"),   { locked = true, repeating = true })   -- step: Settings → Comfort
 b("XF86AudioLowerVolume", run(scripts .. "/vol.sh down"), { locked = true, repeating = true })
-b("XF86AudioMute",        run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true })
+b("XF86AudioMute",        run("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle; ~/.local/bin/kocho-sound.sh audio-volume-change"), { locked = true })
 b("XF86AudioMicMute",     run("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true })
 b("XF86AudioPlay",        run("playerctl play-pause"), { locked = true })
 b("XF86AudioPause",       run("playerctl play-pause"), { locked = true })

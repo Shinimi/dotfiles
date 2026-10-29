@@ -28,6 +28,10 @@ SetSection {
             Label { text: modelData.src; color: modelData.src === "AUR" ? Theme.purple : Theme.blue; font.pixelSize: 10 }
         }
     }
+    Label {   // never an empty box: say what's going on
+        visible: pg.list.length === 0; width: parent.width; color: Theme.muted; font.pixelSize: 11
+        text: pg.busy ? "Looking for updates in the repos and the AUR…" : "\u{f012c}  Everything is up to date"
+    }
     Label { visible: pg.list.length > 6; text: pg.showAll ? "Show less" : "Show all " + pg.list.length; color: Theme.blue; font.pixelSize: 11
         MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: pg.showAll = !pg.showAll } }
 }

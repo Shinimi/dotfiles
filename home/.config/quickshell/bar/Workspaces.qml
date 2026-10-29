@@ -14,7 +14,16 @@ Pill {
     id: wsPill
     padding: 4
     color: "transparent"
-    onScrolled: d => Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = \"e" + (d > 0 ? "-1" : "+1") + "\" })"])   // scroll to switch
+    property bool dots: false                 // the floating bar: tiny dots, a stretched pill for the one you're on
+    property string screenName: "DP-1"        // "DP-2": the side screen's own four workspaces (side, side2, side3, side4)
+    readonly property bool side: screenName === "DP-2"
+    readonly property var sideNames: ["side", "side2", "side3", "side4"]
+    function go(key) { Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = \"" + (typeof key === "string" ? "name:" + key : key) + "\" })"]) }
+    onScrolled: d => {   // scroll to switch
+        if (!side) { Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = \"e" + (d > 0 ? "-1" : "+1") + "\" })"]); return }
+        const cur = sideNames.findIndex(n => { const w = Hyprland.workspaces.values.find(x => x.name === n); return w && w.monitor && w.monitor.activeWorkspace === w })
+        go(sideNames[(Math.max(0, cur) + (d > 0 ? sideNames.length - 1 : 1)) % sideNames.length])
+    }
     // ---- hover preview ----
     property int pendingWs: 0
     property Item pendingItem: null
@@ -24,7 +33,7 @@ Pill {
     Timer { id: hoverIn; interval: 380; onTriggered: { wsPill.previewItem = wsPill.pendingItem; wsPill.previewWs = wsPill.pendingWs; cl.running = true } }
     Timer { id: hoverOut; interval: 160; onTriggered: wsPill.previewWs = 0 }
     function hoverWs(id, item, active) {
-        if (!Settings.cur("ws_preview") || active) { hoverIn.stop(); previewWs = 0; return }
+        if (!Settings.cur("ws_preview") || active || side) { hoverIn.stop(); previewWs = 0; return }
         pendingWs = id; pendingItem = item; hoverOut.stop(); hoverIn.restart()
     }
     function leaveWs() { hoverIn.stop(); hoverOut.restart() }
@@ -113,17 +122,19 @@ Pill {
         .map(w => w.id)
     readonly property var allIds: [1, 2, 3, 4].concat(extra.filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b))
     property int part: 0                 // 0 = all, 1 = first half, 2 = second half (the bar splits them around the clock)
-    readonly property var ids: part === 0 ? allIds : part === 1 ? allIds.slice(0, Math.ceil(allIds.length / 2)) : allIds.slice(Math.ceil(allIds.length / 2))
+    readonly property var ids: side ? sideNames : part === 0 ? allIds : part === 1 ? allIds.slice(0, Math.ceil(allIds.length / 2)) : allIds.slice(Math.ceil(allIds.length / 2))
 
     Repeater {
         model: ids
         Rectangle {
             id: chip
             required property var modelData
-            readonly property int wsId: modelData
-            readonly property var ws: Hyprland.workspaces.values.find(w => w.id === wsId)
-            readonly property bool isActive: !!(Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId)
-                                             || !!(ws && ws.monitor && ws.monitor.name === "DP-1" && ws.monitor.activeWorkspace === ws)
+            required property int index
+            readonly property var ws: typeof modelData === "string" ? Hyprland.workspaces.values.find(w => w.name === modelData)
+                                                                   : Hyprland.workspaces.values.find(w => w.id === modelData)
+            readonly property int wsId: ws ? ws.id : (typeof modelData === "number" ? modelData : 0)
+            readonly property bool isActive: (!wsPill.side && !!(Hyprland.focusedWorkspace && Hyprland.focusedWorkspace.id === wsId))
+                                             || !!(ws && ws.monitor && ws.monitor.name === wsPill.screenName && ws.monitor.activeWorkspace === ws)
             readonly property bool hasWindows: !!(ws && ws.toplevels && ws.toplevels.values.length > 0)
             // the app on it: its icon stands for the workspace (games show Steam's)
             readonly property string app: hasWindows ? (wsPill.wsApp[wsId] || "") : ""
@@ -136,18 +147,33 @@ Pill {
             readonly property bool urgent: !!wsPill.urgentWs[wsId] && !isActive
             // a small tile per workspace, like a tiny window: white = you're here, outlined = has windows,
             // just the number = empty, a pulsing outline = a window there wants you
-            width: 24; height: 22; radius: Math.max(4, Settings.cur("rounding") - 2)
-            color: isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#22ffffff" : "transparent"
-            border.width: isActive ? 0 : (hasWindows || urgent) ? 1 : 0
-            border.color: urgent ? "#ffffff" : "#4a4a4a"
+            width: wsPill.dots ? (isActive ? 28 : 14) : (isActive ? 34 : 24); height: 22; radius: height / 2
+            color: wsPill.dots ? "transparent" : isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#22ffffff" : "transparent"
+            Rectangle {   // dots mode: the dot itself
+                visible: wsPill.dots; anchors.centerIn: parent
+                width: chip.isActive ? 22 : 7; height: 7; radius: 4
+                color: chip.isActive ? "#f2f2f2" : wsMouse.containsMouse ? "#d0d0d0" : chip.urgent ? "#ffffff" : chip.hasWindows ? "#8a8a8a" : "#3a3a3a"
+                Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+                Behavior on color { ColorAnimation { duration: 150 } }
+            }
+            border.width: urgent && !isActive ? 1 : 0
+            border.color: urgent ? "#ffffff" : "transparent"
             Behavior on color { ColorAnimation { duration: 150 } }
+            Behavior on width { NumberAnimation { duration: 220; easing.type: Easing.OutCubic } }
+            Rectangle {   // a small dot under workspaces that have windows
+                visible: chip.hasWindows && !chip.isActive && !wsPill.dots
+                anchors.horizontalCenter: parent.horizontalCenter; anchors.bottom: parent.bottom; anchors.bottomMargin: 2
+                width: 4; height: 2; radius: 1; color: "#9a9a9a"
+            }
             SequentialAnimation on border.color {
                 running: chip.urgent; loops: Animation.Infinite
                 ColorAnimation { to: "#ffffff"; duration: 500 } ColorAnimation { to: "#3a3a3a"; duration: 500 }
             }
             Text {
+                visible: !wsPill.dots
                 anchors.centerIn: parent
-                text: Theme.wsName(chip.wsId); font.family: Theme.font; font.pixelSize: 11; font.bold: chip.isActive || chip.hasWindows
+                anchors.verticalCenterOffset: chip.hasWindows && !chip.isActive ? -1 : 0
+                text: wsPill.side ? String(chip.index + 1) : Theme.wsName(chip.wsId); font.family: Theme.font; font.pixelSize: 11; font.bold: chip.isActive || chip.hasWindows
                 color: chip.isActive ? "#0c0c0c" : wsMouse.containsMouse || chip.urgent ? "#ffffff" : chip.hasWindows ? "#cfcfcf" : "#4e4e4e"
                 Behavior on color { ColorAnimation { duration: 150 } }
             }
@@ -156,7 +182,7 @@ Pill {
                 anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                 onEntered: wsPill.hoverWs(chip.wsId, parent, chip.isActive)
                 onExited: wsPill.leaveWs()
-                onClicked: { wsPill.leaveWs(); Quickshell.execDetached(["hyprctl", "dispatch", "hl.dsp.focus({ workspace = " + chip.wsId + " })"]) }
+                onClicked: { wsPill.leaveWs(); wsPill.go(chip.modelData) }
             }
         }
     }

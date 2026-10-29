@@ -1,4 +1,4 @@
-// Tokyo Night: allow userChrome.css / userContent.css and use the dark theme. Made by Claude.
+// Monochrome: allow userChrome.css / userContent.css and use the dark theme. Made by Claude.
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
 user_pref("layout.css.prefers-color-scheme.content-override", 0);
 user_pref("ui.systemUsesDarkTheme", 1);

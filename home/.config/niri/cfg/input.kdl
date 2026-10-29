@@ -1,0 +1,14 @@
+input {
+    keyboard {
+        xkb { layout "tr"; }
+        repeat-rate 45
+        repeat-delay 400
+        numlock
+    }
+    mouse {
+        accel-speed -0.2        // ≈ your Hyprland sensitivity 0.4 on a flat curve
+        accel-profile "flat"
+    }
+    focus-follows-mouse max-scroll-amount="0%"
+    warp-mouse-to-focus
+}

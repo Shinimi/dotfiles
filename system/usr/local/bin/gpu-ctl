@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# gpu-ctl – the bar's and game mode's way to change the RX 9060 XT's fan curve and power cap. Made by Claude.
+#   gpu-ctl fan quiet|balanced|loud      (remembered across reboots by gpu-fan.service)
+#   gpu-ctl power <watts>|default        (default = the everyday 160 W cap)
+# Runs as root through /etc/sudoers.d/gpu-ctl, so it only accepts these exact words and numbers.
+set -eu
+DEFAULT_W=160
+STATE=/var/lib/gpu-ctl
+g=""; for d in /sys/class/drm/card*/device; do [ "$(cat "$d/vendor" 2>/dev/null)" = 0x1002 ] && { g=$d; break; }; done
+[ -n "$g" ] || { echo "no AMD GPU" >&2; exit 1; }
+h=$(echo "$g"/hwmon/hwmon*)
+case "${1:-}" in
+  power)
+    w=${2:-}; [ "$w" = default ] && w=$DEFAULT_W
+    [[ "$w" =~ ^[0-9]{2,3}$ ]] || { echo "watts must be a number" >&2; exit 2; }
+    lo=$(( $(cat "$h/power1_cap_min") / 1000000 )); hi=$(( $(cat "$h/power1_cap_max") / 1000000 ))
+    (( w < lo )) && w=$lo; (( w > hi )) && w=$hi
+    echo $(( w * 1000000 )) > "$h/power1_cap"
+    echo "power cap ${w} W" ;;
+  fan)
+    m=${2:-}
+    case "$m" in quiet|balanced|loud) ;; *) echo "fan mode: quiet, balanced or loud" >&2; exit 2 ;; esac
+    fc="$g/gpu_od/fan_ctrl/fan_curve"
+    [ -w "$fc" ] || { echo "fan control is off (needs amdgpu.ppfeaturemask and a reboot)" >&2; exit 3; }
+    mkdir -p "$STATE"; echo "$m" > "$STATE/fan"
+    if [ "$m" = balanced ]; then echo r > "$fc"; echo "fan balanced (stock curve)"; exit 0; fi
+    # allowed ranges, e.g. "FAN_CURVE(hotspot temp): 25C 100C" / "FAN_CURVE(fan speed): 15% 100%"
+    read -r tlo thi < <(grep -i 'FAN_CURVE(hotspot temp)' "$fc" | grep -oE '[0-9]+' | head -2 | paste -sd' ')
+    read -r plo phi < <(grep -i 'FAN_CURVE(fan speed)' "$fc" | grep -oE '[0-9]+' | head -2 | paste -sd' ')
+    clamp() { local v=$1 a=$2 b=$3; (( v < a )) && v=$a; (( v > b )) && v=$b; echo $v; }
+    #            hotspot °C : fan %
+    if [ "$m" = quiet ]; then pts="50:20 62:28 72:38 82:55 92:80"; else pts="40:35 50:45 60:60 70:80 80:100"; fi
+    i=0; for p in $pts; do
+      echo "$i $(clamp ${p%:*} ${tlo:-25} ${thi:-100}) $(clamp ${p#*:} ${plo:-15} ${phi:-100})" > "$fc"; i=$((i+1))
+    done
+    zr="$g/gpu_od/fan_ctrl/fan_zero_rpm_enable"   # quiet lets the fans stop at idle, loud keeps them spinning
+    [ -w "$zr" ] && { echo $([ "$m" = quiet ] && echo 1 || echo 0) > "$zr"; echo c > "$zr"; } 2>/dev/null || true
+    echo c > "$fc"
+    echo "fan $m" ;;
+  restore)
+    m=$(cat "$STATE/fan" 2>/dev/null || echo balanced)
+    [ "$m" = balanced ] || exec "$0" fan "$m" ;;
+  *) echo "usage: gpu-ctl fan quiet|balanced|loud | power <watts>|default" >&2; exit 2 ;;
+esac

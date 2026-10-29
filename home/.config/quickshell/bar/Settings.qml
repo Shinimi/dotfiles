@@ -30,14 +30,14 @@ Singleton {
         ui_font: "Noto Sans", ui_font_size: 10, fetch_logo: "katana", fetch_source: "",
         // bar & notifications
         clock_seconds: false, clock_12h: false, clock_date: true, bar_media: true,
-        notif_timeout: 5, notif_center: false, sounds: false, desktop_clock: true, desktop_clock_pos: "left",
+        notif_timeout: 5, notif_center: false, sounds: false, ui_sound_volume: 55, desktop_clock: true, desktop_clock_pos: "left",
         // power
         lock_minutes: 10, screen_off_after: 1, mouse_wakes: false, game_mode: true,
         // account, wallpaper, apps, time
         user_name: "yu", avatar: "", cc_logo: "avatar", wall_main: "", wall_side: "", default_apps: ({}), autostart: [],
         weather_place: "", weather_label: "", game_profiles: ({}),
         // extras
-        hot_corner: true, instant_apply: false, confirm_power: true, volume_step: 3, shot_save: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true, screensaver: true, auto_pause: false, sort_downloads: true, screen_time: true, game_workspace: true, wall_tint: true, ascii_wall: false, ws_preview: true, login_handoff: true, mono_mode: false, music_stats: true, game_bg_share: true, ptt: false, ptt_key: "mouse:276"
+        hot_corner: true, instant_apply: false, confirm_power: true, volume_step: 3, shot_save: true, wall_shuffle: 0, pause_on_lock: true, island_peeks: true, screensaver: true, auto_pause: false, sort_downloads: true, screen_time: true, game_workspace: true, wall_tint: true, ascii_wall: false, music_pulse: true, desk_clock: true, ws_preview: true, login_handoff: true, mono_mode: false, music_stats: true, game_bg_share: true, ptt: false, ptt_key: "mouse:276"
     })
     property var v: defaults        // applied
     property var draft: defaults    // being edited

@@ -1,0 +1,66 @@
+// Every window: rounded like Hyprland (8 px), a little see-through, blurred behind.
+window-rule {
+    geometry-corner-radius 8
+    clip-to-geometry true
+    background-effect { blur true; xray false; }
+}
+window-rule {
+    match is-active=false
+    opacity 0.88
+}
+
+// Discord, Spotify and Telegram live on the side screen.
+window-rule {
+    match app-id=r#"^(vesktop|discord|Spotify|spotify|org\.telegram\.desktop)$"#
+    open-on-workspace "side"
+    open-focused false
+}
+
+// Games: fill the screen under the bar (maximised) while they think they're fullscreen; fully solid.
+window-rule {
+    match app-id=r#"^(steam_app_\d+|cs2|gamescope)$"#
+    open-maximized true
+    open-fullscreen false
+    opacity 1.0
+    variable-refresh-rate true
+}
+// Video players and the fullscreen ones stay solid too.
+window-rule {
+    match app-id=r#"^(mpv|vlc|org\.kde\.gwenview)$"#
+    opacity 1.0
+}
+
+// Small utility windows and dialogs float, centred.
+window-rule {
+    match app-id=r#"^(pavucontrol|org\.pulseaudio\.pavucontrol|nm-connection-editor|blueman-manager|btop|org\.kde\.kcalc|floating-term)$"#
+    match title=r#"^(Open|Open File.*|Open Folder|Save|Save As.*|Choose .*|Select .*|File Upload|.*[Cc]opying.*|.*[Pp]rogress.*|Picture-in-Picture)$"#
+    open-floating true
+}
+// Steam's pop-ups float; its toasts stay out of the way.
+window-rule {
+    match app-id="steam"
+    exclude title=r#"^[Ss]team$"#
+    open-floating true
+}
+window-rule {
+    match app-id="steam" title=r#"^notificationtoasts_\d+_desktop$"#
+    default-floating-position x=10 y=10 relative-to="bottom-right"
+    open-focused false
+}
+// Noctalia's settings window floats at a comfortable size.
+window-rule {
+    match app-id="dev.noctalia.Noctalia"
+    open-floating true
+    default-column-width { fixed 1080; }
+    default-window-height { fixed 920; }
+}
+
+// Noctalia's layers: wallpaper inside the overview backdrop, panels without x-ray blur.
+layer-rule {
+    match namespace="^noctalia-wallpaper"
+    place-within-backdrop true
+}
+layer-rule {
+    match namespace=r#"^noctalia-(bar-[^"]+|notification|dock|panel|attached-panel|osd)$"#
+    background-effect { xray false; }
+}

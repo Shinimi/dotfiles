@@ -65,7 +65,7 @@ step "System tweaks"
 echo "${dim}login screen, scheduler, boot splash, weekly cache cleanup, GPU 160 W cap, CPU boost cap${off}"
 echo "${dim}(the GPU/CPU caps are tuned for a Ryzen 7 5700X + RX 9060 XT)${off}"
 if ask "Install system files (needs sudo)?"; then
-  sudo rsync -a --backup --suffix=".before-dotfiles" "$R/system/" /
+  sudo rsync -a --chown=root:root --backup --suffix=".before-dotfiles" "$R/system/" /
   sudo systemctl daemon-reload
   sudo systemctl enable --now scx_loader.service 2>/dev/null || true
   if ask "  Enable the GPU power cap and CPU boost cap?"; then
@@ -89,15 +89,17 @@ systemctl --user add-wants 'dev-snd-by\x2did-usb\x2dXiiSound_Technology_Corporat
 gsettings set org.gnome.desktop.interface gtk-theme adw-gtk3-dark 2>/dev/null || true
 gsettings set org.gnome.desktop.interface color-scheme prefer-dark 2>/dev/null || true
 gsettings set org.gnome.desktop.interface icon-theme Papirus-Dark 2>/dev/null || true
-gsettings set org.gnome.desktop.interface cursor-theme capitaine-cursors 2>/dev/null || true
+gsettings set org.gnome.desktop.interface cursor-theme Vimix-white-cursors 2>/dev/null || true
+gsettings set org.gnome.desktop.interface accent-color slate 2>/dev/null || true   # libadwaita apps: grey accent, not blue
 gsettings set org.gnome.desktop.interface cursor-size 24 2>/dev/null || true
 command -v plasma-apply-colorscheme >/dev/null && plasma-apply-colorscheme Monochrome >/dev/null 2>&1 || true
 if command -v kwriteconfig6 >/dev/null; then
   kwriteconfig6 --file kdeglobals --group Icons --key Theme Papirus-Dark
   kwriteconfig6 --file kdeglobals --group General --key ColorScheme Monochrome
   kwriteconfig6 --file kdeglobals --group General --key TerminalApplication kitty
+  kwriteconfig6 --file katerc --group "KTextEditor Renderer" --key "Color Theme" Monochrome   # Kate: monochrome code colours
 fi
-command -v spicetify >/dev/null && { spicetify config current_theme Monochrome >/dev/null 2>&1; spicetify backup apply -q -n >/dev/null 2>&1 || true; }
+command -v spicetify >/dev/null && { spicetify config current_theme Monochrome color_scheme Night spotify_path "$HOME/.local/share/spotify-launcher/install/usr/share/spotify" prefs_path "$HOME/.config/spotify/prefs" >/dev/null 2>&1; spicetify backup apply -q -n >/dev/null 2>&1 || true; }
 [ "$(basename "${SHELL:-}")" = zsh ] || { ask "Make zsh your shell?" && chsh -s /usr/bin/zsh; }
 [ -f "$HOME/.face.icon" ] && "$HOME/.local/bin/fetch-logo.sh"
 python3 -I "$HOME/.local/bin/mono-icons.py" >/dev/null 2>&1 || true

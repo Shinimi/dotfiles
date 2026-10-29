@@ -24,9 +24,14 @@ home_paths=(
   .config/OpenRGB .config/mimeapps.list .config/swaync .config/user-dirs.dirs
   Games/OptiScaler-Endfield-backup-2026-10-24/OptiScaler.ini
   Downloads/Optiv10/OptiScaler.ini Downloads/Optiv10/README-Optiv10.txt Downloads/Optiv10/install-optiv10.sh
+  .config/niri .config/noctalia .config/mpv .config/brave-origin-flags.conf .local/share/org.kde.syntax-highlighting .face
+  .local/bin/game-session.sh .local/bin/usb-sounds.sh
+  .config/systemd/user/rates-refresh.service .config/systemd/user/rates-refresh.timer
+  .config/systemd/user/pkgwatch.service .config/systemd/user/pkgwatch.timer .config/systemd/user/usb-sounds.service
 )
 system_paths=(
-  /etc/sddm.conf.d/10-tokyo-night-yu.conf /etc/scx_loader.toml
+  /etc/sddm.conf.d/10-mono-yu.conf /etc/sddm.conf.d/10-tokyo-night-yu.conf /etc/scx_loader.toml
+  /usr/local/bin/gpu-ctl /etc/systemd/system/gpu-fan.service
   /etc/systemd/system/amdgpu-power-cap.service /etc/systemd/system/cpu-boost-cap.service
   /etc/systemd/system/paccache.service.d/keep2.conf
   /etc/systemd/system/health-watch.service /etc/systemd/system/health-watch.timer /usr/local/bin/health-watch.sh

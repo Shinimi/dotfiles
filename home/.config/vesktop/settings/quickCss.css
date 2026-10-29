@@ -99,3 +99,20 @@ section[class*="panels"], div[class*="panels_"] , [class*="avatarWrapper"] { bac
 }
 /* scrollbars: thin white threads */
 ::-webkit-scrollbar { width: 6px !important; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.22) !important; border-radius: 0 !important; border: 0 !important; }
+
+/* ---------- the last colours: status dots, speaking rings, role colours, links. Made by Claude. ---------- */
+:root, .theme-dark, .theme-darker, .theme-midnight, .visual-refresh {
+  --status-online: #ededed !important; --status-online-500: #ededed !important; --green-360: #ededed !important; --green-400: #d6d6d6 !important;
+  --status-idle: #9a9a9a !important; --status-idle-500: #9a9a9a !important; --yellow-300: #b0b0b0 !important;
+  --status-offline: #4a4a4a !important; --status-streaming: #bdbdbd !important;
+  --text-positive: #ededed !important; --text-warning: #cfcfcf !important; --info-positive-foreground: #ededed !important;
+  --button-positive-background: #e0e0e0 !important; --button-positive-background-hover: #ffffff !important;
+  --premium-perk-blue: #d6d6d6 !important; --premium-perk-purple: #bdbdbd !important; --premium-perk-pink: #d6d6d6 !important;
+}
+/* who's talking: a white ring instead of green */
+[class*="speaking"] { --green-360: #ffffff !important; box-shadow: 0 0 0 2px #ffffff !important; border-color: #ffffff !important; }
+/* role colours and coloured names: greys, still readable */
+[class*="username_"], [class*="roleDot"], [class*="roleCircle"], [class*="roleColor"] { filter: grayscale(1) brightness(1.15) !important; }
+/* Nitro gradients and shop banners: flattened */
+[class*="premium"] [class*="gradient"], [class*="shopBanner"], [class*="nitroWheel"] { filter: grayscale(1) !important; }
+a, [class*="anchor_"] { color: #f0f0f0 !important; text-decoration-color: rgba(255,255,255,.35) !important; }

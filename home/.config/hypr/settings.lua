@@ -6,7 +6,7 @@ hl.config({
     dwindle = { smart_split = false },
     decoration = {
         rounding = 8,
-        active_opacity = 0.96, inactive_opacity = 0.88,
+        active_opacity = 0.84, inactive_opacity = 0.74,
         dim_inactive = false, dim_strength = 0.12,
         blur = { enabled = true, size = 6, passes = 3, vibrancy = 0.15,
                  brightness = 0.62, noise = 0.010, xray = false, popups = true },
@@ -34,5 +34,5 @@ hl.animation({ leaf = "fade", enabled = true, speed = 1.95, bezier = "snappy" })
 hl.animation({ leaf = "layers", enabled = true, speed = 1.95, bezier = "snappy", style = "fade" })
 hl.animation({ leaf = "workspaces", enabled = true, speed = 2.60, bezier = "easeInOut", style = "slidefade 12%" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 2.60, bezier = "overshot", style = "slidevert" })
-hl.monitor({ output = "DP-1", mode = "2560x1440@120.00", position = "0x0", scale = 1, vrr = 2, bitdepth = 8, cm = "srgb" })
-hl.monitor({ output = "DP-2", mode = "1920x1080@60.00", position = "2560x0", scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })
+hl.monitor({ output = "DP-1", mode = "2560x1440@144.00", position = "0x0", scale = 1, vrr = 2, bitdepth = 8, cm = "srgb" })
+hl.monitor({ output = "DP-2", mode = "1920x1080@165.01", position = "2560x0", scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })

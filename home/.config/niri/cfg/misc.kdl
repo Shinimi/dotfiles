@@ -1,0 +1,25 @@
+prefer-no-csd
+screenshot-path "~/Pictures/Screenshots/Screenshot %Y-%m-%d %H-%M-%S.png"
+
+environment {
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    QT_QPA_PLATFORM "wayland;xcb"
+    QT_QPA_PLATFORMTHEME "kde"            // KDE apps keep the Monochrome colour scheme
+    XDG_CURRENT_DESKTOP "niri"
+    XDG_SESSION_TYPE "wayland"
+    MESA_SHADER_CACHE_MAX_SIZE "12G"
+}
+cursor {
+    xcursor-theme "Vimix-white-cursors"
+    xcursor-size 24
+}
+blur {
+    passes 3
+    offset 3.0
+    noise 0.02
+    saturation 1.0                        // monochrome: no colour boost
+}
+debug {
+    honor-xdg-activation-with-invalid-serial   // Noctalia's notification actions can focus windows
+}
+hotkey-overlay { skip-at-startup; }

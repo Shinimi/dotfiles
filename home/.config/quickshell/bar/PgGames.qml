@@ -1,4 +1,4 @@
-// Settings → Games: a profile per game (FPS cap, overlay, power) applied automatically while it runs. Made by Claude.
+// Settings → Games: a profile per game (FPS cap, overlay, power, GPU watts) applied automatically while it runs. Made by Claude.
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
@@ -14,7 +14,7 @@ Column {
         command: [Qt.resolvedUrl("games.sh").toString().replace("file://", "")]
         stdout: StdioCollector { onStreamFinished: { try { pg.games = JSON.parse(this.text) } catch (e) {} } }
     }
-    function prof(id) { return Object.assign({ fps: 0, hud: "off", power: "performance" }, (Settings.get("game_profiles") || {})[id] || {}) }
+    function prof(id) { return Object.assign({ fps: 0, hud: "off", power: "performance", gpu: 0 }, (Settings.get("game_profiles") || {})[id] || {}) }
     function setProf(id, k, v) {
         const all = Object.assign({}, Settings.get("game_profiles") || {})
         const p = prof(id); p[k] = v; all[id] = p
@@ -28,20 +28,22 @@ Column {
             id: row
             required property var modelData
             readonly property var p: pg.prof(modelData.id)
-            width: pg.width; height: 118; radius: 22; color: "#131313"
+            width: pg.width; height: Math.max(118, info.implicitHeight + 24); radius: 22; color: "#131313"
             ClippingRectangle {
                 x: 12; y: 12; width: 64; height: 94; radius: 12; color: Theme.bgAlt
                 Image { anchors.fill: parent; source: Theme.fileUrl(row.modelData.cover); fillMode: Image.PreserveAspectCrop; asynchronous: true; sourceSize.width: 128 }
             }
             Column {
+                id: info
                 x: 92; y: 12; width: parent.width - 104; spacing: 8
                 Label { text: row.modelData.name; font.pixelSize: 14; font.bold: true; width: parent.width; elide: Text.ElideRight }
-                Row {
-                    spacing: 18
+                Flow {
+                    width: parent.width; spacing: 18
                     Repeater {
                         model: [["fps", "FPS cap", [[0, "Off"], [60, "60"], [90, "90"], [120, "120"], [141, "141"]]],
                                 ["hud", "Overlay", [["off", "Off"], ["fps", "FPS"], ["full", "Full"]]],
-                                ["power", "Power", [["performance", "Max"], ["balanced", "Balanced"]]]]
+                                ["power", "Power", [["performance", "Max"], ["balanced", "Balanced"]]],
+                                ["gpu", "GPU watts", [[0, "Usual 160"], [140, "Cool 140"], [182, "Max 182"]]]]
                         Column {
                             id: grp
                             required property var modelData

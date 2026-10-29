@@ -23,8 +23,8 @@
   "butterflies": true,
   "butterfly_count": 7,
   "ws_anim": "slidefade",
-  "opacity_active": 96,
-  "opacity_inactive": 88,
+  "opacity_active": 84,
+  "opacity_inactive": 74,
   "glass": 60,
   "blur": true,
   "blur_size": 6,
@@ -58,13 +58,13 @@
   "vibrance": 100,
   "monitors": {
     "DP-1": {
-      "mode": "2560x1440@120.00",
+      "mode": "2560x1440@144.00",
       "cm": "srgb",
       "bitdepth": 8,
       "vrr": 2
     },
     "DP-2": {
-      "mode": "1920x1080@60.00",
+      "mode": "1920x1080@165.01",
       "cm": "srgb",
       "bitdepth": 8,
       "vrr": 0
@@ -84,7 +84,8 @@
   "bar_media": true,
   "notif_timeout": 5,
   "notif_center": false,
-  "sounds": false,
+  "sounds": true,
+  "ui_sound_volume": 55,
   "desktop_clock": false,
   "desktop_clock_pos": "left",
   "lock_minutes": 25,
@@ -92,10 +93,10 @@
   "mouse_wakes": false,
   "game_mode": true,
   "user_name": "YU",
-  "avatar": "/home/yu/Pictures/PFP/Black/Leon Kennedy.jpg",
+  "avatar": "/home/yu/Pictures/7fabb41eff1aca5db1554bc614b8dbf2-2561673958.jpg",
   "cc_logo": "avatar",
   "wall_main": "/home/yu/Pictures/wallpaper/mono-dunes.jpg",
-  "wall_side": "/home/yu/Pictures/wallpaper/mono-fuji.jpg",
+  "wall_side": "/home/yu/Pictures/wallpaper/mono-torii-night.jpg",
   "default_apps": {
     "files": "org.kde.dolphin.desktop",
     "images": "org.kde.gwenview.desktop",
@@ -106,10 +107,40 @@
   "weather_place": "",
   "weather_label": "",
   "game_profiles": {
+    "230410": {
+      "fps": 141,
+      "hud": "fps",
+      "power": "performance",
+      "gpu": 0
+    },
+    "269210": {
+      "fps": 60,
+      "hud": "fps",
+      "power": "balanced",
+      "gpu": 140
+    },
+    "570940": {
+      "fps": 60,
+      "hud": "full",
+      "power": "balanced",
+      "gpu": 140
+    },
+    "1372110": {
+      "fps": 60,
+      "hud": "fps",
+      "power": "balanced",
+      "gpu": 140
+    },
     "1973530": {
       "fps": 60,
       "hud": "off",
       "power": "balanced"
+    },
+    "3513350": {
+      "fps": 120,
+      "hud": "full",
+      "power": "performance",
+      "gpu": 140
     }
   },
   "hot_corner": true,
@@ -126,7 +157,9 @@
   "screen_time": true,
   "game_workspace": true,
   "wall_tint": true,
-  "ascii_wall": false,
+  "ascii_wall": true,
+  "music_pulse": true,
+  "desk_clock": true,
   "ws_preview": true,
   "login_handoff": true,
   "mono_mode": false,

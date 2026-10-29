@@ -18,8 +18,10 @@ Scope {
     Variants {   // every screen
         model: Quickshell.screens
         PanelWindow {
-            visible: root.on || fade.running
             required property var modelData
+            // at night the side screen belongs to the desk clock (DeskClock.qml)
+            readonly property bool deskNight: modelData.name === "DP-2" && Settings.cur("desk_clock") !== false && (h => h >= 22 || h < 8)(new Date().getHours())
+            visible: (root.on || fade.running) && !deskNight
             screen: modelData
             anchors { top: true; bottom: true; left: true; right: true }
             exclusionMode: ExclusionMode.Ignore

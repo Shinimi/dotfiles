@@ -7,6 +7,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pipewire
+import Quickshell.Bluetooth
 import "."   // our own Label wins over the Qt Controls one
 
 Scope {
@@ -42,14 +43,18 @@ Scope {
         ["storage", "\u{f02ca}", "Storage", "Devices", "disk ssd space health"],
         ["power", "\u{f0425}", "Power & lock", "System", "sleep lock screen off game mode performance"],
         ["datetime", "\u{f0954}", "Date & time", "System", "clock timezone ntp"],
+        ["packages", "\u{f03d7}", "Packages", "System", "packages pacman aur orphans leftovers cache size updated installed removed"],
         ["about", "\u{f02fd}", "About & updates", "System", "system info updates maintenance cpu gpu"]
     ]
     readonly property var pageInfo: pages.find(p => p[0] === page) || pages[0]
     property string search: ""
     readonly property var shownPages: {
         const q = search.trim().toLowerCase()
-        return q ? pages.filter(p => (p[2] + " " + p[4]).toLowerCase().indexOf(q) >= 0) : pages
+        const all = pages.filter(p => p[0] !== "bluetooth" || Bluetooth.defaultAdapter)   // no adapter on this PC: no page for it
+        return q ? all.filter(p => (p[2] + " " + p[4]).toLowerCase().indexOf(q) >= 0) : all
     }
+    readonly property string greeting: { const h = new Date().getHours(); return h < 5 ? "Good night" : h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening" }
+    readonly property string userName: (n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())(Settings.get("user_name") || Quickshell.env("USER"))
     readonly property var keyPage: ({
         accent: "appearance", border_spin: "appearance", border_angle: "appearance", gaps_in: "appearance", gaps_out: "appearance", border_size: "appearance", rounding: "appearance", layout: "appearance", smart_split: "appearance", snap: "appearance", resize_on_border: "appearance",
         glow: "effects", glow_range: "effects", glow_strength: "effects", shadows: "effects", shadow_range: "effects", shadow_tint: "effects", dim_inactive: "effects", dim_strength: "effects", animations: "effects", anim_speed: "effects", butterflies: "effects", butterfly_count: "effects", ws_anim: "effects",
@@ -88,6 +93,7 @@ Scope {
         case "storage": return root.info.disk ? root.info.disk + " used" : "Drives"
         case "power": return "Lock after " + g("lock_minutes") + " min"
         case "datetime": return Qt.formatTime(new Date(), "HH:mm")
+        case "packages": return "Updates, leftovers, cache"
         case "about": return Updates.total > 0 ? n(Updates.total, "update", "updates") + " waiting" : "Up to date"
         }
         return ""
@@ -219,7 +225,7 @@ Scope {
         WlrLayershell.namespace: "qsbar-settings"
         WlrLayershell.keyboardFocus: root.visible ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
         color: "transparent"
-        implicitWidth: 1080; implicitHeight: 760
+        implicitWidth: 1280; implicitHeight: 860
 
         Rectangle {
             id: frame
@@ -231,60 +237,66 @@ Scope {
             Keys.onUpPressed: { const i = root.shownPages.findIndex(p => p[0] === root.page); if (i > 0) root.page = root.shownPages[i - 1][0] }
             Keys.onDownPressed: { const i = root.shownPages.findIndex(p => p[0] === root.page); if (i < root.shownPages.length - 1) root.page = root.shownPages[i + 1][0] }
 
-            // ================= sidebar =================
+            // ================= sidebar: you, search, then every page in its group =================
             Rectangle {
                 id: side
-                x: 0; y: 0; width: 268; height: parent.height
-                color: "transparent"
+                x: 10; y: 10; width: 272; height: parent.height - 20; radius: 22
+                color: "#0e0e0e"; border.width: 1; border.color: "#161616"
 
-                Column {
-                    id: sideTop
-                    x: 16; y: 20; width: parent.width - 32; spacing: 14
-                    Rectangle {   // you
-                        width: parent.width; height: 66; radius: 20
-                        color: root.page === "account" ? "#222222" : (um.containsMouse ? "#1c1c1c" : "#151515")
-                        Row {
-                            x: 10; anchors.verticalCenter: parent.verticalCenter; spacing: 12
-                            Avatar { size: 42; radius: 21; pick: Settings.get("avatar") }
-                            Column {
-                                anchors.verticalCenter: parent.verticalCenter
-                                Label { text: (n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())(Settings.get("user_name") || Quickshell.env("USER")); font.pixelSize: 15; font.weight: Font.Bold }
-                                Label { text: "Picture and name"; color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
-                            }
+                Rectangle {   // you
+                    id: me
+                    x: 12; y: 12; width: parent.width - 24; height: 68; radius: 16
+                    color: root.page === "account" ? "#1f1f1f" : (um.containsMouse ? "#191919" : "#141414")
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Row {
+                        x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
+                        Avatar { size: 44; radius: 22; pick: Settings.get("avatar") }
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter; spacing: 2
+                            Label { text: root.userName; font.pixelSize: 15; font.weight: Font.Bold }
+                            Label { text: "Account  \u{f0142}"; color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
                         }
-                        MouseArea { id: um; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = "account" }
                     }
-                    Rectangle {   // Home: the overview with a tile per page
-                        width: parent.width; height: 38; radius: 12
-                        readonly property bool cur: root.page === "home"
-                        color: cur ? "#ececec" : (hmM.containsMouse ? "#181818" : "transparent")
-                        Behavior on color { ColorAnimation { duration: 120 } }
-                        Row {
-                            x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
-                            Label { width: 18; text: "\u{f02dc}"; color: parent.parent.cur ? "#0b0b0b" : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
-                            Label { text: "Home"; color: parent.parent.cur ? "#0b0b0b" : "#c4c4c4"; font.pixelSize: 12; font.bold: parent.parent.cur; anchors.verticalCenter: parent.verticalCenter }
-                        }
-                        MouseArea { id: hmM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { root.page = "home"; root.search = ""; find.text = "" } }
-                    }
-                    TextField {
-                        id: find
-                        width: parent.width; height: 40
-                        placeholderText: "Search settings"; placeholderTextColor: Theme.muted
-                        onTextEdited: { root.search = text; if (root.page !== "home" && root.shownPages.length) root.page = root.shownPages[0][0] }
-                        Keys.onEscapePressed: { text = ""; root.search = "" }
-                        color: Theme.fg; font.family: Theme.font; font.pixelSize: 12; leftPadding: 34
-                        background: Rectangle { radius: 14; color: "#151515"; border.width: 1; border.color: find.activeFocus ? "#40ffffff" : "transparent" }
-                        Label { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 14 }
-                    }
+                    MouseArea { id: um; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = "account" }
                 }
-                Flickable {   // the pages, grouped: LOOK & FEEL, DESKTOP, DEVICES, SYSTEM
+                TextField {
+                    id: find
+                    x: 12; anchors.top: me.bottom; anchors.topMargin: 10; width: parent.width - 24; height: 40
+                    placeholderText: "Search"; placeholderTextColor: "#5a5a5a"
+                    onTextEdited: { root.search = text; if (root.page !== "home" && root.shownPages.length) root.page = root.shownPages[0][0] }
+                    Keys.onEscapePressed: { text = ""; root.search = "" }
+                    color: Theme.fg; font.family: Theme.font; font.pixelSize: 12; leftPadding: 36
+                    background: Rectangle { radius: 12; color: "#141414"; border.width: 1; border.color: find.activeFocus ? "#40ffffff" : "#1c1c1c" }
+                    Label { x: 13; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: "#6a6a6a"; font.pixelSize: 14 }
+                    Label { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; visible: !find.activeFocus && !find.text
+                            text: "type to find"; color: "#3e3e3e"; font.pixelSize: 9 }
+                }
+                component NavItem: Rectangle {
+                    id: ni
+                    property string pid; property string icon; property string label
+                    readonly property bool cur: root.page === pid
+                    width: parent ? parent.width : 200; height: 36; radius: 11
+                    color: cur ? "#ececec" : (nim.containsMouse ? "#181818" : "transparent")
+                    Behavior on color { ColorAnimation { duration: 120 } }
+                    Row {
+                        x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
+                        Label { width: 18; horizontalAlignment: Text.AlignHCenter; text: ni.icon; color: ni.cur ? "#0b0b0b" : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
+                        Label { text: ni.label; color: ni.cur ? "#0b0b0b" : "#c4c4c4"; font.pixelSize: 12; font.bold: ni.cur; anchors.verticalCenter: parent.verticalCenter }
+                    }
+                    Rectangle { visible: root.pageDirty(ni.pid); anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
+                                width: 7; height: 7; radius: 4; color: ni.cur ? "#0b0b0b" : "#ffffff" }
+                    MouseArea { id: nim; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                onClicked: { root.page = ni.pid; if (ni.pid === "home") { root.search = ""; find.text = "" } } }
+                }
+                Flickable {   // Home, then LOOK & FEEL, DESKTOP, DEVICES, SYSTEM
                     id: nav
-                    anchors { top: sideTop.bottom; topMargin: 4; left: parent.left; right: parent.right; bottom: sideBottom.top; leftMargin: 16; rightMargin: 16; bottomMargin: 8 }
+                    anchors { top: find.bottom; topMargin: 10; left: parent.left; right: parent.right; bottom: sideBottom.top; leftMargin: 12; rightMargin: 12; bottomMargin: 8 }
                     clip: true; boundsBehavior: Flickable.StopAtBounds
                     contentHeight: navCol.implicitHeight
                     Column {
                         id: navCol
                         width: nav.width; spacing: 2
+                        NavItem { pid: "home"; icon: "\u{f02dc}"; label: "Home" }
                         Repeater {
                             model: ["Look & feel", "Desktop", "Devices", "System"]
                             Column {
@@ -293,38 +305,36 @@ Scope {
                                 readonly property var items: root.shownPages.filter(p => p[3] === ng.modelData)
                                 visible: items.length > 0
                                 width: navCol.width; spacing: 2
-                                Item {
-                                    width: parent.width; height: 28
-                                    Label { x: 12; anchors.bottom: parent.bottom; anchors.bottomMargin: 6; text: ng.modelData.toUpperCase(); color: "#5a5a5a"; font.pixelSize: 9; font.letterSpacing: 1.6; font.bold: true }
-                                }
+                                Label { leftPadding: 12; topPadding: 16; bottomPadding: 6; text: ng.modelData.toUpperCase(); color: "#4e4e4e"; font.pixelSize: 9; font.letterSpacing: 1.8; font.bold: true }
                                 Repeater {
                                     model: ng.items
-                                    Rectangle {
-                                        required property var modelData
-                                        readonly property bool cur: root.page === modelData[0]
-                                        width: navCol.width; height: 36; radius: 12
-                                        color: cur ? "#ececec" : (nm.containsMouse ? "#181818" : "transparent")
-                                        Behavior on color { ColorAnimation { duration: 120 } }
-                                        Row {
-                                            x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 12
-                                            Label { width: 18; text: modelData[1]; color: cur ? "#0b0b0b" : "#7a7a7a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
-                                            Label { text: modelData[2]; color: cur ? "#0b0b0b" : "#c4c4c4"; font.pixelSize: 12; font.bold: cur; anchors.verticalCenter: parent.verticalCenter }
-                                        }
-                                        Rectangle { visible: root.pageDirty(modelData[0]); anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter
-                                                    width: 7; height: 7; radius: 4; color: cur ? "#0b0b0b" : "#ffffff" }
-                                        MouseArea { id: nm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = modelData[0] }
-                                    }
+                                    NavItem { required property var modelData; pid: modelData[0]; icon: modelData[1]; label: modelData[2] }
                                 }
                             }
                         }
                     }
                     Label { anchors.centerIn: parent; visible: root.shownPages.filter(p => p[0] !== "account").length === 0; text: "Nothing found"; color: Theme.muted; font.pixelSize: 11 }
                 }
-                Column {
+                Rectangle {   // fade the list under the bottom row
+                    anchors { left: parent.left; right: parent.right; bottom: sideBottom.top; leftMargin: 1; rightMargin: 1 }
+                    height: 24; gradient: Gradient { GradientStop { position: 0; color: "#000e0e0e" } GradientStop { position: 1; color: "#0e0e0e" } }
+                }
+                Item {
                     id: sideBottom
-                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 16 }
-                    SetButton { width: parent.width; icon: "\u{f0450}"; text: "Reset to defaults"; accent: Theme.muted
-                        onClicked: root.confirm("\u{f0450}", "Reset every setting?", Settings.cur("instant_apply") ? "Everything goes back to how it came, right away." : "Everything goes back to how it came. Nothing changes until you press Apply, so you can still Discard.", "Reset", () => Settings.reset()) }
+                    anchors { left: parent.left; right: parent.right; bottom: parent.bottom; margins: 12 }
+                    height: 34
+                    Rectangle {
+                        anchors.fill: parent; radius: 10; color: rsm.containsMouse ? "#181818" : "transparent"
+                        Row {
+                            x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 10
+                            Label { text: "\u{f0450}"; color: "#6a6a6a"; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
+                            Label { text: "Reset to defaults"; color: rsm.containsMouse ? "#d0d0d0" : "#7a7a7a"; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
+                        }
+                        Label { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: "ctrl+s apply"; color: "#3e3e3e"; font.pixelSize: 9
+                                visible: !Settings.cur("instant_apply") }
+                        MouseArea { id: rsm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: root.confirm("\u{f0450}", "Reset every setting?", Settings.cur("instant_apply") ? "Everything goes back to how it came, right away." : "Everything goes back to how it came. Nothing changes until you press Apply, so you can still Discard.", "Reset", () => Settings.reset()) }
+                    }
                 }
             }
 
@@ -407,7 +417,7 @@ Scope {
             // ================= page =================
             Flickable {
                 id: flick
-                anchors { left: side.right; right: parent.right; top: parent.top; bottom: parent.bottom; margins: 26; leftMargin: 8; bottomMargin: 6 }
+                anchors { left: side.right; right: parent.right; top: parent.top; bottom: parent.bottom; margins: 28; leftMargin: 26; bottomMargin: 6 }
                 contentHeight: pageCol.implicitHeight; clip: true
                 boundsBehavior: Flickable.StopAtBounds
                 Connections { target: root; function onPageChanged() { flick.contentY = 0; fadeIn.restart() } }
@@ -420,8 +430,20 @@ Scope {
 
                     Column {
                         visible: root.page !== "home"
-                        spacing: 4; bottomPadding: 6
-                        Text { id: ttl; text: root.pageInfo[2]; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 24; font.bold: true }
+                        spacing: 4; bottomPadding: 8
+                        Row {
+                            spacing: 6
+                            Label { text: "Settings"; color: hcm.containsMouse ? "#d0d0d0" : "#5a5a5a"; font.pixelSize: 10
+                                    MouseArea { id: hcm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = "home" } }
+                            Label { text: "\u{f0142}"; color: "#3e3e3e"; font.pixelSize: 10 }
+                            Label { text: root.pageInfo[3]; color: "#5a5a5a"; font.pixelSize: 10 }
+                        }
+                        Row {
+                            spacing: 12
+                            Rectangle { width: 40; height: 40; radius: 12; color: "#ececec"; anchors.verticalCenter: parent.verticalCenter
+                                        Label { anchors.centerIn: parent; text: root.pageInfo[1]; color: "#0b0b0b"; font.pixelSize: 19 } }
+                            Text { id: ttl; text: root.pageInfo[2]; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 28; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+                        }
                         Label {
                             color: "#6e6e6e"; font.pixelSize: 12; font.weight: Font.Normal
                             text: ({ comfort: "Little things that make the desktop nicer to live with", account: "Your picture and name", appearance: "Colours, borders, gaps and window layout",
@@ -432,70 +454,144 @@ Scope {
                                      display: "Resolution, refresh rate and colour", sound: "Devices, clean mic and headset EQ (changes here are instant)",
                                      input: "Pointer, scrolling, typing and focus", network: "Your connection", bluetooth: "Wireless devices",
                                      storage: "Drives, health and free space", power: "Performance, auto-lock and screens off",
-                                     datetime: "Clock and time sync", about: "This PC, updates and maintenance" })[root.page] || ""
+                                     datetime: "Clock and time sync", packages: "What changed this week, what you can clear, and what takes the most space", about: "This PC, updates and maintenance" })[root.page] || ""
                         }
                     }
 
 
-                    // ---------- Home: you, a big search, and a tile per page ----------
+                    // ---------- Home: you and your PC, quick switches, then every page grouped in four cards ----------
                     Column {
-                        visible: root.page === "home"; width: parent.width; spacing: 18
-                        RowLayout {
-                            width: parent.width; spacing: 16
-                            Avatar { size: 64; radius: 32; pick: Settings.get("avatar") }
-                            Column {
-                                Layout.fillWidth: true; spacing: 4
-                                Text { text: (n => n.charAt(0).toUpperCase() + n.slice(1).toLowerCase())(Settings.get("user_name") || Quickshell.env("USER"))
-                                       color: "#ffffff"; font.family: Theme.font; font.pixelSize: 24; font.bold: true }
-                                Label { text: "CachyOS  ·  Hyprland " + (root.info.hypr || "") + "  ·  up " + Stats.d.uptime; color: "#7a7a7a"; font.pixelSize: 11; font.weight: Font.Normal }
+                        visible: root.page === "home"; width: parent.width; spacing: 20
+                        Rectangle {   // hero
+                            width: parent.width; height: 168; radius: 24; border.width: 1; border.color: "#1f1f1f"; clip: true
+                            gradient: Gradient { orientation: Gradient.Horizontal
+                                GradientStop { position: 0; color: "#1b1b1b" } GradientStop { position: 1; color: "#0f0f0f" } }
+                            Text {   // a big faint initial for texture
+                                anchors.right: parent.right; anchors.rightMargin: -10; anchors.verticalCenter: parent.verticalCenter
+                                text: root.userName.charAt(0); color: "#0bffffff"; font.family: Theme.font; font.pixelSize: 240; font.weight: Font.Black
                             }
-                            SetButton { visible: Updates.total > 0; icon: "\u{f06b0}"; text: Updates.total + " updates"; onClicked: root.page = "about" }
+                            RowLayout {
+                                anchors.fill: parent; anchors.margins: 26; spacing: 22
+                                Avatar { size: 96; radius: 48; pick: Settings.get("avatar") }
+                                Column {
+                                    Layout.fillWidth: true; spacing: 4
+                                    Label { text: root.greeting + ","; color: "#8a8a8a"; font.pixelSize: 13; font.weight: Font.Normal }
+                                    Text { text: root.userName; color: "#ffffff"; font.family: Theme.font; font.pixelSize: 34; font.bold: true }
+                                    Label { text: "CachyOS  ·  Hyprland " + (root.info.hypr || "") + "  ·  up " + Stats.d.uptime; color: "#6a6a6a"; font.pixelSize: 11; font.weight: Font.Normal }
+                                }
+                                Grid {   // at a glance
+                                    columns: 2; columnSpacing: 8; rowSpacing: 8
+                                    Repeater {
+                                        model: [["\u{f0ee0}", Stats.d.cpuTemp + "°", "CPU", Stats.d.cpuTemp >= 85, ""], ["\u{f08ae}", Stats.d.gpuTemp + "°", "GPU", Stats.d.gpuTemp >= 90, ""],
+                                                ["\u{f02ca}", (root.info.disk || "–").split(" of")[0], "disk used", false, "storage"],
+                                                ["\u{f06b0}", Updates.total > 0 ? String(Updates.total) : "\u{f012c}", Updates.total > 0 ? "updates" : "up to date", Updates.total > 0, "about"]]
+                                        Rectangle {
+                                            required property var modelData
+                                            width: 138; height: 50; radius: 14; color: gm.containsMouse && modelData[4] ? "#242424" : "#161616"; border.width: 1; border.color: "#222222"
+                                            Row {
+                                                x: 12; anchors.verticalCenter: parent.verticalCenter; spacing: 10
+                                                Label { text: modelData[0]; color: "#7a7a7a"; font.pixelSize: 15; anchors.verticalCenter: parent.verticalCenter }
+                                                Column {
+                                                    Label { text: modelData[1]; color: modelData[3] ? "#ffffff" : "#e6e6e6"; font.pixelSize: 14; font.bold: true }
+                                                    Label { text: modelData[2]; color: "#6a6a6a"; font.pixelSize: 9; font.weight: Font.Normal }
+                                                }
+                                            }
+                                            Rectangle { visible: modelData[3]; x: parent.width - 14; y: 8; width: 6; height: 6; radius: 3; color: "#ffffff" }
+                                            MouseArea { id: gm; anchors.fill: parent; hoverEnabled: !!modelData[4]; cursorShape: modelData[4] ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                                        onClicked: if (modelData[4]) root.page = modelData[4] }
+                                        }
+                                    }
+                                }
+                            }
                         }
                         TextField {
                             id: bigFind
-                            width: parent.width; height: 48
+                            width: parent.width; height: 50
                             text: root.search
-                            placeholderText: "Search all settings"; placeholderTextColor: Theme.muted
+                            placeholderText: "Search all settings: try \u201cblur\u201d, \u201cmouse\u201d or \u201cfps\u201d"; placeholderTextColor: "#5a5a5a"
                             onTextEdited: root.search = text
                             onAccepted: { const p = root.shownPages.filter(x => x[0] !== "account"); if (p.length) root.page = p[0][0] }
                             Keys.onEscapePressed: { text = ""; root.search = "" }
-                            color: Theme.fg; font.family: Theme.font; font.pixelSize: 13; leftPadding: 44
-                            background: Rectangle { radius: 16; color: "#131313"; border.width: 1; border.color: bigFind.activeFocus ? "#40ffffff" : "#1d1d1d" }
-                            Label { x: 16; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.pixelSize: 16 }
+                            color: Theme.fg; font.family: Theme.font; font.pixelSize: 13; leftPadding: 46
+                            background: Rectangle { radius: 16; color: "#121212"; border.width: 1; border.color: bigFind.activeFocus ? "#50ffffff" : "#1d1d1d" }
+                            Label { x: 17; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: "#6a6a6a"; font.pixelSize: 16 }
+                            Label { anchors.right: parent.right; anchors.rightMargin: 16; anchors.verticalCenter: parent.verticalCenter; text: "enter opens the first match"; color: "#3e3e3e"; font.pixelSize: 10
+                                    visible: bigFind.text !== "" }
                         }
-                        Repeater {
-                            model: ["Look & feel", "Desktop", "Devices", "System"]
-                            Column {
-                                id: grp
-                                required property string modelData
-                                readonly property var items: root.shownPages.filter(p => p[3] === grp.modelData)
-                                visible: items.length > 0
+                        Column {   // quick switches: the things people flip most, applied right away
+                            visible: root.search === ""; width: parent.width; spacing: 8
+                            SetHeading { text: "Quick switches"; icon: "\u{f0a26}" }
+                            Flow {
                                 width: parent.width; spacing: 8
-                                Label { x: 6; text: grp.modelData.toUpperCase(); color: "#5a5a5a"; font.pixelSize: 9; font.letterSpacing: 1.6; font.bold: true }
-                                Grid {
-                                    width: parent.width; columns: 4; columnSpacing: 10; rowSpacing: 10
-                                    Repeater {
-                                        model: grp.items
-                                        Rectangle {
-                                            id: tl
-                                            required property var modelData
-                                            width: (parent.width - 30) / 4; height: 92; radius: 16
-                                            color: tlM.containsMouse ? "#1a1a1a" : "#131313"; border.width: 1; border.color: tlM.containsMouse ? "#33ffffff" : "#1d1d1d"
-                                            Behavior on color { ColorAnimation { duration: 120 } }
-                                            scale: tlM.pressed ? 0.97 : 1
-                                            Behavior on scale { NumberAnimation { duration: 90 } }
+                                Repeater {
+                                    model: [["\u{f0594}", "Night light", SysState.night, () => SysState.toggleNight()],
+                                            ["\u{f0197}", "Monochrome", !!Settings.cur("mono_mode"), () => Settings.setNow("mono_mode", !Settings.cur("mono_mode"))],
+                                            ["\u{f1545}", "Animations", !!Settings.cur("animations"), () => Settings.setNow("animations", !Settings.cur("animations"))],
+                                            ["\u{f00b5}", "Blur", !!Settings.cur("blur"), () => Settings.setNow("blur", !Settings.cur("blur"))],
+                                            ["\u{f0450}", "Rotating border", !!Settings.cur("border_spin"), () => Settings.setNow("border_spin", !Settings.cur("border_spin"))],
+                                            ["\u{f0241}", "Apply instantly", !!Settings.cur("instant_apply"), () => Settings.setNow("instant_apply", !Settings.cur("instant_apply"))]]
+                                    Rectangle {
+                                        id: qsw
+                                        required property var modelData
+                                        readonly property bool on: modelData[2]
+                                        width: qsr.implicitWidth + 30; height: 40; radius: 20
+                                        color: on ? "#ececec" : (qsm.containsMouse ? "#1c1c1c" : "#141414"); border.width: 1; border.color: on ? "#ececec" : "#222222"
+                                        Behavior on color { ColorAnimation { duration: 130 } }
+                                        Row {
+                                            id: qsr; anchors.centerIn: parent; spacing: 9
+                                            Label { text: qsw.modelData[0]; color: qsw.on ? "#0b0b0b" : "#9a9a9a"; font.pixelSize: 14; anchors.verticalCenter: parent.verticalCenter }
+                                            Label { text: qsw.modelData[1]; color: qsw.on ? "#0b0b0b" : "#d0d0d0"; font.pixelSize: 11; font.bold: qsw.on; anchors.verticalCenter: parent.verticalCenter }
+                                        }
+                                        MouseArea { id: qsm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: qsw.modelData[3]() }
+                                    }
+                                }
+                            }
+                        }
+                        Grid {   // the four groups as cards, each page a row
+                            id: groups
+                            width: parent.width; columns: 2; columnSpacing: 14; rowSpacing: 14
+                            Repeater {
+                                model: [["Look & feel", "\u{f03d8}"], ["Desktop", "\u{f0379}"], ["Devices", "\u{f0fd5}"], ["System", "\u{f0493}"]]
+                                Rectangle {
+                                    id: grpCard
+                                    required property var modelData
+                                    readonly property var items: root.shownPages.filter(p => p[3] === grpCard.modelData[0])
+                                    visible: items.length > 0
+                                    width: (groups.width - 14) / 2; height: gcol.implicitHeight + 20; radius: 20
+                                    color: "#111111"; border.width: 1; border.color: "#1c1c1c"
+                                    Column {
+                                        id: gcol
+                                        x: 10; y: 10; width: parent.width - 20; spacing: 0
+                                        Row {
+                                            leftPadding: 10; topPadding: 6; bottomPadding: 8; spacing: 8
+                                            Label { text: grpCard.modelData[1]; color: "#6a6a6a"; font.pixelSize: 11; anchors.verticalCenter: parent.verticalCenter }
+                                            Label { text: grpCard.modelData[0].toUpperCase(); color: "#8a8a8a"; font.pixelSize: 10; font.letterSpacing: 1.6; font.bold: true; anchors.verticalCenter: parent.verticalCenter }
+                                            Label { text: grpCard.items.length; color: "#4a4a4a"; font.pixelSize: 10; anchors.verticalCenter: parent.verticalCenter }
+                                        }
+                                        Repeater {
+                                            model: grpCard.items
                                             Rectangle {
-                                                x: 14; y: 14; width: 32; height: 32; radius: 10; color: tlM.containsMouse ? "#ececec" : "#1f1f1f"
-                                                Behavior on color { ColorAnimation { duration: 120 } }
-                                                Label { anchors.centerIn: parent; text: tl.modelData[1]; color: tlM.containsMouse ? "#0b0b0b" : "#d0d0d0"; font.pixelSize: 15 }
+                                                id: tl
+                                                required property var modelData
+                                                width: gcol.width; height: 54; radius: 13
+                                                color: tlM.containsMouse ? "#1b1b1b" : "transparent"
+                                                Behavior on color { ColorAnimation { duration: 110 } }
+                                                Rectangle {
+                                                    x: 10; anchors.verticalCenter: parent.verticalCenter; width: 34; height: 34; radius: 11
+                                                    color: tlM.containsMouse ? "#ececec" : "#1c1c1c"
+                                                    Behavior on color { ColorAnimation { duration: 110 } }
+                                                    Label { anchors.centerIn: parent; text: tl.modelData[1]; color: tlM.containsMouse ? "#0b0b0b" : "#cfcfcf"; font.pixelSize: 15 }
+                                                }
+                                                Column {
+                                                    x: 56; anchors.verticalCenter: parent.verticalCenter; width: parent.width - 56 - 40; spacing: 2
+                                                    Label { width: parent.width; elide: Text.ElideRight; text: tl.modelData[2]; color: "#ececec"; font.pixelSize: 12; font.bold: true }
+                                                    Label { width: parent.width; elide: Text.ElideRight; text: root.summary(tl.modelData[0]); color: "#6a6a6a"; font.pixelSize: 10; font.weight: Font.Normal }
+                                                }
+                                                Rectangle { visible: root.pageDirty(tl.modelData[0]); anchors.right: parent.right; anchors.rightMargin: 32; anchors.verticalCenter: parent.verticalCenter; width: 7; height: 7; radius: 4; color: "#ffffff" }
+                                                Label { anchors.right: parent.right; anchors.rightMargin: 12; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0142}"
+                                                        color: tlM.containsMouse ? "#e0e0e0" : "#3a3a3a"; font.pixelSize: 14 }
+                                                MouseArea { id: tlM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = tl.modelData[0] }
                                             }
-                                            Rectangle { visible: root.pageDirty(tl.modelData[0]); x: parent.width - 18; y: 14; width: 7; height: 7; radius: 4; color: "#ffffff" }
-                                            Column {
-                                                x: 14; y: 54; width: parent.width - 28; spacing: 2
-                                                Label { width: parent.width; elide: Text.ElideRight; text: tl.modelData[2]; color: "#ececec"; font.pixelSize: 12 }
-                                                Label { width: parent.width; elide: Text.ElideRight; text: root.summary(tl.modelData[0]); color: "#6e6e6e"; font.pixelSize: 10; font.weight: Font.Normal }
-                                            }
-                                            MouseArea { id: tlM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.page = tl.modelData[0] }
                                         }
                                     }
                                 }
@@ -512,6 +608,7 @@ Scope {
                     PgNetwork { visible: root.page === "network"; width: parent.width }
                     PgBluetooth { visible: root.page === "bluetooth"; width: parent.width }
                     PgStorage { visible: root.page === "storage"; width: parent.width }
+                    PgPackages { visible: root.page === "packages"; width: parent.width }
                     PgDateTime { visible: root.page === "datetime"; width: parent.width }
 
                     // ---------- 0 Appearance ----------
@@ -810,7 +907,8 @@ Scope {
                                     onPicked: v => Settings.set("notif_center", v === "c")
                                 }
                                 SetSlider { label: "Pop-ups stay for"; key: "notif_timeout"; from: 2; to: 15; suffix: " s" }
-                                SetToggle { label: "Sounds"; desc: "soft sounds for notifications, login and screenshots"; key: "sounds" }
+                                SetToggle { label: "Sounds"; desc: "soft monochrome sounds: notifications, volume keys, screenshots, USB devices, lock and login (quiet while you game)"; key: "sounds" }
+                                SetSlider { visible: !!Settings.get("sounds"); label: "Sound volume"; key: "ui_sound_volume"; from: 10; to: 100; step: 5; suffix: "%" }
                                 SetSwitch { label: "Do not disturb"; desc: "hide pop-ups, works right away"; on: Notifs.dnd; onToggled: Notifs.dnd = !Notifs.dnd }
                             }
                             SetSection {
@@ -891,11 +989,12 @@ Scope {
                             readonly property real cw: (width - 20) / 3
                             FeatureCard { width: parent.cw; icon: "\u{f005b}"; label: "Hot corner"; desc: "push the mouse into the top-left corner for the overview"; key: "hot_corner" }
                             FeatureCard { width: parent.cw; icon: "\u{f06d0}"; label: "Workspace previews"; desc: "hover a workspace in the bar to see its windows"; key: "ws_preview" }
-                            FeatureCard { width: parent.cw; icon: "\u{f0b78}"; label: "Song card"; desc: "a small card drops under the bar when the song changes"; key: "island_peeks" }
                             FeatureCard { width: parent.cw; icon: "\u{f033e}"; label: "Pause when locking"; desc: "music stops when the screen locks"; key: "pause_on_lock" }
                             FeatureCard { width: parent.cw; icon: "\u{f0297}"; label: "Game workspace"; desc: "games open on workspace 5; you're brought back after"; key: "game_workspace" }
                             FeatureCard { width: parent.cw; icon: "\u{f1104}"; label: "Screensaver"; desc: "your wallpaper in glowing characters, halfway to the auto-lock"; key: "screensaver" }
-                            FeatureCard { width: parent.cw; icon: "\u{f0169}"; label: "ASCII wallpaper"; desc: "your wallpaper drawn in glowing characters, slowly moving"; key: "ascii_wall" }
+                            FeatureCard { width: parent.cw; icon: "\u{f0169}"; label: "ASCII wallpaper"; desc: "your wallpaper in glowing characters that follows the real sky: rain, snow, fog, wind and night"; key: "ascii_wall" }
+                            FeatureCard { width: parent.cw; icon: "\u{f075a}"; label: "Music pulse"; desc: "a hairline under the bar that breathes with the song"; key: "music_pulse" }
+                            FeatureCard { width: parent.cw; icon: "\u{f0954}"; label: "Desk clock"; desc: "at night, the side screen becomes a dim bedside clock while you're away"; key: "desk_clock" }
                             FeatureCard { width: parent.cw; icon: "\u{f0342}"; label: "Login hand-off"; desc: "after logging in, the ASCII dunes dissolve into your desktop"; key: "login_handoff" }
                             FeatureCard { width: parent.cw; icon: "\u{f0266}"; label: "Wallpaper tint"; desc: "the glass picks up a little of your wallpaper's colour"; key: "wall_tint" }
                         }

@@ -15,4 +15,5 @@ fi
 stamp="$XDG_RUNTIME_DIR/ui-sound.last"; now=$(date +%s%N)
 [ -f "$stamp" ] && [ $(( (now - $(cat "$stamp")) / 1000000 )) -lt 700 ] && exit 0
 echo "$now" > "$stamp"
-pw-play --volume 0.55 "$f" >/dev/null 2>&1 &
+vol=$(grep -oP '"ui_sound_volume":\s*\K[0-9]+' "$HOME/.config/hypr/settings.json" 2>/dev/null); vol=${vol:-55}   # Settings → Notifications
+pw-play --volume "$(awk -v v="$vol" 'BEGIN{printf "%.2f", v/100}')" "$f" >/dev/null 2>&1 &

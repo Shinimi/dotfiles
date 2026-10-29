@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Power menu (SUPER+X / bar button). Big icon row, Tokyo Night. Made by Claude.
+# Power menu (SUPER+X / bar button). Big icon row, monochrome. Made by Claude.
 pgrep -x rofi >/dev/null && { pkill -x rofi; exit 0; }
 lock=$''; logout=$''; sleep=$''; reboot=$''; off=$''
 choice=$(printf '%s\n%s\n%s\n%s\n%s\n' "$lock" "$logout" "$sleep" "$reboot" "$off" | rofi -dmenu -p "" -selected-row 0 -theme-str '

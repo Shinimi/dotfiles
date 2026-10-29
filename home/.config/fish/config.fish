@@ -7,7 +7,7 @@ source /usr/share/cachyos-fish-config/cachyos-config.fish
 #end
 export PATH="$HOME/.local/bin:$PATH"
 
-# Tokyo Night prompt
+# Monochrome prompt
 if status is-interactive; and type -q starship
     starship init fish | source
 end

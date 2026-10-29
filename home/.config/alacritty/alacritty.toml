@@ -20,38 +20,47 @@ history = 10000
 multiplier = 3
 
 [font]
-normal = { family = "monospace", style = "Regular" }
-bold = { family = "monospace", style = "Bold" }
-italic = { family = "monospace", style = "Italic" }
-bold_italic = { family = "monospace", style = "Bold Italic" }
+normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
+italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
+bold_italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
 size = 12.0
 
 [colors]
 draw_bold_text_with_bright_colors = true
 
+# Monochrome, same palette as kitty. Made by Claude.
 [colors.primary]
-background = "0x2E3440"
-foreground = "0xD8DEE9"
+background = "#111111"
+foreground = "#eaeaea"
+
+[colors.cursor]
+text = "#111111"
+cursor = "#eaeaea"
+
+[colors.selection]
+text = "CellForeground"
+background = "#333333"
 
 [colors.normal]
-black = "0x3B4252"
-red = "0xBF616A"
-green = "0xA3BE8C"
-yellow = "0xEBCB8B"
-blue = "0x81A1C1"
-magenta = "0xB48EAD"
-cyan = "0x88C0D0"
-white = "0xE5E9F0"
+black = "#080808"
+red = "#cf6b6b"
+green = "#c8c8c8"
+yellow = "#d6d6d6"
+blue = "#e0e0e0"
+magenta = "#b0b0b0"
+cyan = "#c4c4c4"
+white = "#c8c8c8"
 
 [colors.bright]
-black = "0x4C566A"
-red = "0xBF616A"
-green = "0xA3BE8C"
-yellow = "0xEBCB8B"
-blue = "0x81A1C1"
-magenta = "0xB48EAD"
-cyan = "0x8FBCBB"
-white = "0xECEFF4"
+black = "#3a3a3a"
+red = "#dd8f8f"
+green = "#e2e2e2"
+yellow = "#ececec"
+blue = "#ffffff"
+magenta = "#cfcfcf"
+cyan = "#dcdcdc"
+white = "#eaeaea"
 
 [selection]
 semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"

@@ -1,0 +1,7 @@
+[Unit]
+Description=Your week in packages, Monday mornings. Made by Claude.
+[Timer]
+OnCalendar=Mon 10:00
+Persistent=true
+[Install]
+WantedBy=timers.target

@@ -13,6 +13,12 @@ Singleton {
     property int wind: 0
     property string desc: ""
     property string icon: ""
+    property int code: 0                     // wttr.in condition code (the living ASCII wallpaper reads rain / snow / fog from it)
+    // what the sky is doing right now, 0..1, for the living ASCII wallpaper
+    readonly property real rain: [176, 263, 266, 293, 296, 353].includes(code) ? 0.35 : [299, 302, 356, 281, 284, 311].includes(code) ? 0.65
+                               : [305, 308, 359, 200, 386, 389, 314].includes(code) ? 1.0 : 0
+    readonly property real snow: [179, 227, 323, 326, 368, 182, 185, 317, 320, 362, 365, 374, 377].includes(code) ? 0.5 : [230, 329, 332, 335, 338, 350, 371, 392, 395].includes(code) ? 1.0 : 0
+    readonly property real fog: [143, 248, 260].includes(code) ? 1.0 : 0
     property var days: []
 
     function iconFor(code, night) {
@@ -41,6 +47,7 @@ Singleton {
                     temp = parseInt(c.temp_C); feels = parseInt(c.FeelsLikeC)
                     humidity = parseInt(c.humidity); wind = parseInt(c.windspeedKmph)
                     desc = c.weatherDesc[0].value.trim()
+                    code = parseInt(c.weatherCode)
                     icon = iconFor(c.weatherCode, h < 6 || h >= 19)
                     place = Settings.cur("weather_label") || Settings.cur("weather_place") || "Batman Merkez"
                     days = j.weather.map(d => ({

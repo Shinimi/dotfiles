@@ -5,3 +5,4 @@ case "$1" in
   up)   wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ "${st}%+" ;;
   down) wpctl set-volume @DEFAULT_AUDIO_SINK@ "${st}%-" ;;
 esac
+"$HOME/.local/bin/kocho-sound.sh" audio-volume-change

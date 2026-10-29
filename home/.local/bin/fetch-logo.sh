@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# fetch-logo.sh – rounded copy of your picture with a Tokyo Night ring, used by fastfetch in kitty. Made by Claude.
+# fetch-logo.sh – rounded copy of your picture with a monochrome ring, used by fastfetch in kitty. Made by Claude.
 src="${1:-$HOME/.face.icon}"; out="$HOME/.config/fastfetch/logo.png"; t=$(mktemp -d)
 [ -f "$src" ] || exit 0
 # rounded masks

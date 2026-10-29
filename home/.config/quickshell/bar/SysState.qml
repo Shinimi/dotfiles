@@ -15,6 +15,7 @@ Singleton {
     readonly property bool perf: profile === "performance"
     property var fx: ({ mic: false, eq: false, preset: "flat" })
     property bool gameMode: false
+    property bool recording: false   // screen recording on (rec.sh → bar ipc); shown on whichever screen holds the status icons
 
     function refresh() { st.running = true; fxState.running = true }
     function run(cmd) { Quickshell.execDetached(cmd); later.restart() }

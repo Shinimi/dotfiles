@@ -1,0 +1,5 @@
+[Unit]
+Description=Refresh lira exchange rates for the control center and the launcher. Made by Claude.
+[Service]
+Type=oneshot
+ExecStart=%h/.config/quickshell/bar/rates.sh refresh

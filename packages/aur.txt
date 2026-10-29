@@ -1,5 +1,3 @@
-google-chrome
-megabasterd-bin
-millennium
-spicetify-cli
+millennium-bin
+spicetify-bin
 zapret2

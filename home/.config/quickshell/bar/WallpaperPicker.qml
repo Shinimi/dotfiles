@@ -17,7 +17,7 @@ Scope {
     property var favs: []
     property string cat: "all"
     readonly property string favFile: Quickshell.env("HOME") + "/.local/state/wall-favs.json"
-    readonly property var cats: [["all", "All"], ["mono", "Monochrome"], ["dark", "Dark"], ["light", "Light"], ["colour", "Colour"], ["fav", "Favourites"]]
+    readonly property var cats: [["all", "All"], ["mono", "Monochrome"], ["dark", "Dark"], ["light", "Light"], ["colour", "Colour"], ["live", "Live"], ["fav", "Favourites"]]
     readonly property var list: cat === "all" ? all : cat === "fav" ? all.filter(w => favs.indexOf(w.path) >= 0) : all.filter(w => w.cat === cat)
     readonly property var cur: list.length ? list[Math.max(0, Math.min(pv.currentIndex, list.length - 1))] : null
     property string flash: ""
