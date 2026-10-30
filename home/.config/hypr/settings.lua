@@ -11,7 +11,7 @@ hl.config({
         blur = { enabled = true, size = 6, passes = 3, vibrancy = 0.15,
                  brightness = 0.62, noise = 0.010, xray = false, popups = true },
         shadow = { enabled = true, range = 12, color = "rgba(000000aa)" },
-        glow = { enabled = false, range = 14, color = { colors = { "rgba(eaeaea66)", "rgba(7a7a7a66)" }, angle = 45 } },
+        glow = { enabled = true, range = 14, color = { colors = { "rgba(eaeaea66)", "rgba(7a7a7a66)" }, angle = 45 } },
         screen_shader = "",
     },
     animations = { enabled = true },
@@ -34,5 +34,5 @@ hl.animation({ leaf = "fade", enabled = true, speed = 1.95, bezier = "snappy" })
 hl.animation({ leaf = "layers", enabled = true, speed = 1.95, bezier = "snappy", style = "fade" })
 hl.animation({ leaf = "workspaces", enabled = true, speed = 2.60, bezier = "easeInOut", style = "slidefade 12%" })
 hl.animation({ leaf = "specialWorkspace", enabled = true, speed = 2.60, bezier = "overshot", style = "slidevert" })
-hl.monitor({ output = "DP-1", mode = "2560x1440@144.00", position = "0x0", scale = 1, vrr = 2, bitdepth = 8, cm = "srgb" })
+hl.monitor({ output = "DP-1", mode = "2560x1440@144.00", position = "0x0", scale = 1, vrr = 2, bitdepth = 8, cm = "edid" })
 hl.monitor({ output = "DP-2", mode = "1920x1080@165.01", position = "2560x0", scale = 1, vrr = 0, bitdepth = 8, cm = "srgb" })

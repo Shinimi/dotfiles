@@ -1,7 +1,7 @@
 // fastfetch – monochrome · Guts. A katana in braille, a tree of what matters. Made by Claude.
 {
   "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": { "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 30, "height": 14, "padding": { "top": 1, "left": 3, "right": 4 } }, // LOGO (Settings → Theme)
+  "logo": { "type": "file-raw", "source": "~/.config/fastfetch/torii.txt", "padding": { "top": 1, "left": 2, "right": 5 } }, // LOGO (Settings → Theme)
   "display": {
     "separator": " ",
     "color": { "keys": "#6e6e6e", "output": "#e6e6e6" },

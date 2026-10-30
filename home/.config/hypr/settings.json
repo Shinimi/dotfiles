@@ -6,7 +6,7 @@
   "accent": "mono",
   "border_spin": false,
   "border_angle": 45,
-  "glow": false,
+  "glow": true,
   "glow_range": 14,
   "glow_strength": 40,
   "shadows": true,
@@ -59,7 +59,7 @@
   "monitors": {
     "DP-1": {
       "mode": "2560x1440@144.00",
-      "cm": "srgb",
+      "cm": "edid",
       "bitdepth": 8,
       "vrr": 2
     },
@@ -76,7 +76,7 @@
   "cursor_size": 24,
   "ui_font": "Inter",
   "ui_font_size": 10,
-  "fetch_logo": "portrait",
+  "fetch_logo": "torii",
   "fetch_source": "",
   "clock_seconds": true,
   "clock_12h": false,
@@ -86,7 +86,7 @@
   "notif_center": false,
   "sounds": true,
   "ui_sound_volume": 55,
-  "desktop_clock": false,
+  "desktop_clock": true,
   "desktop_clock_pos": "left",
   "lock_minutes": 25,
   "screen_off_after": 5,
@@ -95,8 +95,8 @@
   "user_name": "YU",
   "avatar": "/home/yu/Pictures/7fabb41eff1aca5db1554bc614b8dbf2-2561673958.jpg",
   "cc_logo": "avatar",
-  "wall_main": "/home/yu/Pictures/wallpaper/mono-dunes.jpg",
-  "wall_side": "/home/yu/Pictures/wallpaper/mono-torii-night.jpg",
+  "wall_main": "/home/yu/Pictures/wallpaper/mono-torii-night.jpg",
+  "wall_side": "/home/yu/Pictures/wallpaper/mono-dunes.jpg",
   "default_apps": {
     "files": "org.kde.dolphin.desktop",
     "images": "org.kde.gwenview.desktop",
@@ -143,7 +143,7 @@
       "gpu": 140
     }
   },
-  "hot_corner": true,
+  "hot_corner": false,
   "instant_apply": false,
   "confirm_power": true,
   "volume_step": 3,
@@ -157,8 +157,8 @@
   "screen_time": true,
   "game_workspace": true,
   "wall_tint": true,
-  "ascii_wall": true,
-  "music_pulse": true,
+  "ascii_wall": false,
+  "music_pulse": false,
   "desk_clock": true,
   "ws_preview": true,
   "login_handoff": true,

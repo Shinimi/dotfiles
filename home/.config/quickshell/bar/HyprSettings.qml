@@ -110,6 +110,7 @@ Scope {
         target: "settings"
         function toggle(): void { root.toggle() }
         function open(page: string): void { root.open(page) }
+        function scrollEnd(): void { flick.contentY = Math.max(0, flick.contentHeight - flick.height) }   // jump to the bottom of the page
         function set(key: string, value: string): void {
             Settings.setNow(key, value === "true" ? true : value === "false" ? false : isNaN(Number(value)) ? value : Number(value))
         }
@@ -120,6 +121,18 @@ Scope {
     }
 
     // ---- data for the Display / System pages ----
+    // everything installed (icon themes, cursors, fonts) for the Theme page: last scan shows at once, a fresh one runs on open
+    property var scan: ({ icons: [], cursors: [], fonts: [] })
+    FileView {
+        id: scanFile
+        path: Quickshell.env("HOME") + "/.cache/qsbar/themes.json"; watchChanges: true; onFileChanged: reload()
+        onLoaded: { try { root.scan = JSON.parse(text()) } catch (e) {} }
+    }
+    Process {
+        id: scanRun
+        command: ["sh", "-c", "mkdir -p ~/.cache/qsbar && python3 -I " + root.qsDir + "/theme-scan.py > ~/.cache/qsbar/themes.json.tmp && mv ~/.cache/qsbar/themes.json.tmp ~/.cache/qsbar/themes.json"]
+    }
+    onPageChanged: if (page === "theme" && !scanRun.running) scanRun.running = true
     Process {
         id: fetchPick
         command: ["kdialog", "--title", "Picture for terminal art", "--getopenfilename", Quickshell.env("HOME") + "/Pictures", "Images (*.png *.jpg *.jpeg *.webp)"]
@@ -751,12 +764,28 @@ Scope {
                     // ---------- Theme ----------
                     Column {
                         visible: root.page === "theme"; width: parent.width; spacing: 14
+                        Label { width: parent.width; wrapMode: Text.WordWrap; text: "Everything installed on your PC is listed. GTK apps switch right away; Qt apps like Dolphin on their next start."; color: Theme.muted; font.pixelSize: 10 }
                         SetSection {
-                            width: parent.width; title: "Icons"; icon: "\u{f02e9}"
-                            SetTiles {
-                                label: "Icon style"; columns: 3; current: Settings.get("icon_base")
-                                options: [["Tela-mono", "Tela mono", "flat, single colour", "\u{f024b}"], ["Papirus-Dark", "Papirus", "rounded, pick a folder colour", "\u{f024b}"], ["breeze-dark", "Breeze", "KDE's own", "\u{f024b}"]]
-                                onPicked: v => Settings.set("icon_base", v)
+                            width: parent.width; title: "Icons  ·  " + root.scan.icons.length + " installed"; icon: "\u{f02e9}"
+                            Grid {
+                                width: parent.width; columns: 4; columnSpacing: 8; rowSpacing: 8
+                                Repeater {
+                                    model: root.scan.icons
+                                    ThemeCard {
+                                        id: icard
+                                        required property var modelData
+                                        width: (parent.width - 24) / 4; previewHeight: 34
+                                        title: modelData.name; on: Settings.get("icon_base") === modelData.id
+                                        onPicked: Settings.set("icon_base", modelData.id)
+                                        Row {   // real icons from the theme
+                                            spacing: 8
+                                            Repeater {
+                                                model: icard.modelData.previews
+                                                Image { required property string modelData; width: 32; height: 32; sourceSize: Qt.size(64, 64); source: "file://" + modelData; asynchronous: true; smooth: true }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                             Column {
                                 visible: Settings.get("icon_base") === "Papirus-Dark"
@@ -781,60 +810,171 @@ Scope {
                                 }
                             }
                         }
-                        Row {
-                            width: parent.width; spacing: 14
-                            SetSection {
-                                width: (parent.width - 14) / 2; title: "Cursor"; icon: "\u{f01bf}"
-                                SetTiles {
-                                    label: "Style"; columns: 2; current: Settings.get("cursor_theme")
-                                    options: [["Vimix-white-cursors", "Vimix white", "light pointer"], ["Vimix-cursors", "Vimix dark", "dark pointer"], ["capitaine-cursors", "Capitaine dark", "macOS-like"], ["capitaine-cursors-light", "Capitaine light", "macOS-like"], ["breeze_cursors", "Breeze", "KDE's own"]]
-                                    onPicked: v => Settings.set("cursor_theme", v)
-                                }
-                                SetTiles {
-                                    label: "Size"; columns: 3; current: Settings.get("cursor_size")
-                                    options: [[24, "Normal", "24 px", "\u{f01bf}"], [32, "Large", "32 px", "\u{f01bf}"], [40, "Huge", "40 px", "\u{f01bf}"]]
-                                    onPicked: v => Settings.set("cursor_size", v)
-                                }
-                            }
-                            SetSection {
-                                width: (parent.width - 14) / 2; title: "Font"; icon: "\u{f0881}"
-                                Column {
-                                    width: parent.width; spacing: 8
-                                    Label { text: "App font"; color: "#e6e6e6"; font.pixelSize: 12 }
-                                    Grid {   // each font shown in itself
-                                        width: parent.width; columns: 2; columnSpacing: 8; rowSpacing: 8
-                                        Repeater {
-                                            model: ["Inter", "Noto Sans", "Fira Sans", "Cantarell"]
-                                            Rectangle {
-                                                id: fo
-                                                required property string modelData
-                                                readonly property bool cur: Settings.get("ui_font") === modelData
-                                                width: (parent.width - 8) / 2; height: 74; radius: 14
-                                                color: cur ? "#ececec" : fom.containsMouse ? "#1c1c1c" : "#0f0f0f"; border.width: 1; border.color: cur ? "#ececec" : "#222222"
-                                                Behavior on color { ColorAnimation { duration: 130 } }
-                                                Text { x: 12; y: 6; text: "Aa"; font.family: fo.modelData; font.pixelSize: 30; color: fo.cur ? "#0b0b0b" : "#f0f0f0" }
-                                                Text { x: 12; anchors.bottom: parent.bottom; anchors.bottomMargin: 8; text: fo.modelData; font.family: fo.modelData; font.pixelSize: 11; color: fo.cur ? "#70000000" : "#8a8a8a" }
-                                                MouseArea { id: fom; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Settings.set("ui_font", fo.modelData) }
-                                            }
+                        SetSection {
+                            width: parent.width; title: "Cursor  ·  " + root.scan.cursors.length + " installed"; icon: "\u{f01bf}"
+                            Grid {
+                                width: parent.width; columns: 4; columnSpacing: 8; rowSpacing: 8
+                                Repeater {
+                                    model: root.scan.cursors
+                                    ThemeCard {
+                                        id: ccard
+                                        required property var modelData
+                                        width: (parent.width - 24) / 4; previewHeight: 30
+                                        title: modelData.name; sub: "pointer · link · text · busy"; on: Settings.get("cursor_theme") === modelData.id
+                                        onPicked: Settings.set("cursor_theme", modelData.id)
+                                        Image {   // drawn from the theme's own cursor files
+                                            height: 30; width: implicitWidth * height / Math.max(1, implicitHeight); fillMode: Image.PreserveAspectFit
+                                            source: "file://" + ccard.modelData.preview; cache: false; asynchronous: true; smooth: true; mipmap: true
                                         }
                                     }
                                 }
-                                SetSlider { label: "Font size"; key: "ui_font_size"; from: 9; to: 13; suffix: " pt" }
+                            }
+                            SetTiles {
+                                label: "Size"; columns: 4; current: Settings.get("cursor_size")
+                                options: [[24, "Normal", "24 px", "\u{f01bf}"], [32, "Large", "32 px", "\u{f01bf}"], [40, "Huge", "40 px", "\u{f01bf}"], [48, "Giant", "48 px", "\u{f01bf}"]]
+                                onPicked: v => Settings.set("cursor_size", v)
                             }
                         }
-                        Label { width: parent.width; wrapMode: Text.WordWrap; text: "Icons and fonts update in GTK apps right away; Qt apps like Dolphin pick them up next time they open."; color: Theme.muted; font.pixelSize: 10 }
+                        SetSection {
+                            id: fontSec
+                            width: parent.width; title: "Font  ·  " + root.scan.fonts.length + " installed"; icon: "\u{f0881}"
+                            property string query: ""; property string kind: "all"; property bool all: false
+                            readonly property var matches: {   // yours first, the rest A–Z
+                                const ok = root.scan.fonts.filter(f => (kind === "all" || f.kind === kind) && f.family.toLowerCase().includes(query.toLowerCase()))
+                                const mine = Settings.get("ui_font")
+                                return ok.filter(f => f.family === mine).concat(ok.filter(f => f.family !== mine))
+                            }
+                            readonly property bool limited: !all && query === "" && matches.length > 12
+                            Row {   // search + kind filter
+                                width: parent.width; spacing: 8
+                                TextField {
+                                    id: fontFind
+                                    width: parent.width - kinds.width - 8; height: 34
+                                    placeholderText: "Search fonts…"; placeholderTextColor: Theme.muted
+                                    color: Theme.fg; font.family: Theme.font; font.pixelSize: 12; leftPadding: 34
+                                    onTextEdited: fontSec.query = text
+                                    background: Rectangle { radius: 10; color: "#0e0e0e"; border.width: 1; border.color: fontFind.activeFocus ? "#55ffffff" : "#262626"
+                                        Text { x: 12; anchors.verticalCenter: parent.verticalCenter; text: "\u{f0349}"; color: Theme.muted; font.family: Theme.font; font.pixelSize: 13 } }
+                                }
+                                Row {
+                                    id: kinds; spacing: 6
+                                    Repeater {
+                                        model: [["all", "All"], ["sans", "Sans"], ["serif", "Serif"], ["mono", "Mono"]]
+                                        Rectangle {
+                                            id: kc
+                                            required property var modelData
+                                            readonly property bool on: fontSec.kind === modelData[0]
+                                            width: kt.implicitWidth + 24; height: 34; radius: 10
+                                            color: on ? "#ececec" : kcm.containsMouse ? "#1c1c1c" : "#0f0f0f"; border.width: 1; border.color: on ? "#ececec" : "#222222"
+                                            Text { id: kt; anchors.centerIn: parent; text: kc.modelData[1]; color: kc.on ? "#0b0b0b" : "#cfcfcf"; font.family: Theme.font; font.pixelSize: 11; font.bold: true }
+                                            MouseArea { id: kcm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: fontSec.kind = kc.modelData[0] }
+                                        }
+                                    }
+                                }
+                            }
+                            Grid {   // each font written in itself
+                                width: parent.width; columns: 3; columnSpacing: 8; rowSpacing: 8
+                                Repeater {
+                                    model: fontSec.limited ? fontSec.matches.slice(0, 12) : fontSec.matches
+                                    ThemeCard {
+                                        id: fcard
+                                        required property var modelData
+                                        width: (parent.width - 16) / 3; previewHeight: 40
+                                        title: modelData.family; sub: modelData.kind; on: Settings.get("ui_font") === modelData.family
+                                        onPicked: Settings.set("ui_font", modelData.family)
+                                        Row {
+                                            spacing: 12
+                                            Text { text: "Aa"; font.family: fcard.modelData.family; font.pixelSize: 30; color: "#f0f0f0"; anchors.verticalCenter: parent.verticalCenter }
+                                            Text { width: fcard.width - 90; elide: Text.ElideRight; text: "The quick brown fox\njumps over 0123"; font.family: fcard.modelData.family; font.pixelSize: 11; lineHeight: 1.1; color: "#8a8a8a"; anchors.verticalCenter: parent.verticalCenter }
+                                        }
+                                    }
+                                }
+                            }
+                            Label { visible: fontSec.matches.length === 0; text: "No installed font matches “" + fontSec.query + "”."; color: Theme.muted; font.pixelSize: 11 }
+                            SetButton {
+                                visible: fontSec.limited || (fontSec.all && fontSec.query === "" && fontSec.matches.length > 12)
+                                icon: fontSec.all ? "\u{f0143}" : "\u{f0140}"
+                                text: fontSec.all ? "Show fewer" : "Show all " + fontSec.matches.length + " fonts"
+                                onClicked: fontSec.all = !fontSec.all
+                            }
+                            SetSlider { label: "Font size"; key: "ui_font_size"; from: 9; to: 13; suffix: " pt" }
+                        }
                         SetSection {
                             width: parent.width; title: "Terminal art (fastfetch)"; icon: "\u{f018d}"
-                            SetTiles {
-                                label: "Shown next to your system info"; columns: 5; current: Settings.get("fetch_logo"); onPicked: v => Settings.set("fetch_logo", v)
-                                options: [["katana", "Katana"], ["guts", "Guts portrait"], ["mono", "Mono ring"], ["crest", "Butterfly crest"], ["kamon", "Crest (dots)"], ["butterfly", "Butterfly"], ["portrait", "Shinobu portrait"], ["picture", "My picture"], ["ascii", "Text art"], ["distro", "CachyOS logo"]]
+                            Column {
+                                width: parent.width; spacing: 10
+                                Column {
+                                    width: parent.width; spacing: 2
+                                    Label { text: "Shown next to your system info"; color: "#e6e6e6"; font.pixelSize: 12 }
+                                    Label { text: "Each tile is what your terminal will show."; color: "#6e6e6e"; font.pixelSize: 10 }
+                                }
+                                Grid {   // a live preview of every art, read from the same files fastfetch uses
+                                    id: artGrid
+                                    width: parent.width; columns: 5; columnSpacing: 8; rowSpacing: 8
+                                    readonly property string dir: Quickshell.env("HOME") + "/.config/fastfetch/"
+                                    Repeater {
+                                        // [value, name, text-art file or picture, kind]
+                                        model: [["katana", "Katana", "katana.txt", "text"], ["torii", "Torii moon", "torii.txt", "text"],
+                                                ["kamon", "Crest (dots)", "kamon.txt", "text"], ["butterfly", "Butterfly", "butterfly.txt", "text"],
+                                                ["guts", "Guts portrait", "guts-framed.png", "image"], ["mono", "Mono ring", "mono.png", "image"],
+                                                ["crest", "Butterfly crest", "crest.png", "image"], ["picture", "My picture", Quickshell.env("HOME") + "/.face.icon", "image"],
+                                                ["ascii", "Text art", "ascii.txt", "text"], ["distro", "CachyOS logo", "", "logo"]]
+                                        Rectangle {
+                                            id: art
+                                            required property var modelData
+                                            readonly property bool on: Settings.get("fetch_logo") === modelData[0]
+                                            readonly property string file: modelData[2].startsWith("/") ? modelData[2] : artGrid.dir + modelData[2]
+                                            width: (parent.width - 32) / 5; height: 138; radius: 14
+                                            color: on ? "#191919" : am.containsMouse ? "#161616" : "#0f0f0f"
+                                            border.width: on ? 1.5 : 1; border.color: on ? "#ececec" : am.containsMouse ? "#33ffffff" : "#222222"
+                                            Behavior on color { ColorAnimation { duration: 130 } }
+                                            scale: am.pressed ? 0.97 : 1
+                                            Behavior on scale { NumberAnimation { duration: 90 } }
+                                            Rectangle {   // the preview "screen"
+                                                id: pv
+                                                x: 8; y: 8; width: parent.width - 16; height: 96; radius: 9
+                                                color: "#050505"; border.width: 1; border.color: art.on ? "#cfcfcf" : "#1a1a1a"; clip: true
+                                                FileView { id: artFile; path: art.modelData[3] === "text" ? art.file : ""; watchChanges: true; onFileChanged: reload() }
+                                                Text {   // braille art, colours stripped, scaled to fit
+                                                    visible: art.modelData[3] === "text"
+                                                    anchors.centerIn: parent
+                                                    text: visible ? artFile.text().replace(/\x1b\[[0-9;?]*[a-zA-Z]/g, "").replace(/\s+$/, "") : ""
+                                                    color: "#e8e8e8"; font.family: Theme.font; font.pixelSize: 12
+                                                    renderType: Text.CurveRendering   // no colour fringes when scaled down
+                                                    lineHeightMode: Text.FixedHeight; lineHeight: 12
+                                                    scale: implicitWidth > 0 ? Math.min((pv.width - 12) / implicitWidth, (pv.height - 10) / implicitHeight) : 1
+                                                }
+                                                Image {
+                                                    visible: art.modelData[3] === "image"
+                                                    anchors.fill: parent; anchors.margins: 6
+                                                    source: visible ? "file://" + art.file : ""; cache: false
+                                                    fillMode: Image.PreserveAspectFit; asynchronous: true; smooth: true; mipmap: true
+                                                }
+                                                Text {
+                                                    visible: art.modelData[3] === "logo"
+                                                    anchors.centerIn: parent; text: "\u{f303}"; color: "#e0e0e0"; font.family: Theme.font; font.pixelSize: 44
+                                                }
+                                            }
+                                            Text {
+                                                x: 12; anchors.bottom: parent.bottom; anchors.bottomMargin: 10; width: parent.width - 24; elide: Text.ElideRight
+                                                text: art.modelData[1]; color: "#ececec"; font.family: Theme.font; font.pixelSize: 12; font.bold: true
+                                            }
+                                            Rectangle {   // check
+                                                visible: art.on; width: 18; height: 18; radius: 9; color: "#ececec"
+                                                anchors { right: parent.right; bottom: parent.bottom; margins: 10 }
+                                                Text { anchors.centerIn: parent; text: "\u{f012c}"; color: "#0b0b0b"; font.family: Theme.font; font.pixelSize: 11 }
+                                            }
+                                            MouseArea { id: am; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: Settings.set("fetch_logo", art.modelData[0]) }
+                                        }
+                                    }
+                                }
                             }
                             Row {
                                 visible: Settings.get("fetch_logo") === "ascii"; spacing: 8
                                 SetButton { icon: "\u{f0256}"; text: "Make text art from a picture…"; onClicked: fetchPick.running = true }
-                                Label { anchors.verticalCenter: parent.verticalCenter; text: Settings.get("fetch_source") ? Settings.get("fetch_source").split("/").pop() : "Shinobu (default)"; color: Theme.muted; font.pixelSize: 11 }
+                                Label { anchors.verticalCenter: parent.verticalCenter; text: Settings.get("fetch_source") ? Settings.get("fetch_source").split("/").pop() : "mountain peak (default)"; color: Theme.muted; font.pixelSize: 11 }
                             }
-                            Label { width: parent.width; wrapMode: Text.WordWrap; text: "Tip: close-up, high-contrast pictures (manga panels, simple portraits) turn into the clearest art."; color: Theme.muted; font.pixelSize: 10 }
+                            Label { visible: Settings.get("fetch_logo") === "ascii"; width: parent.width; wrapMode: Text.WordWrap; text: "Tip: close-up, high-contrast pictures (manga panels, simple portraits) turn into the clearest art."; color: Theme.muted; font.pixelSize: 10 }
                         }
                     }
 

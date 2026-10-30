@@ -200,20 +200,20 @@ chmod +x "$H/autostart.sh"; rm -f "$S"/*.todo
 python3 -I - "$H/settings.json" "$S" <<'PY'
 import json,sys,os,subprocess,re
 s=json.load(open(sys.argv[1])); st=sys.argv[2]
-mode=s.get("fetch_logo","ascii"); src=s.get("fetch_source","") or os.path.expanduser("~/.config/fastfetch/shinobu-source.png")
+mode=s.get("fetch_logo","torii"); src=s.get("fetch_source","") or os.path.expanduser("~/.config/fastfetch/text-art-source.jpg")
+if mode=="portrait": mode="torii"   # the Shinobu portrait was retired
 key=json.dumps([mode,src]); f=os.path.join(st,"fetch.applied")
 if os.path.exists(f) and open(f).read()==key: sys.exit()
 if mode=="ascii": subprocess.run([os.path.expanduser("~/.local/bin/fetch-ascii.sh"),src],capture_output=True)
-if mode in ("portrait","picture"):
-    pic=os.path.expanduser("~/.config/fastfetch/shinobu-portrait.png") if mode=="portrait" else os.path.expanduser("~/.face.icon")
-    subprocess.run([os.path.expanduser("~/.local/bin/fetch-logo.sh"),pic],capture_output=True)
+if mode=="picture":
+    subprocess.run([os.path.expanduser("~/.local/bin/fetch-logo.sh"),os.path.expanduser("~/.face.icon")],capture_output=True)
 logo={"katana":'{ "type": "file-raw", "source": "~/.config/fastfetch/katana.txt", "padding": { "top": 0, "left": 2, "right": 5 } }',
       "guts":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/guts-framed.png", "width": 26, "height": 12, "padding": { "top": 1, "left": 2, "right": 4 } }',
       "mono":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/mono.png", "width": 26, "height": 11, "padding": { "top": 1, "left": 2, "right": 4 } }',
       "crest":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/crest.png", "width": 26, "height": 11, "padding": { "top": 1, "left": 2, "right": 4 } }',
       "kamon":'{ "type": "file-raw", "source": "~/.config/fastfetch/kamon.txt", "padding": { "top": 1, "left": 3, "right": 6 } }',
       "butterfly":'{ "type": "file-raw", "source": "~/.config/fastfetch/butterfly.txt", "padding": { "top": 2, "left": 3, "right": 5 } }',
-      "portrait":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 30, "height": 14, "padding": { "top": 1, "left": 3, "right": 4 } }',
+      "torii":'{ "type": "file-raw", "source": "~/.config/fastfetch/torii.txt", "padding": { "top": 1, "left": 2, "right": 5 } }',
       "ascii":'{ "type": "file-raw", "source": "~/.config/fastfetch/ascii.txt", "padding": { "top": 1, "left": 2, "right": 4 } }',
       "picture":'{ "type": "kitty-direct", "source": "~/.config/fastfetch/logo.png", "width": 34, "height": 15, "padding": { "top": 1, "left": 3, "right": 5 } }',
       "distro":'{ "type": "builtin", "color": { "1": "#e0e0e0", "2": "#b0b0b0" }, "padding": { "top": 1, "left": 2, "right": 4 } }'}[mode]
