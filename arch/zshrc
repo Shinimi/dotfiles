@@ -1,0 +1,23 @@
+# zsh on vanilla Arch · monochrome: your Frieren fetch, Powerlevel10k, suggestions + highlighting. Made by Claude.
+[[ -o interactive && -z "$NO_FETCH" ]] && command -v frieren-fetch >/dev/null && frieren-fetch
+[[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]] && source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+
+HISTFILE=~/.zsh_history HISTSIZE=50000 SAVEHIST=50000
+setopt share_history hist_ignore_all_dups autocd interactive_comments
+autoload -Uz compinit && compinit; zstyle ':completion:*' menu select matcher-list 'm:{a-z}={A-Z}'
+bindkey -e; bindkey '^[[1;5C' forward-word; bindkey '^[[1;5D' backward-word; bindkey '^[[3~' delete-char
+
+export PATH="$HOME/.local/bin:$PATH" EDITOR=nano
+alias fetch=frieren-fetch ff=fastfetch ls='ls --color=auto' ll='ls -lah --color=auto' grep='grep --color=auto'
+
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source /usr/share/zsh-theme-powerlevel10k/powerlevel10k.zsh-theme
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+# monochrome highlighting / suggestions
+typeset -A ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[command]='fg=255' ZSH_HIGHLIGHT_STYLES[builtin]='fg=255' ZSH_HIGHLIGHT_STYLES[alias]='fg=255' ZSH_HIGHLIGHT_STYLES[arg0]='fg=255'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=167' ZSH_HIGHLIGHT_STYLES[path]='fg=250,underline'
+ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=245' ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=245'
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=240'

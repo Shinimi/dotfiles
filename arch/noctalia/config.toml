@@ -1,0 +1,126 @@
+# yu's Noctalia on vanilla Arch + Hyprland: minimal (after TermNode's setup), monochrome. Only what differs from the defaults is here;
+# everything else is Noctalia's own default (see `noctalia --help` and docs.noctalia.dev). Settings you change in the
+# GUI are saved as overrides on top of this file. Made by Claude.
+
+[shell]
+font_family    = "JetBrainsMono Nerd Font"
+time_format    = "{:%H:%M}"
+polkit_agent   = true                 # password prompts
+avatar_path    = "~/.face"
+offline_mode   = false
+telemetry_enabled = false
+
+[shell.panel]
+transparency_mode  = "glass"          # panels are see-through glass, like the Hyprland control center
+border_color       = "outline_variant"
+launcher_placement = "floating"
+
+[shell.animation]
+enabled = true
+speed   = 1.15
+
+# ── monochrome: the palette comes from your wallpaper in greys only, with true-black darks ──
+[theme]
+mode             = "dark"
+source           = "wallpaper"
+wallpaper_scheme = "m3-monochrome"
+pure_black_dark  = true
+
+[wallpaper]
+enabled         = true
+directory       = "~/Pictures/wallpaper"
+fill_mode       = "crop"
+transition      = ["fade", "pixel"]
+transition_duration = 900
+
+[wallpaper.default]
+path = "~/Pictures/wallpaper/mono-torii-night.jpg"
+
+# ── the bar: floating, see-through, small things in the middle (like the Hyprland bar) ──
+[bar.main]
+position           = "top"
+thickness          = 32
+background_opacity = 0.0              # no strip: widgets float over the wallpaper
+compositor_blur    = false
+radius             = 0
+margin_ends        = 10
+margin_edge        = 8
+padding            = 10
+widget_spacing     = 14
+shadow             = false
+capsule            = false
+start  = ["launcher"]
+center = ["workspaces", "cpu", "temp", "ram", "clock"]
+end    = ["tray", "notifications", "volume", "control-center", "session"]
+
+[bar.main.monitor.DP-2]
+enabled = false                       # the side screen has no bar
+
+[widget.workspaces]
+type               = "workspaces"
+style              = "regular"
+show_labels        = false            # dots, with a stretched pill for the one you're on
+show_icons         = false
+active_pill_size   = 3.0
+inactive_pill_size = 1.0
+pill_scale         = 0.6
+focused_color      = "#f2f2f2"
+occupied_color     = "#8a8a8a"
+empty_color        = "#3a3a3a"
+urgent_color       = "#ffffff"
+
+[widget.cpu]
+type          = "sysmon"
+stat          = "cpu_usage"
+visualization = "none"
+
+[widget.temp]
+type          = "sysmon"
+stat          = "cpu_temp"
+visualization = "none"
+
+[widget.ram]
+type          = "sysmon"
+stat          = "ram_used"
+visualization = "none"
+
+[widget.clock]
+type           = "clock"
+format         = "{:%H:%M:%S}"
+tooltip_format = "{:%A %d %B}"
+
+[system.monitor]
+enabled = true
+
+# ── the rest of your Hyprland habits ──
+[weather]
+enabled = true
+unit    = "celsius"
+effects = false                       # no rain effects (you turned those off on Hyprland)
+
+[location]
+auto_locate = false
+address     = "Batman, Türkiye"
+
+[lockscreen]
+enabled         = true
+blurred_desktop = true
+blur_intensity  = 0.6
+tint_intensity  = 0.45
+transition      = ["fade"]
+transition_duration = 700
+
+[idle.behavior.lock]
+enabled = true
+timeout = 1500                        # 25 min, like hypridle
+action  = "lock"
+
+[idle.behavior.screen-off]
+enabled = true
+timeout = 1800                        # 30 min
+action  = "screen_off"
+
+[notification]
+background_opacity = 0.9
+border             = true
+follow_focused_output = true
