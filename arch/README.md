@@ -16,6 +16,7 @@ Made by Claude. Read this on your phone while you install: it's the `arch/README
 | `hypr/hyprland.lua` | Minimal Hyprland: your screens, Turkish keyboard, flat mouse, monochrome glass, window rules, keys |
 | `noctalia/config.toml` | Noctalia in monochrome (greys from the wallpaper, true black), clean floating bar, none on the side screen |
 | `zshrc` | zsh with your Frieren fetch, Powerlevel10k, suggestions + highlighting |
+| `CONTEXT.md` | Where things stand, your preferences, what's left: for continuing with Claude |
 
 ## Before you start
 
@@ -61,6 +62,9 @@ reboot
 
 Then: login screen → Hyprland + Noctalia. Open **Steam → Settings → Storage → add `/mnt/games/SteamLibrary`**, and every
 game is back without downloading. Spotify: `spotify-launcher`. GPU fan/undervolt: **LACT** (in the launcher).
+
+**Carry on with Claude:** setup.sh installs the Claude app and puts back its data from the Games drive, so the chat that
+built all this is still there; open it and keep going. For a fresh chat, say: *"read arch/CONTEXT.md in my dotfiles"*.
 
 ## If an update ever breaks something
 

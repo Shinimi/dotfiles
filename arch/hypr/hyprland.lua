@@ -24,14 +24,17 @@ hl.monitor({ output = "",     mode = "preferred",     position = "auto",   scale
 
 ---------------------------------------------------------------- start
 hl.on("hyprland.start", function()
-    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE")
+    hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE QT_QPA_PLATFORMTHEME XCURSOR_THEME")
+    hl.exec_cmd("hyprctl setcursor Vimix-cursors-white 24")
     hl.exec_cmd("noctalia")
 end)
 
 ---------------------------------------------------------------- environment
-hl.env("XCURSOR_THEME", "Vimix-white-cursors")
+hl.env("XCURSOR_THEME", "Vimix-cursors-white")
 hl.env("XCURSOR_SIZE", "24")
 hl.env("QT_QPA_PLATFORM", "wayland;xcb")
+hl.env("QT_QPA_PLATFORMTHEME", "qt6ct")             -- dark Qt apps (Dolphin, Ark)
+hl.env("MANGOHUD", "1")                             -- game overlay loaded, hidden until Right Shift + F12
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
 hl.env("MESA_SHADER_CACHE_MAX_SIZE", "12G")
 
