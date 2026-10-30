@@ -95,8 +95,8 @@
   "user_name": "YU",
   "avatar": "/home/yu/Pictures/7fabb41eff1aca5db1554bc614b8dbf2-2561673958.jpg",
   "cc_logo": "avatar",
-  "wall_main": "/home/yu/Pictures/wallpaper/mono-torii-night.jpg",
-  "wall_side": "/home/yu/Pictures/wallpaper/mono-dunes.jpg",
+  "wall_main": "/home/yu/Pictures/wallpaper/mono-peak.jpg",
+  "wall_side": "/home/yu/Pictures/wallpaper/mono-torii-night.jpg",
   "default_apps": {
     "files": "org.kde.dolphin.desktop",
     "images": "org.kde.gwenview.desktop",
@@ -140,6 +140,12 @@
       "fps": 120,
       "hud": "full",
       "power": "performance",
+      "gpu": 140
+    },
+    "5335510": {
+      "fps": 60,
+      "hud": "full",
+      "power": "balanced",
       "gpu": 140
     }
   },

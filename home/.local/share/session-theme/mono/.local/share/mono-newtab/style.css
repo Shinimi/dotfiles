@@ -1,0 +1,30 @@
+/* Hub-style new tab: mono, sharp corners, corner brackets, numbered labels. Made by Claude. */
+:root { --fg: #ececec; --dim: #8a8a8a; --faint: #4a4a4a; --line: rgba(255,255,255,.16); --bg: #000; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; background: var(--bg); color: var(--fg); overflow: hidden;
+  font-family: "JetBrainsMono Nerd Font", "JetBrains Mono", "JetBrains Mono", monospace; }
+canvas#ascii { position: fixed; inset: 0; width: 100vw; height: 100vh; }
+.shade { position: fixed; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,.88) 0%, rgba(0,0,0,.78) 42%, rgba(0,0,0,.12) 62%, rgba(0,0,0,.3) 100%); }
+main { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; padding-top: 14vh; }
+.tag { font-size: 11px; letter-spacing: 3px; color: var(--dim); margin-bottom: 18px; }
+.tag b { color: var(--fg); } .num, .sl { color: var(--faint); } .jp { color: var(--dim); letter-spacing: 1px; font-family: "Noto Sans CJK JP", sans-serif; }
+#clock { font-size: 128px; font-weight: 100; letter-spacing: 4px; line-height: 1; }
+#date { margin-top: 10px; font-size: 18px; color: #c8c8c8; letter-spacing: 1px; }
+#line { margin-top: 8px; font-size: 13px; color: #8a8a8a; font-style: italic; }
+#search { position: relative; margin-top: 46px; width: min(640px, 80vw); height: 48px; display: flex; align-items: center;
+  background: rgba(10,10,10,.92); border: 1px solid var(--line); border-left: 2px solid #fff; border-radius: 2px; }
+#search:focus-within { border-color: rgba(255,255,255,.55); border-left-color: #fff; }
+#search .caret { padding: 0 10px 0 14px; color: var(--dim); font-size: 18px; }
+#search input { flex: 1; height: 100%; background: transparent; border: 0; outline: 0; color: var(--fg); font: inherit; font-size: 15px; }
+#search input::placeholder { color: #555; }
+#search .hint { padding: 0 14px; font-size: 9px; letter-spacing: 2px; color: var(--faint); }
+#links { margin-top: 34px; display: grid; grid-template-columns: repeat(4, 200px); gap: 12px; }
+#links a { position: relative; display: block; padding: 14px 16px; height: 64px; text-decoration: none; color: var(--fg);
+  background: rgba(8,8,8,.82); border: 1px solid var(--line); border-radius: 2px; transition: background .12s, border-color .12s; }
+#links a .n { font-size: 10px; color: var(--faint); } #links a .s { font-size: 10px; color: #3a3a3a; margin: 0 6px; }
+#links a .t { font-size: 11px; letter-spacing: 2px; font-weight: 700; }
+#links a .u { display: block; margin-top: 8px; font-size: 10px; color: #5a5a5a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#links a:hover, #links a:focus { background: #ededed; border-color: #ededed; outline: 0; }
+#links a:hover .t, #links a:focus .t { color: #0c0c0c; } #links a:hover .n, #links a:hover .u, #links a:focus .u { color: #555; }
+footer { position: fixed; bottom: 22px; left: 0; right: 0; z-index: 2; text-align: center; font-size: 11px; letter-spacing: 2px; color: var(--faint); }
+footer b { color: #d8d8d8; font-weight: 400; } footer .jp { margin-left: 18px; }

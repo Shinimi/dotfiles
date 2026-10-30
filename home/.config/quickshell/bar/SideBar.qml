@@ -18,6 +18,11 @@ PanelWindow {
         x: Settings.cur("gaps_out"); y: Theme.barTop
         width: ws.implicitWidth + 12; height: Theme.barHeight
         color: "transparent"   // floating, like the main bar: just the dots
-        Workspaces { id: ws; screenName: "DP-2"; dots: true; anchors.centerIn: parent }
+        Loader {   // Hyprland's workspace dots, or Niri's
+            id: ws; anchors.centerIn: parent
+            sourceComponent: Niri.active ? niriDots : hyprDots
+            Component { id: hyprDots; Workspaces { screenName: "DP-2"; dots: true } }
+            Component { id: niriDots; NiriWorkspaces { screenName: "DP-2" } }
+        }
     }
 }

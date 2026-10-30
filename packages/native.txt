@@ -146,6 +146,7 @@ mesa-utils
 micro
 mkinitcpio
 modemmanager
+moonlight-qt
 mpvpaper
 mtools
 nano
@@ -187,6 +188,7 @@ pv
 python
 python-defusedxml
 python-packaging
+qbittorrent
 qqc2-breeze-style
 quickshell
 realtime-privileges

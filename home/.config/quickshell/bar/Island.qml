@@ -67,7 +67,12 @@ PanelWindow {
         Row {   // middle: workspace dots · what's playing · the time
             id: mid
             anchors.centerIn: parent; spacing: 12
-            Workspaces { dots: true; anchors.verticalCenter: parent.verticalCenter }
+            Loader {   // Hyprland's workspace dots, or Niri's
+                anchors.verticalCenter: parent.verticalCenter
+                sourceComponent: Niri.active ? niriDots : hyprDots
+                Component { id: hyprDots; Workspaces { dots: true } }
+                Component { id: niriDots; NiriWorkspaces { screenName: "DP-1" } }
+            }
             Sep {}
             Row {   // the machine at a glance: CPU load, CPU temperature, RAM in use
                 anchors.verticalCenter: parent.verticalCenter; spacing: 14

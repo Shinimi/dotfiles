@@ -1,0 +1,93 @@
+{
+  "manifest_version": 3,
+  "name": "Monochrome (local)",
+  "version": "1.1",
+  "description": "Shinobu Kocho browser theme. Made by Claude.",
+  "theme": {
+    "colors": {
+      "frame": [
+        8,
+        8,
+        8
+      ],
+      "frame_inactive": [
+        8,
+        8,
+        8
+      ],
+      "frame_incognito": [
+        11,
+        11,
+        11
+      ],
+      "toolbar": [
+        13,
+        13,
+        13
+      ],
+      "tab_text": [
+        234,
+        234,
+        234
+      ],
+      "tab_background_text": [
+        110,
+        110,
+        110
+      ],
+      "tab_background_text_inactive": [
+        122,
+        122,
+        122
+      ],
+      "bookmark_text": [
+        200,
+        200,
+        200
+      ],
+      "toolbar_text": [
+        234,
+        234,
+        234
+      ],
+      "toolbar_button_icon": [
+        224,
+        224,
+        224
+      ],
+      "omnibox_background": [
+        20,
+        20,
+        20
+      ],
+      "omnibox_text": [
+        234,
+        234,
+        234
+      ],
+      "ntp_background": [
+        11,
+        11,
+        11
+      ],
+      "ntp_text": [
+        234,
+        234,
+        234
+      ],
+      "ntp_link": [
+        224,
+        224,
+        224
+      ],
+      "button_background": [
+        30,
+        30,
+        30
+      ]
+    },
+    "properties": {
+      "ntp_background_alignment": "bottom"
+    }
+  }
+}

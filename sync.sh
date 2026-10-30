@@ -28,6 +28,7 @@ home_paths=(
   .local/bin/game-session.sh .local/bin/usb-sounds.sh
   .config/systemd/user/rates-refresh.service .config/systemd/user/rates-refresh.timer
   .config/systemd/user/pkgwatch.service .config/systemd/user/pkgwatch.timer .config/systemd/user/usb-sounds.service
+  .local/share/session-theme
 )
 system_paths=(
   /etc/sddm.conf.d/10-mono-yu.conf /etc/sddm.conf.d/10-tokyo-night-yu.conf /etc/scx_loader.toml

@@ -188,7 +188,9 @@ Scope {
     Timer { running: cc.visible && cc.page === 0; interval: 5000; repeat: true; triggeredOnStart: true; onTriggered: notesProc.running = true }
     property string fanPick: ""   // the fan mode just clicked, shown until the stats catch up
     function setFan(m) { cc.fanPick = m; Quickshell.execDetached(["sudo", "-n", "/usr/local/bin/gpu-ctl", "fan", m]); fanLater.restart() }
-    Timer { id: fanLater; interval: 900; onTriggered: { Stats.refresh(); cc.fanPick = "" } }
+    Timer { id: fanLater; interval: 900; onTriggered: { Stats.refresh(); cc.fanPick = ""; cc.uvPick = "" } }
+    property string uvPick: ""    // same for the undervolt level
+    function setUv(m) { cc.uvPick = m; Quickshell.execDetached(["sudo", "-n", "/usr/local/bin/gpu-ctl", "undervolt", m]); fanLater.restart() }
     function go(cmd) { cc.visible = false; Quickshell.execDetached(cmd) }
     function qs(target, fn) { go(["qs", "ipc", "-p", qsDir, "call", target, fn || "toggle"]) }
     readonly property string greeting: {
@@ -517,7 +519,7 @@ Scope {
 
                     // ================= the page area =================
                     Item {
-                        property real h: cc.page === 0 ? 698 : cc.page === 4 ? 640 : cc.page === 7 ? 560 : cc.page === 2 ? 450 : 404   // Home and System hold more
+                        property real h: cc.page === 0 ? 698 : cc.page === 4 ? 676 : cc.page === 7 ? 560 : cc.page === 2 ? 450 : 404   // Home and System hold more
                         Behavior on h { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
                         Layout.fillWidth: true; Layout.preferredHeight: h
 
@@ -1067,6 +1069,12 @@ Scope {
                                         options: [["quiet", "Quiet"], ["balanced", "Balanced"], ["loud", "Loud"]]
                                         current: cc.fanPick || Stats.d.fanMode
                                         onPicked: v => cc.setFan(v)
+                                    }
+                                    Seg {   // undervolt: same clocks at a lower core voltage, so less heat and fan noise
+                                        visible: !!Stats.d.fanOk
+                                        options: [["off", "Stock volts"], ["light", "−50 mV"], ["strong", "−100 mV"]]
+                                        current: cc.uvPick || Stats.d.undervolt || "off"
+                                        onPicked: v => cc.setUv(v)
                                     }
                                     Text { visible: !Stats.d.fanOk; width: parent.width; wrapMode: Text.WordWrap; color: cc.dim; font.family: Theme.font; font.pixelSize: 10
                                            text: "Fan modes turn on after the next reboot" }

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# gpu-ctl – the bar's and game mode's way to change the RX 9060 XT's fan curve and power cap. Made by Claude.
+# gpu-ctl – the bar's and game mode's way to change the RX 9060 XT's fan curve, undervolt and power cap. Made by Claude.
 #   gpu-ctl fan quiet|balanced|loud      (remembered across reboots by gpu-fan.service)
+#   gpu-ctl undervolt off|light|strong   (core voltage 0 / −50 / −100 mV: same speed, less heat; remembered too)
 #   gpu-ctl power <watts>|default        (default = the everyday 160 W cap)
 # Runs as root through /etc/sudoers.d/gpu-ctl, so it only accepts these exact words and numbers.
 set -eu
@@ -17,6 +18,14 @@ case "${1:-}" in
     (( w < lo )) && w=$lo; (( w > hi )) && w=$hi
     echo $(( w * 1000000 )) > "$h/power1_cap"
     echo "power cap ${w} W" ;;
+  undervolt)
+    m=${2:-}
+    case "$m" in off) mv=0 ;; light) mv=-50 ;; strong) mv=-100 ;; *) echo "undervolt: off, light or strong" >&2; exit 2 ;; esac
+    od="$g/pp_od_clk_voltage"
+    grep -q VDDGFX_OFFSET "$od" 2>/dev/null || { echo "undervolt is off (needs amdgpu.ppfeaturemask and a reboot)" >&2; exit 3; }
+    echo "vo $mv" > "$od"; echo c > "$od"
+    mkdir -p "$STATE"; echo "$m" > "$STATE/undervolt"
+    echo "undervolt $m (${mv} mV)" ;;
   fan)
     m=${2:-}
     case "$m" in quiet|balanced|loud) ;; *) echo "fan mode: quiet, balanced or loud" >&2; exit 2 ;; esac
@@ -38,7 +47,9 @@ case "${1:-}" in
     echo c > "$fc"
     echo "fan $m" ;;
   restore)
+    u=$(cat "$STATE/undervolt" 2>/dev/null || echo off)
+    [ "$u" = off ] || "$0" undervolt "$u" || true
     m=$(cat "$STATE/fan" 2>/dev/null || echo balanced)
     [ "$m" = balanced ] || exec "$0" fan "$m" ;;
-  *) echo "usage: gpu-ctl fan quiet|balanced|loud | power <watts>|default" >&2; exit 2 ;;
+  *) echo "usage: gpu-ctl fan quiet|balanced|loud | undervolt off|light|strong | power <watts>|default" >&2; exit 2 ;;
 esac

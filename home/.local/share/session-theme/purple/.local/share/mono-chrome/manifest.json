@@ -1,0 +1,93 @@
+{
+  "manifest_version": 3,
+  "name": "Niri (local)",
+  "version": "1.1",
+  "description": "Niri browser theme (purple). Made by Claude.",
+  "theme": {
+    "colors": {
+      "frame": [
+        16,
+        13,
+        22
+      ],
+      "frame_inactive": [
+        16,
+        13,
+        22
+      ],
+      "frame_incognito": [
+        16,
+        13,
+        22
+      ],
+      "toolbar": [
+        16,
+        13,
+        22
+      ],
+      "tab_text": [
+        236,
+        230,
+        247
+      ],
+      "tab_background_text": [
+        94,
+        84,
+        120
+      ],
+      "tab_background_text_inactive": [
+        94,
+        84,
+        120
+      ],
+      "bookmark_text": [
+        164,
+        156,
+        189
+      ],
+      "toolbar_text": [
+        236,
+        230,
+        247
+      ],
+      "toolbar_button_icon": [
+        179,
+        146,
+        240
+      ],
+      "omnibox_background": [
+        22,
+        18,
+        31
+      ],
+      "omnibox_text": [
+        236,
+        230,
+        247
+      ],
+      "ntp_background": [
+        16,
+        13,
+        22
+      ],
+      "ntp_text": [
+        236,
+        230,
+        247
+      ],
+      "ntp_link": [
+        179,
+        146,
+        240
+      ],
+      "button_background": [
+        29,
+        24,
+        40
+      ]
+    },
+    "properties": {
+      "ntp_background_alignment": "bottom"
+    }
+  }
+}

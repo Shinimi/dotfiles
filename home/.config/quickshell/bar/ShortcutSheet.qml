@@ -21,7 +21,7 @@ Scope {
 
     Process {
         id: load
-        command: ["sh", "-c", "awk '/KEYBINDS/{f=1;next} f && /^-- =====/{exit} f && /^--/' \"$HOME/.config/hypr/hyprland.lua\" | sed 's/^--  *//'"]
+        command: ["sh", "-c", "if [ -n \"$NIRI_SOCKET\" ]; then awk '/KEYBINDS/{f=1;next} f && /^\\/\\/ =====/{exit} f && /^\\/\\//' \"$HOME/.config/niri/cfg/keybinds.kdl\" | sed 's|^//  *||'; else awk '/KEYBINDS/{f=1;next} f && /^-- =====/{exit} f && /^--/' \"$HOME/.config/hypr/hyprland.lua\" | sed 's/^--  *//'; fi"]
         stdout: StdioCollector {
             onStreamFinished: {
                 const out = []

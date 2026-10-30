@@ -1,0 +1,39 @@
+/* Monochrome colours on top of adw-gtk3 / libadwaita. Made by Claude. */
+@define-color accent_color #e0e0e0;
+@define-color accent_bg_color #4a4a4a;
+@define-color accent_fg_color #ffffff;
+@define-color destructive_color #cf6b6b;
+@define-color destructive_bg_color #8f4545;
+@define-color success_color #c8c8c8;
+@define-color warning_color #d6d6d6;
+@define-color error_color #cf6b6b;
+@define-color window_bg_color #0b0b0b;
+@define-color window_fg_color #eaeaea;
+@define-color view_bg_color #111111;
+@define-color view_fg_color #eaeaea;
+@define-color headerbar_bg_color #0b0b0b;
+@define-color headerbar_fg_color #eaeaea;
+@define-color headerbar_backdrop_color #0b0b0b;
+@define-color headerbar_shade_color rgba(0,0,0,0.36);
+@define-color sidebar_bg_color #0b0b0b;
+@define-color sidebar_fg_color #eaeaea;
+@define-color sidebar_backdrop_color #0b0b0b;
+@define-color secondary_sidebar_bg_color #111111;
+@define-color card_bg_color #161616;
+@define-color card_fg_color #eaeaea;
+@define-color dialog_bg_color #161616;
+@define-color dialog_fg_color #eaeaea;
+@define-color popover_bg_color #161616;
+@define-color popover_fg_color #eaeaea;
+@define-color thumbnail_bg_color #161616;
+@define-color shade_color rgba(0,0,0,0.36);
+@import 'colors.css';
+/* libadwaita 1.6+ reads these CSS variables (and the system accent) instead of @define-color: grey them too. Made by Claude. */
+:root {
+  --accent-color: #e0e0e0; --accent-bg-color: #d6d6d6; --accent-fg-color: #0b0b0b;
+  --accent-blue: #d6d6d6; --accent-teal: #d6d6d6; --accent-green: #d6d6d6; --accent-yellow: #d6d6d6;
+  --accent-orange: #d6d6d6; --accent-red: #cf6b6b; --accent-pink: #d6d6d6; --accent-purple: #d6d6d6; --accent-slate: #d6d6d6;
+  --destructive-bg-color: #8f4545; --destructive-color: #cf6b6b; --success-bg-color: #4a4a4a; --success-color: #d6d6d6;
+  --warning-bg-color: #5a5a5a; --warning-color: #e0e0e0; --window-bg-color: #0b0b0b; --view-bg-color: #111111;
+  --headerbar-bg-color: #0b0b0b; --sidebar-bg-color: #0b0b0b; --card-bg-color: #161616; --dialog-bg-color: #161616; --popover-bg-color: #161616;
+}

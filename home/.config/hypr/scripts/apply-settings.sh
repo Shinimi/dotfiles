@@ -221,3 +221,4 @@ p=os.path.expanduser("~/.config/fastfetch/config.jsonc"); c=open(p).read()
 c=re.sub(r'  "logo": .*// LOGO \(Settings → Theme\)', lambda m: f'  "logo": {logo}, // LOGO (Settings → Theme)', c)
 open(p,'w').write(c); open(f,'w').write(key)
 PY
+

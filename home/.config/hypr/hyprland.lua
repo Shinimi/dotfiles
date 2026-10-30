@@ -89,7 +89,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("wl-paste --type text  --watch cliphist store")  -- clipboard history
     hl.exec_cmd("wl-paste --type image --watch cliphist store")
     hl.exec_cmd("gsettings set org.gnome.desktop.interface color-scheme prefer-dark")
-    hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/autostart.sh")
+    hl.exec_cmd(os.getenv("HOME") .. "/.local/share/session-theme/session-theme.sh mono; " .. os.getenv("HOME") .. "/.config/hypr/autostart.sh")   -- apps go black (Niri makes them purple), then your apps
     hl.exec_cmd("sleep 2; " .. os.getenv("HOME") .. "/.local/bin/kocho-sound.sh desktop-login")   -- login chime     -- your apps (Settings → Autostart)
 end)
 
@@ -249,7 +249,7 @@ hl.on("window.close", function(w)
     for _, o in ipairs(hl.get_windows() or {}) do
         if o.address ~= w.address and is_game(o) then return end
     end
-    hl.exec_cmd(gamemode .. " off")
+    hl.exec_cmd(gamemode .. " off auto")
 end)
 
 hl.on("window.open", function(w)
@@ -293,11 +293,11 @@ hl.window_rule({ name = "pip", match = { title = "^([Pp]icture[- ][Ii]n[- ][Pp]i
                  opacity = "1.0 override 1.0 override" })
 
 -- Glass: these stay fully solid (games, video players, fullscreen)
-hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|org.kde.gwenview|com.obsproject.Studio)$" }, opacity = "1.0 override 1.0 override" })
+hl.window_rule({ name = "glass-solid-apps", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|mpv|vlc|org.kde.gwenview|com.obsproject.Studio|com.moonlight_stream.Moonlight)$" }, opacity = "1.0 override 1.0 override" })
 -- games: allowed to tear when they turn vsync off (less input lag); nothing else ever tears
-hl.window_rule({ name = "games-immediate", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, immediate = true })
--- games fill the screen under the bar (maximised) while they themselves think they're fullscreen: the bar stays visible
-hl.window_rule({ name = "games-under-bar", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, fullscreen_state = "1 2" })
+hl.window_rule({ name = "games-immediate", match = { class = "^(steam_app_[0-9]+|cs2|gamescope|com.moonlight_stream.Moonlight)$" }, immediate = true })   -- (Moonlight too: the stream is a game)
+-- games open truly fullscreen: the bar steps aside, and tearing + direct scanout (skips compositing) can kick in
+hl.window_rule({ name = "games-fullscreen", match = { class = "^(steam_app_[0-9]+|cs2|gamescope)$" }, fullscreen_state = "2 2" })
 hl.window_rule({ name = "glass-solid-fullscreen", match = { fullscreen = true }, opacity = "1.0 override 1.0 override" })
 -- kitty and Discord draw their own transparent background, so their text stays perfectly crisp
 hl.window_rule({ name = "glass-kitty", match = { class = "^(kitty|vesktop|dropterm)$" }, opacity = "1.0 override 1.0 override" })
