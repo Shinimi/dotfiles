@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # setup.sh – turns a fresh, minimal Arch install into yu's desktop: Hyprland + Noctalia (minimal, monochrome), only the
-# apps you use, gaming ready, the Games drive (Steam library) mounted at /mnt/games, your wallpapers back.
+# apps you use, gaming ready, the Games drive (Steam library) mounted at /mnt/games, your wallpapers back. Then tune.sh
+# makes it fast like CachyOS, safe like Debian and secure like Fedora.
 # Run it once as your user (not root) after the first boot:  bash ~/dotfiles/arch/setup.sh
 # It asks for your password (sudo) and prints each step. Safe to run again. Made by Claude.
 set -euo pipefail
@@ -30,6 +31,12 @@ pkgs=(
   steam mesa lib32-mesa vulkan-radeon lib32-vulkan-radeon mangohud lib32-mangohud gamescope lact
   # system
   zram-generator power-profiles-daemon
+  # fast: kernels + CachyOS's gaming CPU scheduler
+  linux-zen linux-zen-headers linux-lts amd-ucode scx-scheds scx-tools
+  # safe: snapshots on every update, mirror + cache upkeep
+  snapper snap-pac btrfs-assistant reflector pacman-contrib
+  # secure: firewall, AppArmor, firmware updates
+  ufw apparmor fwupd
 )
 sudo pacman -Syu --needed --noconfirm "${pkgs[@]}"
 
@@ -38,8 +45,9 @@ if ! command -v paru >/dev/null; then
   t=$(mktemp -d); git clone --depth 1 https://aur.archlinux.org/paru-bin.git "$t/paru-bin"
   (cd "$t/paru-bin" && makepkg -si --noconfirm); rm -rf "$t"
 fi
-step "AUR apps: Vesktop, Brave, Helium, Waterfox, Powerlevel10k, your cursor"
-paru -S --needed --noconfirm vesktop-bin brave-bin helium-browser-bin waterfox-bin zsh-theme-powerlevel10k vimix-cursors-git
+mkdir -p ~/.config/paru; printf '[options]\nNewsOnUpgrade\nRemoveMake\nCleanAfter\n' > ~/.config/paru/paru.conf   # Arch news before every update
+step "AUR apps: Vesktop, Brave, Helium, Waterfox, Powerlevel10k, your cursor, snapshot boot entries"
+paru -S --needed --noconfirm vesktop-bin brave-bin helium-browser-bin waterfox-bin zsh-theme-powerlevel10k vimix-cursors-git limine-snapper-sync
 
 step "services: login screen, power profiles, GPU control, compressed RAM swap"
 sudo tee /etc/greetd/config.toml >/dev/null <<'EOF'
@@ -51,6 +59,8 @@ user = "greeter"
 EOF
 printf '[zram0]\nzram-size = ram / 2\ncompression-algorithm = zstd\n' | sudo tee /etc/systemd/zram-generator.conf >/dev/null
 sudo systemctl enable greetd power-profiles-daemon lactd
+
+bash "$A/tune.sh"     # fast + safe + secure
 
 step "Games drive → /mnt/games (Steam library: /mnt/games/SteamLibrary)"
 sudo mkdir -p /mnt/games
@@ -77,5 +87,6 @@ mkdir -p ~/Pictures
 [ -d /mnt/games/home-backup/Games ] && cp -rn /mnt/games/home-backup/Games ~/
 
 echo
-echo "Done. Reboot: you'll get the login screen, then Hyprland + Noctalia."
+echo "Done. Reboot: the login screen, then Hyprland + Noctalia."
+echo "If an update ever breaks something: reboot, pick a snapshot in the boot menu."
 echo "In Steam: Settings → Storage → add /mnt/games/SteamLibrary, and your games are back without downloading."

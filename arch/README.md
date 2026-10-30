@@ -1,11 +1,18 @@
-# Vanilla Arch: yu's minimal Hyprland + Noctalia (monochrome)
+# Vanilla Arch: yu's ultimate minimal setup
 
 A fresh, clean Arch with only what you use: Hyprland + Noctalia (minimal, like TermNode's setup, in your black-and-white),
-your apps, gaming ready, and your Steam library on the Games drive. Made by Claude.
+your apps, gaming ready, your Steam library on the Games drive, and:
+
+- **fast like CachyOS:** zen kernel, CachyOS's gaming CPU scheduler (LAVD), CachyOS's own memory/disk/CPU tweaks, NTSYNC for Proton, the modern Ryzen frequency driver
+- **safe like Debian:** an LTS fallback kernel, a snapshot before and after every update that you can boot from the menu, Arch news shown before each update, mirrors/cache/SSD kept healthy automatically
+- **secure like Fedora:** firewall, AppArmor, kernel and network hardening, encrypted DNS, out-of-memory killer, firmware updates
+
+Made by Claude. Read this on your phone while you install: it's the `arch/README.md` page of the dotfiles repo on GitHub.
 
 | File | What |
 |---|---|
-| `setup.sh` | Run once after the install: packages, AUR apps, login screen, services, Games drive, configs, wallpapers |
+| `setup.sh` | Run once after the install: packages, AUR apps, login screen, services, Games drive, configs, wallpapers; runs `tune.sh` |
+| `tune.sh` | The fast / safe / secure part (re-runnable on its own) |
 | `hypr/hyprland.lua` | Minimal Hyprland: your screens, Turkish keyboard, flat mouse, monochrome glass, window rules, keys |
 | `noctalia/config.toml` | Noctalia in monochrome (greys from the wallpaper, true black), clean floating bar, none on the side screen |
 | `zshrc` | zsh with your Frieren fetch, Powerlevel10k, suggestions + highlighting |
@@ -26,15 +33,15 @@ your apps, gaming ready, and your Steam library on the Games drive. Made by Clau
 |---|---|
 | Mirrors | Region → **Turkey** (and Germany as a backup) |
 | Locales | Keyboard **trq** · Language **en_US.UTF-8** · Encoding UTF-8 |
-| Disk configuration | Use a best-effort default layout → **nvme0n1 (931 GB)** only → **btrfs** → use subvolumes **yes** → compression **yes** |
-| Bootloader | **Limine** (or Systemd-boot) |
+| Disk configuration | Use a best-effort default layout → **nvme0n1 (931 GB)** only → **btrfs** → use subvolumes **yes** → compression **yes** (if it asks about snapshots: **Snapper**) |
+| Bootloader | **Limine** (needed for booting into snapshots) |
 | Swap | **zram yes** |
 | Hostname | `yu` |
 | Root password | leave empty (sudo user below) |
 | User account | **yu**, your password, **superuser yes** |
 | Profile | **Minimal** (setup.sh adds Hyprland + Noctalia; don't pick a desktop here) |
 | Audio | **Pipewire** |
-| Kernels | **linux** (add **linux-zen** if you want a lower-latency gaming kernel too) |
+| Kernels | **linux-zen** + **linux-lts** (zen = fast gaming kernel, lts = the safe fallback if zen ever breaks) |
 | Network | **NetworkManager** |
 | Timezone | **Europe/Istanbul** |
 | Additional packages | `git` |
@@ -54,3 +61,16 @@ reboot
 
 Then: login screen → Hyprland + Noctalia. Open **Steam → Settings → Storage → add `/mnt/games/SteamLibrary`**, and every
 game is back without downloading. Spotify: `spotify-launcher`. GPU fan/undervolt: **LACT** (in the launcher).
+
+## If an update ever breaks something
+
+Every update makes a snapshot before and after. Reboot → in the boot menu open **Snapshots** → pick the one from before
+the update → it boots and restores. Or use **Btrfs Assistant** (in the launcher). If the zen kernel misbehaves, pick
+**linux-lts** in the boot menu.
+
+**Updating:** `paru` (shows Arch news first, then updates everything, snapshots included).
+
+## Discord in Turkey
+
+Discord is blocked by Turkish ISPs. Encrypted DNS (already on) fixes some of it; if Discord still won't connect, your old
+fix (zapret2) can be set up again: its config is in `system/opt/zapret2/` of this repo.
