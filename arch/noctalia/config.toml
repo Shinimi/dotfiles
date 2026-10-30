@@ -98,10 +98,6 @@ enabled = true
 unit    = "celsius"
 effects = false                       # no rain effects (you turned those off on Hyprland)
 
-[location]
-auto_locate = false
-address     = "Batman, Türkiye"
-
 [lockscreen]
 enabled         = true
 blurred_desktop = true
